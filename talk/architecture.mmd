@@ -1,4 +1,4 @@
-%% O-RAN Agent Harness for Cloud RAN Day-2 — fully detailed closed-loop architecture (v3)
+%% O-RAN Agent Harness for Cloud RAN Day-2, fully detailed closed-loop architecture (v3)
 %% Companion to: docs/title_and_abstract_final.txt
 %% v3 changes vs v2: added Hardware Domain Agent + mcp-hardware; added Knowledge Base (RAG)
 %%                   shared across agents and Router; added Root Cause Analysis artifact
@@ -28,7 +28,7 @@ flowchart TB
     SMO["Partner SMO / Domain Orchestrator<br/>(Ericsson SMO, Amdocs, Nokia, Mavenir, ZTE)<br/>Service-layer remediation owner"]:::smo
 
     %% ============== AGENT HARNESS ==============
-    subgraph Harness["Agent Harness (Cloud RAN Day-2) — Day-2 reasoning + remediation routing"]
+    subgraph Harness["Agent Harness (Cloud RAN Day-2), Day-2 reasoning + remediation routing"]
         direction TB
 
         subgraph GatewayLayer["Agentic Gateway over MCP"]
@@ -173,7 +173,7 @@ flowchart TB
             subgraph HostOS["RHCOS Host OS"]
                 Kernel["Linux kernel<br/>(realtime patches optional)"]:::kernel
                 Driver["NIC driver<br/>(ice / mlx5_core / iavf)<br/>kernel module"]:::driver
-                FwLldp["fw-lldp-agent<br/>(host service —<br/>Scenario A target)"]:::hostsvc
+                FwLldp["fw-lldp-agent<br/>(host service,<br/>Scenario A target)"]:::hostsvc
             end
 
             subgraph Hardware["Bare-metal hardware (NUMA-aware)"]
