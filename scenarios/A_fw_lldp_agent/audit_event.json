@@ -1,0 +1,43 @@
+{
+  "eventId": "evt-flt-2026-05-14-001-001",
+  "eventTime": "2026-05-14T10:42:18Z",
+  "eventType": "RemediationProposed",
+  "event": {
+    "correlatedEventId": "flt-2026-05-14-001",
+    "domain": "oran-ocloud",
+    "remediation": {
+      "proposalId": "prop-2026-05-14-001",
+      "version": "v1alpha1",
+      "targetLayer": "infra",
+      "classificationConfidence": "high",
+      "classificationMethod": "deterministic",
+      "taxonomyMatch": "ptp_host_stack",
+      "contributingSignals": [
+        "platform.ptp_host_stack.master_offset_anomaly",
+        "platform.ptp_host_stack.state_unstable",
+        "platform.ptp_host_stack.fw_lldp_agent_active",
+        "platform.host_nic.tx_hwtstamp_timeouts"
+      ],
+      "actionType": "apply_machine_config",
+      "actionTarget": "worker-ran-01.dallas.example.com",
+      "actionPayloadRef": "99-worker-ran-disable-fw-lldp-agent",
+      "ocloudInternalPath": "machine-config-operator",
+      "dryRun": true,
+      "guardrailResult": {
+        "outcome": "pass",
+        "rulesEvaluated": [
+          "blast_radius.max_nodes",
+          "blast_radius.max_sites",
+          "action_allowlist"
+        ],
+        "blastRadius": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 0
+        }
+      },
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending"
+    }
+  }
+}

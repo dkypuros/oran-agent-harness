@@ -1,0 +1,272 @@
+%% O-RAN Agent Harness for Cloud RAN Day-2 — fully detailed closed-loop architecture (v3)
+%% Companion to: docs/title_and_abstract_final.txt
+%% v3 changes vs v2: added Hardware Domain Agent + mcp-hardware; added Knowledge Base (RAG)
+%%                   shared across agents and Router; added Root Cause Analysis artifact
+%%                   between agents and Router; expanded Gateway security profile label.
+flowchart TB
+
+    %% ============== UPSTREAM RAN CONTEXT ==============
+    subgraph RanUpstream["RAN Upstream Context"]
+        direction LR
+        GPS["GNSS / GPS Antenna<br/>(disciplined source)"]:::external
+        GM["PTP Grandmaster<br/>(T-GM, G.8275.1 profile,<br/>runs ts2phc + ptp4l,<br/>ITU-T compliant)"]:::external
+        BC["Boundary Clock (T-BC)<br/>(deployment-specific)"]:::external
+        RU["O-RAN Radio Unit (O-RU)<br/>(physical radio + antenna)"]:::external
+        GPS --> GM
+        GM --> BC
+    end
+
+    %% ============== 5G CORE (downstream context) ==============
+    subgraph Core5G["5G Core (downstream of vCU)"]
+        direction LR
+        UPF["User Plane Function (UPF)<br/>(N3 endpoint)"]:::external
+        AMF["AMF / SMF"]:::external
+        UPF --- AMF
+    end
+
+    %% ============== SMO / DOMAIN ORCHESTRATOR ==============
+    SMO["Partner SMO / Domain Orchestrator<br/>(Ericsson SMO, Amdocs, Nokia, Mavenir, ZTE)<br/>Service-layer remediation owner"]:::smo
+
+    %% ============== AGENT HARNESS ==============
+    subgraph Harness["Agent Harness (Cloud RAN Day-2) — Day-2 reasoning + remediation routing"]
+        direction TB
+
+        subgraph GatewayLayer["Agentic Gateway over MCP"]
+            Gateway["Agentic Gateway<br/>(O-RAN CloudEvents inbound,<br/>vendor-private tool exposure,<br/>mTLS + OAuth2 + IP allowlist)"]:::gateway
+            McpPlat["mcp-platform<br/>(FastMCP, stdio)<br/>ptp4l + driver + host config tools"]:::mcp
+            McpRan["mcp-ran<br/>(FastMCP, stdio)<br/>cell + PM + RAN param tools"]:::mcp
+            McpHw["mcp-hardware<br/>(FastMCP, stdio)<br/>NIC PHC introspection /<br/>BMC Redfish / CPU perf counters"]:::mcp
+            McpOcloud["mcp-ocloud<br/>(FastMCP, stdio)<br/>O2 IMS Inventory / Alarms /<br/>apply (gated)"]:::mcp
+            Gateway --> McpPlat
+            Gateway --> McpRan
+            Gateway --> McpHw
+            Gateway --> McpOcloud
+        end
+
+        subgraph AgentLayer["Domain Agents (LangGraph nodes)"]
+            PlatA["Platform Agent<br/>(diagnoses host / driver /<br/>PTP stack faults)"]:::agent
+            RanA["RAN Domain Agent<br/>(diagnoses cell / PM /<br/>RAN parameter faults)"]:::agent
+            HwA["Hardware Domain Agent<br/>(diagnoses NIC firmware / PHC /<br/>BMC / CPU / HW timestamping)"]:::agent
+        end
+
+        subgraph KbLayer["Knowledge Base (RAG)"]
+            KB["Knowledge Base (RAG)<br/>NOC troubleshooting playbooks,<br/>case history, SID context<br/>(maps to TMF GB922 +<br/>vendor RAG surfaces)"]:::kb
+        end
+
+        subgraph RouterLayer["Remediation Router"]
+            RCA["Root Cause Analysis<br/>(cross-domain evidence chain,<br/>structured findings per agent)"]:::artifact
+            Taxonomy["taxonomy.yaml<br/>(O-RAN WG6 resource model;<br/>~20 entries)"]:::config
+            Router["Remediation Router<br/>deterministic classification<br/>+ LLM-assist on ambiguous edges"]:::router
+            Proposal["RemediationProposal<br/>(structured dataclass:<br/>target_layer, evidence,<br/>action, confidence)"]:::artifact
+            RCA --> Router
+            Taxonomy -- "lookup" --> Router
+            Router --> Proposal
+        end
+
+        subgraph GuardLayer["Guardrail Contract Layer (LLM-free, deterministic)"]
+            Guard["Guardrail Engine<br/>(operator-harness<br/>co-authorization)"]:::guard
+            Rules["guardrails.yaml<br/>(dry-run default,<br/>blast-radius caps,<br/>HITL action allowlist)"]:::config
+            Audit["Audit Sink<br/>(JSONL file +<br/>TMF688-shaped events)"]:::artifact
+            Rules -- "policy" --> Guard
+            Guard --> Audit
+        end
+
+        subgraph LlmLayer["LLM-neutral Substrate (consumed by agents + router only)"]
+            LiteLLM["LiteLLM<br/>(provider abstraction)"]:::llm
+            Claude["Claude<br/>(Anthropic)"]:::llmBackend
+            GPT["GPT<br/>(OpenAI)"]:::llmBackend
+            Granite["Granite 8B<br/>(local Ollama,<br/>data sovereignty)"]:::llmBackend
+            LiteLLM --> Claude
+            LiteLLM --> GPT
+            LiteLLM --> Granite
+        end
+
+        McpPlat --> PlatA
+        McpRan --> RanA
+        McpHw --> HwA
+        McpOcloud -.inventory + alarm context.-> PlatA
+        PlatA --> RCA
+        RanA --> RCA
+        HwA --> RCA
+        Proposal --> Guard
+        KB -.playbook lookup.-> PlatA
+        KB -.playbook lookup.-> RanA
+        KB -.playbook lookup.-> HwA
+        KB -.SID context.-> Router
+        PlatA -.LLM reasoning.-> LiteLLM
+        RanA -.LLM reasoning.-> LiteLLM
+        HwA -.LLM reasoning.-> LiteLLM
+        Router -.LLM-assist<br/>(ambiguous edges only).-> LiteLLM
+    end
+
+    %% ============== HUB CLUSTER (O-CLOUD CONTROL PLANE) ==============
+    subgraph Hub["Red Hat O-Cloud Control Plane (Hub OpenShift Cluster)"]
+        direction TB
+        O2IMS["O-Cloud Manager<br/>O2 IMS API<br/>(openshift-kni/oran-o2ims)<br/>Inventory + Cluster + Alarms"]:::ocloud
+        TALM["Topology Aware<br/>Lifecycle Manager (TALM)<br/>ZTP rollout sequencing"]:::hubop
+        ArgoCD["OpenShift GitOps<br/>(ArgoCD)"]:::hubop
+        ACM["Advanced Cluster Management<br/>(RHACM, multi-cluster)"]:::acm
+        Git["Git repository<br/>(ClusterTemplate +<br/>PolicyGenTemplate)"]:::artifact
+
+        O2IMS --> TALM
+        O2IMS --> ArgoCD
+        TALM --> ACM
+        ArgoCD --> Git
+        Git --> ACM
+    end
+
+    %% ============== OBSERVABILITY (adjacent to harness) ==============
+    subgraph Obs["Observability Stack"]
+        direction LR
+        Prom["Prometheus / Thanos"]:::obs
+        Graf["Grafana"]:::obs
+        Loki["Loki (logs)"]:::obs
+        Otel["OpenTelemetry collector"]:::obs
+        Prom --> Graf
+        Loki --> Graf
+        Otel --> Prom
+        Otel --> Loki
+    end
+
+    %% ============== SPOKE CLUSTER ==============
+    subgraph Spoke["Managed OpenShift Cluster (Cloud RAN Edge Site)"]
+        direction TB
+
+        subgraph SpokeOps["Cluster Operators (managed by hub)"]
+            direction LR
+            MCO["Machine Config<br/>Operator (MCO)"]:::mco
+            KMM["Kernel Module<br/>Management (KMM)"]:::kmm
+            PTPOp["PTP Operator"]:::ptpop
+            NTO["Node Tuning Operator<br/>(PerformanceProfile,<br/>realtime kernel)"]:::nto
+            Metal3["Metal3<br/>(BareMetalHost,<br/>HostFirmwareComponents)"]:::metal3
+            SRIOV["SR-IOV Network<br/>Operator"]:::sriov
+            NFD["NodeFeatureDiscovery<br/>(NFD)"]:::nfd
+        end
+
+        subgraph SpokeNet["Cluster Networking"]
+            direction LR
+            OVNK["OVN-Kubernetes<br/>(primary CNI)"]:::netcni
+            Multus["Multus<br/>(secondary networks)"]:::netcni
+        end
+
+        subgraph Worker["worker-ran-XX (RHCOS bare-metal node)"]
+            direction TB
+
+            subgraph KubeNode["Kubernetes Node Plane"]
+                Kubelet["kubelet"]:::kube
+                CRIO["CRI-O runtime"]:::kube
+                TopoMgr["Topology Manager<br/>+ CPU Manager (pinned)<br/>+ HugePages (1G)"]:::kube
+            end
+
+            subgraph WorkloadPods["RAN Workload Pods (3GPP / O-RAN)"]
+                direction LR
+                VDU["O-RAN vDU / gNB-DU<br/>(L1/L2 RAN workload)<br/>uses DPDK + SR-IOV VFs<br/>consumes PTP timing (TAI)"]:::vdu
+                VCU["O-RAN vCU / gNB-CU<br/>(L3 RAN workload)"]:::vdu
+                VDU -- "F1 interface<br/>(midhaul, SCTP / GTP-U)" --> VCU
+            end
+
+            subgraph PtpPods["PTP Stack Pods (managed by PTP Operator)"]
+                LinuxPtp["linuxptp-daemon pod<br/>ptp4l + phc2sys<br/>(Boundary / Ordinary Clock)<br/>G.8275.1 profile"]:::daemon
+                CEProxy["Cloud Event Proxy<br/>(sidecar in same pod)<br/>O-RAN CloudEvents publisher"]:::proxy
+            end
+
+            subgraph HostOS["RHCOS Host OS"]
+                Kernel["Linux kernel<br/>(realtime patches optional)"]:::kernel
+                Driver["NIC driver<br/>(ice / mlx5_core / iavf)<br/>kernel module"]:::driver
+                FwLldp["fw-lldp-agent<br/>(host service —<br/>Scenario A target)"]:::hostsvc
+            end
+
+            subgraph Hardware["Bare-metal hardware (NUMA-aware)"]
+                NIC["Intel E810 NIC<br/>(or Mellanox CX-6 DX)<br/>PHC (PTP Hardware Clock)<br/>SR-IOV capable<br/>hardware timestamping"]:::hw
+                BMC["BMC<br/>(Redfish endpoint,<br/>OOB management)"]:::bmc
+                CPU["CPU sockets<br/>(NUMA-pinned)<br/>+ RAM + NVMe"]:::cpu
+            end
+
+            VDU -- "clock_gettime<br/>(CLOCK_TAI)" --> Kernel
+            VDU -- "DPDK userspace<br/>networking" --> NIC
+            LinuxPtp -- "PHC adjust + timestamping<br/>(clock_adjtime,<br/>SIOCSHWTSTAMP ioctl)" --> Kernel
+            LinuxPtp -- "state notifications<br/>(UDS / log parsing)" --> CEProxy
+            Kernel --> Driver
+            FwLldp -. "LLDP TX contention<br/>(fault in Scenario A)" .-> NIC
+            Driver -- "HW register config<br/>+ DMA descriptors" --> NIC
+            Kubelet --> CRIO
+            CRIO --> VDU
+            CRIO --> VCU
+            CRIO --> LinuxPtp
+            TopoMgr -- "NUMA + CPU pinning" --> VDU
+        end
+    end
+
+    %% ============== EXTERNAL RAN FLOWS ==============
+    GM == "PTP packets<br/>(G.8275.1)" ==> NIC
+    BC -. "boundary clock<br/>(if deployed)" .-> NIC
+    VDU == "Open Fronthaul<br/>eCPRI (O-RAN WG4)<br/>U/C/S/M planes" ==> RU
+    VCU == "N3 / GTP-U<br/>(backhaul)" ==> UPF
+
+    %% ============== OBSERVATION CHANNEL UP ==============
+    CEProxy == "O-RAN CloudEvents<br/>(WG6 Cloud Notifications<br/>over CNCF CloudEvents 1.0)" ==> Gateway
+    LinuxPtp -. "PM counters<br/>+ ptp4l logs" .-> Prom
+    Audit -. "TMF688 events<br/>(production: Kafka/AMQ)" .-> Otel
+
+    %% ============== ROUTING DECISIONS ==============
+    Router == "service-layer<br/>(TMF921-style intent)" ==> SMO
+    Router == "infra-layer<br/>via O2 IMS" ==> O2IMS
+
+    %% ============== HUB -> SPOKE POLICY PROPAGATION ==============
+    ACM -- "policy propagation" --> MCO
+    ACM -- "policy propagation" --> KMM
+    ACM -- "policy propagation" --> PTPOp
+    ACM -- "policy propagation" --> NTO
+    ACM -- "policy propagation" --> Metal3
+    ACM -- "policy propagation" --> SRIOV
+    ACM -- "policy propagation" --> NFD
+
+    %% ============== OPERATORS DELIVER TO WORKER ==============
+    MCO == "Scenario A:<br/>MachineConfig<br/>(mask fw-lldp-agent.service)" ==> FwLldp
+    KMM == "Scenario A-prime:<br/>Module CR<br/>(swap ice 1.11.x -> 1.13.7+)" ==> Driver
+    PTPOp -- "PtpConfig CR<br/>(ptp4l.conf, profile)" --> LinuxPtp
+    PTPOp -- "deploys daemon set" --> LinuxPtp
+    PTPOp -- "deploys sidecar" --> CEProxy
+    NTO -- "PerformanceProfile<br/>(TopoMgr, CPU pinning,<br/>HugePages, RT kernel)" --> TopoMgr
+    Metal3 -- "BMC Redfish<br/>(BIOS + BMC firmware,<br/>vendor-dependent NIC FW)" --> BMC
+    BMC -- "OOB mgmt plane" --> NIC
+    SRIOV -- "SR-IOV VF allocation<br/>+ hardware tagging" --> NIC
+    NFD -- "node labels<br/>(sriov.capable, etc.)" --> Kubelet
+    OVNK -- "pod networking" --> Kubelet
+    Multus -- "secondary NICs<br/>(DPDK / SR-IOV)" --> VDU
+
+    %% ============== STYLING ==============
+    classDef smo fill:#fde8e8,stroke:#c53030,color:#000,stroke-width:3px
+    classDef gateway fill:#fef3c7,stroke:#b45309,color:#000,stroke-width:3px
+    classDef mcp fill:#fef9c3,stroke:#854d0e,color:#000,stroke-width:2px
+    classDef agent fill:#dbeafe,stroke:#1e40af,color:#000,stroke-width:2px
+    classDef router fill:#fed7aa,stroke:#c2410c,color:#000,stroke-width:3px
+    classDef artifact fill:#fae8ff,stroke:#86198f,color:#000
+    classDef config fill:#f3e8ff,stroke:#6b21a8,color:#000
+    classDef kb fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:2px
+    classDef guard fill:#fbcfe8,stroke:#9d174d,color:#000,stroke-width:2px
+    classDef llm fill:#e9d5ff,stroke:#6b21a8,color:#000,stroke-width:2px
+    classDef llmBackend fill:#ede9fe,stroke:#5b21b6,color:#000
+    classDef ocloud fill:#fee2e2,stroke:#b91c1c,color:#000,stroke-width:3px
+    classDef hubop fill:#ffe4e6,stroke:#9f1239,color:#000
+    classDef acm fill:#fecaca,stroke:#991b1b,color:#000,stroke-width:2px
+    classDef obs fill:#ecfeff,stroke:#155e75,color:#000
+    classDef mco fill:#ddd6fe,stroke:#5b21b6,color:#000,stroke-width:2px
+    classDef kmm fill:#bbf7d0,stroke:#15803d,color:#000,stroke-width:2px
+    classDef ptpop fill:#bae6fd,stroke:#0c4a6e,color:#000,stroke-width:2px
+    classDef nto fill:#fce7f3,stroke:#831843,color:#000,stroke-width:2px
+    classDef metal3 fill:#fde68a,stroke:#92400e,color:#000,stroke-width:2px
+    classDef sriov fill:#d9f99d,stroke:#365314,color:#000
+    classDef nfd fill:#e0e7ff,stroke:#312e81,color:#000
+    classDef netcni fill:#cffafe,stroke:#0e7490,color:#000
+    classDef kube fill:#e0e7ff,stroke:#312e81,color:#000
+    classDef daemon fill:#d1fae5,stroke:#065f46,color:#000,stroke-width:2px
+    classDef proxy fill:#a7f3d0,stroke:#047857,color:#000,stroke-width:2px
+    classDef hw fill:#f3f4f6,stroke:#1f2937,color:#000,stroke-width:2px
+    classDef bmc fill:#e5e7eb,stroke:#374151,color:#000
+    classDef cpu fill:#f9fafb,stroke:#4b5563,color:#000
+    classDef driver fill:#cffafe,stroke:#0e7490,color:#000
+    classDef hostsvc fill:#fef2f2,stroke:#b91c1c,color:#000
+    classDef kernel fill:#dbeafe,stroke:#1e3a8a,color:#000
+    classDef vdu fill:#fef9c3,stroke:#a16207,color:#000,stroke-width:3px
+    classDef external fill:#f5f5f4,stroke:#44403c,color:#000

@@ -1,0 +1,23 @@
+# Scenario A remediation
+# Disable fw-lldp-agent.service on RAN worker nodes via MachineConfig.
+# Delivered by Machine Config Operator after ACM propagates the cluster
+# template update referenced by the O2 IMS ProvisioningRequest.
+#
+# Real production OpenShift remediation shape. systemd unit is masked,
+# not just disabled, to prevent automatic re-enablement by dependent units.
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: 99-worker-ran-disable-fw-lldp-agent
+  labels:
+    machineconfiguration.openshift.io/role: worker-ran
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+        - name: fw-lldp-agent.service
+          enabled: false
+          mask: true

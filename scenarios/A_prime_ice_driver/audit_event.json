@@ -1,0 +1,43 @@
+{
+  "eventId": "evt-flt-2026-05-14-002-001",
+  "eventTime": "2026-05-14T11:15:12Z",
+  "eventType": "RemediationProposed",
+  "event": {
+    "correlatedEventId": "flt-2026-05-14-002",
+    "domain": "oran-ocloud",
+    "remediation": {
+      "proposalId": "prop-2026-05-14-002",
+      "version": "v1alpha1",
+      "targetLayer": "infra",
+      "classificationConfidence": "high",
+      "classificationMethod": "deterministic",
+      "taxonomyMatch": "host_driver",
+      "contributingSignals": [
+        "platform.ptp_host_stack.phc_drift_monotonic",
+        "platform.ptp_host_stack.state_uncalibrated",
+        "platform.host_driver.version_outdated",
+        "platform.host_driver.known_issue_match"
+      ],
+      "actionType": "apply_kmm_module",
+      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionPayloadRef": "ice-driver-update",
+      "ocloudInternalPath": "kmm",
+      "dryRun": true,
+      "guardrailResult": {
+        "outcome": "pass",
+        "rulesEvaluated": [
+          "blast_radius.max_nodes",
+          "blast_radius.max_sites",
+          "action_allowlist"
+        ],
+        "blastRadius": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 0
+        }
+      },
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending"
+    }
+  }
+}

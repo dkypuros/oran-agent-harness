@@ -1,0 +1,53 @@
+# Private workspace, never push to GitHub
+.local/
+
+# Internal sprint output (decision 5 of the plan)
+python_demo/
+
+# OMC state and logs (working directory only)
+.omc/state/
+.omc/logs/
+.omc/research/
+.omc/drafts/
+
+# macOS noise
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor backups
+*~
+*.bak
+*.swp
+*.swo
+*.orig
+
+# Python caches (defense in depth even though no Python ships)
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node (defense in depth)
+node_modules/
+
+# Environment and secrets
+.env
+.env.*
+
+# PDF redistribution guard (NG2 from plan)
+*.pdf
+
+# Archive formats (defense in depth)
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+
+# IDE
+.idea/
+.vscode/
