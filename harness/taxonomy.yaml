@@ -1,0 +1,114 @@
+# Conforms to: O-RAN.WG6 O-Cloud resource model, applied per WG1 Architecture Description sect on O2 interfaces
+# Bibliography ref: 1, 2
+# Purpose: deterministic taxonomy consulted by the Remediation Router before any LLM reasoning.
+# The Router does a lookup here first; LLM-assist only resolves ambiguous edges.
+# Each entry: id (taxonomy key), layer (infra | service | ambiguous), description, oran_wg6_section.
+# Total entries: 20 (12 infra, 5 service, 3 ambiguous).
+
+resource_taxonomy:
+
+  # ---------- Infra layer (routes DOWN through O2 IMS into the O-Cloud) ----------
+  infra_layer:
+    - id: host_config
+      layer: infra
+      description: "Host-level system configuration delivered as MachineConfig (kernel args, systemd units, NetworkManager files, sysctls). Path: MCO."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "host configuration"
+
+    - id: host_driver
+      layer: infra
+      description: "Out-of-tree kernel module updates (ice, mlx5, iavf) delivered as KMM Module CRs. Path: KMM."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "kernel driver"
+
+    - id: node_firmware
+      layer: infra
+      description: "BIOS, BMC, and vendor-dependent NIC firmware delivered via Metal3 HostFirmwareComponents and HostFirmwareSettings. Path: Metal3."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "node firmware"
+
+    - id: ptp_host_stack
+      layer: infra
+      description: "linuxptp daemon configuration (ptp4l, phc2sys) and PTP-related host services interfering with timing. Path: PTP Operator + MCO when service mask required."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "ptp_host_stack"
+
+    - id: container_platform
+      layer: infra
+      description: "kubelet, CRI-O, OVN-Kubernetes runtime configuration delivered via MachineConfig or Node Tuning Operator profiles. Path: MCO + NTO."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "container_platform"
+
+    - id: performance_profile
+      layer: infra
+      description: "CPU pinning, NUMA topology, huge pages, realtime kernel selection delivered via Node Tuning Operator PerformanceProfile. Path: NTO."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "performance_profile"
+
+    - id: sriov_allocation
+      layer: infra
+      description: "SR-IOV VF allocation, hardware tagging, NIC partitioning delivered via SR-IOV Network Operator. Path: SR-IOV Operator."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "sriov_allocation"
+
+    - id: node_feature_labels
+      layer: infra
+      description: "NodeFeatureDiscovery labels (sriov.capable, gpu.present, ptp.capable) consumed by scheduler. Path: NFD."
+      oran_wg6_section: O2 IMS Inventory, node feature reporting
+
+    - id: cluster_networking
+      layer: infra
+      description: "Primary CNI configuration (OVN-Kubernetes) and secondary networks (Multus) for DPDK or SR-IOV pod attachments. Path: ACM-propagated policy."
+      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "cluster_networking"
+
+    - id: gitops_pipeline
+      layer: infra
+      description: "OpenShift GitOps (ArgoCD) ApplicationSets and Git-tracked ClusterTemplate/PolicyGenTemplate artifacts. Path: ArgoCD + ACM."
+      oran_wg6_section: O2 IMS Provisioning, hub-cluster orchestration
+
+    - id: hub_lifecycle
+      layer: infra
+      description: "Topology Aware Lifecycle Manager (TALM) sequencing of ZTP rollouts and policy waves. Path: TALM."
+      oran_wg6_section: O2 IMS Provisioning, cluster lifecycle management
+
+    - id: cluster_alarm
+      layer: infra
+      description: "Cluster-level alarms surfaced through O2 IMS Alarms API (degraded operators, MachineConfig pool rollout failures). Path: O-Cloud Manager."
+      oran_wg6_section: O2 IMS Alarms
+
+  # ---------- Service layer (routes UP to partner SMO via TMF921 intent) ----------
+  service_layer:
+    - id: ran_parameter
+      layer: service
+      description: "Cell-level RAN parameter changes (transmit power, neighbor lists, carrier configuration). Path: partner SMO."
+      oran_wg6_section: N/A (service-layer, delegated upward, not in WG6 scope)
+
+    - id: ran_pm_counter
+      layer: service
+      description: "PM-counter anomalies (PRACH detection rate, BLER, MAC scheduling) indicating RAN-side processing drift. Path: partner SMO."
+      oran_wg6_section: N/A (service-layer)
+
+    - id: cell_timing
+      layer: service
+      description: "Cell sync state, RU timing reference, gNB-side clock holdover behavior. Path: partner SMO."
+      oran_wg6_section: N/A (service-layer)
+
+    - id: ran_software_version
+      layer: service
+      description: "vDU or vCU container image version rollouts and rollbacks. Path: partner SMO or partner CI pipeline."
+      oran_wg6_section: N/A (service-layer)
+
+    - id: slice_intent
+      layer: service
+      description: "Network slice intent updates (SLA targets, throughput, latency, isolation). Path: partner SMO via TMF921."
+      oran_wg6_section: N/A (service-layer)
+
+  # ---------- Ambiguous (Router defers to LLM-assist before classification) ----------
+  ambiguous:
+    - id: ptp_boundary
+      layer: ambiguous
+      description: PTP Boundary Clock anomalies. Could be host stack misconfiguration (infra) or upstream T-GM degradation (service or external).
+      oran_wg6_section: depends on root cause; deterministic classification fails without time-series context
+
+    - id: network_transport
+      layer: ambiguous
+      description: Open Fronthaul (eCPRI) transport issues. Could be infra fabric (host NIC, MTU, queue config) or RAN-side fronthaul plane.
+      oran_wg6_section: depends on root cause
+
+    - id: workload_health
+      layer: ambiguous
+      description: vDU pod restarts or readiness probe failures. Could be infra (NUMA misalignment, CPU pinning, hugepages exhaustion) or service (RAN software regression).
+      oran_wg6_section: depends on root cause

@@ -1,0 +1,75 @@
+{
+  "_conforms_to": {
+    "spec": "Anthropic MCP tool-schema spec. O-Cloud surface per O-RAN.WG6.O2IMS-Interface.",
+    "spec_section": "MCP tools object; O2 IMS Inventory, Alarms, and ProvisioningRequest endpoints",
+    "spec_version": "MCP current, O-RAN.WG6.O2IMS current",
+    "bibliography_ref": [3, 6, 13],
+    "schema_role": "Declares the tool surface for mcp-ocloud, the FastMCP server exposing O2 IMS Inventory, Alarms, Cluster, and gated apply tools. Consumed by the Platform Agent for inventory context AND by the Remediation Router for the apply step."
+  },
+  "server_name": "mcp-ocloud",
+  "server_role": "O-Cloud Manager facade for the harness (read-mostly, one gated write)",
+  "tools": [
+    {
+      "name": "get_inventory",
+      "description": "Returns O2 IMS Inventory entries for clusters, nodes, and node-level resources visible to the O-Cloud Manager. Read-only.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "cluster_filter": {"type": "string"},
+          "resource_type": {
+            "type": "string",
+            "enum": ["cluster", "node", "interface", "kernel_module", "machine_config"]
+          }
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_alarms",
+      "description": "Returns O2 IMS Alarms current set for a cluster. Read-only.",
+      "input_schema": {
+        "type": "object",
+        "required": ["cluster_id"],
+        "properties": {
+          "cluster_id": {"type": "string"},
+          "severity_min": {"type": "string", "enum": ["info", "minor", "major", "critical"]}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_cluster_state",
+      "description": "Returns aggregated cluster state (operator pool rollout status, MachineConfig pool degradation, KMM module reconciliation state). Used by the Router to verify pre-conditions before proposing a remediation.",
+      "input_schema": {
+        "type": "object",
+        "required": ["cluster_id"],
+        "properties": {
+          "cluster_id": {"type": "string"}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "apply_remediation",
+      "description": "Gated write. Submits a RemediationProposal as an O2 IMS ProvisioningRequest. RECEIVING TOOL MUST verify guardrails.yaml co_authorization commit_phase has completed AND humanApprovalStatus is approved before invoking.",
+      "gated": true,
+      "input_schema": {
+        "type": "object",
+        "required": ["proposal_id", "remediation_proposal", "audit_event"],
+        "properties": {
+          "proposal_id": {"type": "string"},
+          "remediation_proposal": {"$ref": "../schemas/RemediationProposal.json"},
+          "audit_event": {"$ref": "../schemas/AuditEvent.json"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "provisioning_request_id": {"type": "string"},
+          "submitted_at": {"type": "string", "format": "date-time"},
+          "ocloud_internal_path": {"type": "string"}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+# Conforms to: harness-unique policy contract. Audit shape conforms to TMF688 Event Management API.
+# Bibliography ref: 18
+# Purpose: declarative form of the talk's second contribution. Names the four elements of the
+# guardrail contract layer and points at the deterministic engine that enforces them.
+
+guardrail_contract:
+  name: contribution-2-guardrail-contract
+  version: v1alpha1
+  contribution_label: "Guardrail contract layer for closed-loop Day-2 remediation"
+  bibliography_refs: [18]
+
+  engine_source: ../guardrails.yaml
+
+  # Four named elements per the talk abstract:
+  elements:
+
+    operator_harness_co_authorization:
+      description: "Operator-harness co-authorization. NOT discrete HITL approve/reject. Co-authorship: the harness drafts; the operator edits and commits."
+      enforced_by: guardrails.yaml.co_authorization
+      contrast_with: traditional_HITL
+      contrast_rationale: "HITL implies discrete approve/reject gates. Co-authorization permits the operator to modify the RemediationProposal before promotion, with both states captured in the audit event."
+
+    blast_radius_caps:
+      description: "Hard ceilings the harness will not cross regardless of operator authorization. Absolute limits in v0."
+      enforced_by: guardrails.yaml.rules.blast_radius
+      v0_values:
+        max_nodes: 1
+        max_sites: 1
+        max_cells: 4
+
+    dry_run_default:
+      description: "Every action class starts in dry-run. Live application requires explicit operator promotion."
+      enforced_by: guardrails.yaml.rules.dry_run_default
+      v0_value: true
+
+    structured_audit_emission:
+      description: "Every RemediationProposal produces a TMF688-shaped AuditEvent. Production deployments route the sink to Kafka, AMQ Streams, or a TMF688-conformant broker."
+      enforced_by: guardrails.yaml.rules.audit_sink
+      audit_schema: ../schemas/AuditEvent.json
+      audit_format: TMF688 Event Management API
+
+  # The guardrail contract is LLM-FREE by design. Deterministic policy enforcement is the
+  # primitive operators trust. Any LLM reasoning happens upstream (in the Router for
+  # ambiguous_path classification, in the domain agents for evidence chain construction).
+  determinism_contract:
+    llm_in_evaluation_path: false
+    rationale: "Operators must be able to predict, from the YAML, exactly what the engine will do for any given proposal. The presence of LLM reasoning in the evaluation path would make the contract opaque and undermine the audit trail."

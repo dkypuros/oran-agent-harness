@@ -1,0 +1,50 @@
+{
+  "_conforms_to": {
+    "spec": "Anthropic MCP tool-schema spec. PHC introspection per Intel E810 datasheet. BMC introspection per Redfish DMTF.",
+    "spec_section": "MCP tools object",
+    "spec_version": "MCP current",
+    "bibliography_ref": [13, 34],
+    "schema_role": "Declares the tool surface for mcp-hardware, the FastMCP server exposing NIC PHC, BMC Redfish, and CPU perf counter tools to the Hardware Domain Agent."
+  },
+  "server_name": "mcp-hardware",
+  "server_role": "hardware-side diagnostic tools for the Hardware Domain Agent",
+  "tools": [
+    {
+      "name": "get_nic_phc_status",
+      "description": "Returns the PTP Hardware Clock state, frequency offset (ppb), drift rate, and timestamping capability mask for the named interface. Hardware-side complement to mcp-platform.get_ptp4l_status which observes the daemon-side state.",
+      "input_schema": {
+        "type": "object",
+        "required": ["interface"],
+        "properties": {
+          "interface": {"type": "string"}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_bmc_redfish_health",
+      "description": "Queries the BMC Redfish endpoint for chassis, system, and component health. Returns aggregated health state plus any pending firmware update tasks.",
+      "input_schema": {
+        "type": "object",
+        "required": ["node"],
+        "properties": {
+          "node": {"type": "string", "description": "Node FQDN. The BMC IP is resolved via Metal3 BareMetalHost CRs."}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_cpu_perf_counters",
+      "description": "Returns CPU performance counters relevant to RAN workload behavior (cache misses, branch mispredicts, NUMA local hits, frequency throttling events). Used to disambiguate workload health between infra (CPU pinning, NUMA) and service (RAN software regression).",
+      "input_schema": {
+        "type": "object",
+        "required": ["node"],
+        "properties": {
+          "node": {"type": "string"},
+          "cpu_set": {"type": "string", "description": "Optional CPU set restriction, e.g. '4-15,20-31'."}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    }
+  ]
+}

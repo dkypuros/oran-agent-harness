@@ -1,0 +1,52 @@
+{
+  "_conforms_to": {
+    "spec": "Anthropic MCP tool-schema spec. PM-counter context per 3GPP TS 28.552.",
+    "spec_section": "MCP tools object; 3GPP TS 28.552 5G performance measurements",
+    "spec_version": "MCP current, 3GPP TS 28.552 current",
+    "bibliography_ref": [13, 32],
+    "schema_role": "Declares the tool surface for mcp-ran, the FastMCP server exposing cell, PM counter, and RAN parameter tools to the RAN Domain Agent."
+  },
+  "server_name": "mcp-ran",
+  "server_role": "RAN-side diagnostic tools for the RAN Domain Agent",
+  "tools": [
+    {
+      "name": "get_cell_sync_state",
+      "description": "Returns the cell-level sync state, RU timing reference quality, and holdover status. Maps roughly to gNB Time Resource Group state per 3GPP TS 38.300.",
+      "input_schema": {
+        "type": "object",
+        "required": ["cell_id"],
+        "properties": {
+          "cell_id": {"type": "string", "description": "gNB-DU cell identifier."}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "list_pm_counters",
+      "description": "Returns recent PM counter samples for the named cell. Counter family per 3GPP TS 28.552 (PRACH detection rate, BLER, MAC scheduling, fronthaul telemetry).",
+      "input_schema": {
+        "type": "object",
+        "required": ["cell_id"],
+        "properties": {
+          "cell_id": {"type": "string"},
+          "counter_family": {"type": "string", "description": "e.g. PRACH, BLER, FH telemetry."},
+          "window_seconds": {"type": "integer", "default": 300}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_ran_param",
+      "description": "Returns the current value of a named RAN parameter (e.g. transmit power, neighbor list, carrier configuration). Read-only; modification happens via TMF921 intent through the partner SMO.",
+      "input_schema": {
+        "type": "object",
+        "required": ["cell_id", "param_name"],
+        "properties": {
+          "cell_id": {"type": "string"},
+          "param_name": {"type": "string"}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    }
+  ]
+}

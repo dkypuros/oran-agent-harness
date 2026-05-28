@@ -1,0 +1,129 @@
+{
+  "_conforms_to": {
+    "spec": "O-RAN.WG6.O2IMS-Interface (provisioning intent shape) and TMF921 Intent Management API (intent envelope)",
+    "spec_section": "O2 IMS Provisioning, ProvisioningRequest resource; TMF921 Intent resource",
+    "spec_version": "WG6 O2IMS current, TMF921 current",
+    "bibliography_ref": [3, 19],
+    "schema_role": "Validates the Router output before the Guardrail engine evaluates it."
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/RemediationProposal.json",
+  "title": "RemediationProposal",
+  "description": "Structured proposal emitted by the Remediation Router. Carries the classification decision, the action payload reference, and the guardrail evaluation outcome.",
+  "type": "object",
+  "required": [
+    "proposalId",
+    "version",
+    "targetLayer",
+    "classificationConfidence",
+    "classificationMethod",
+    "taxonomyMatch",
+    "contributingSignals",
+    "actionType",
+    "actionTarget",
+    "actionPayloadRef",
+    "dryRun",
+    "requiresHumanApproval",
+    "humanApprovalStatus"
+  ],
+  "properties": {
+    "proposalId": {
+      "type": "string",
+      "pattern": "^prop-\\d{4}-\\d{2}-\\d{2}-\\d{3}$"
+    },
+    "version": {
+      "type": "string",
+      "const": "v1alpha1"
+    },
+    "targetLayer": {
+      "type": "string",
+      "enum": ["infra", "service", "ambiguous"],
+      "description": "Output of the routing rule. Infra routes DOWN via O2 IMS; service routes UP via TMF921; ambiguous returns to LLM-assist."
+    },
+    "classificationConfidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "classificationMethod": {
+      "type": "string",
+      "enum": ["deterministic", "llm_assist", "manual"]
+    },
+    "taxonomyMatch": {
+      "type": "string",
+      "description": "Must match a taxonomy id from harness/taxonomy.yaml."
+    },
+    "contributingSignals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dotted signal identifiers, e.g. platform.ptp_host_stack.master_offset_anomaly."
+    },
+    "actionType": {
+      "type": "string",
+      "enum": [
+        "apply_machine_config",
+        "apply_kmm_module",
+        "apply_metal3_firmware",
+        "apply_performance_profile",
+        "apply_sriov_config",
+        "emit_smo_intent"
+      ]
+    },
+    "actionTarget": {
+      "type": "string",
+      "description": "Node FQDN or cluster identifier the action applies to."
+    },
+    "actionPayloadRef": {
+      "type": "string",
+      "description": "Name of the MachineConfig, Module, or intent resource the action will deliver."
+    },
+    "ocloudInternalPath": {
+      "type": "string",
+      "enum": [
+        "machine-config-operator",
+        "kernel-module-management",
+        "metal3-baremetal-operator",
+        "node-tuning-operator",
+        "sriov-network-operator",
+        "smo-tmf921-endpoint"
+      ]
+    },
+    "dryRun": {
+      "type": "boolean",
+      "description": "True until the operator explicitly promotes per the co_authorization contract in guardrails.yaml."
+    },
+    "guardrailResult": {
+      "type": "object",
+      "required": ["outcome", "rulesEvaluated", "blastRadius"],
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": ["pass", "fail", "warn"]
+        },
+        "rulesEvaluated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blastRadius": {
+          "type": "object",
+          "required": ["nodes", "sites", "cells"],
+          "properties": {
+            "nodes": {"type": "integer", "minimum": 0},
+            "sites": {"type": "integer", "minimum": 0},
+            "cells": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "requiresHumanApproval": {
+      "type": "boolean"
+    },
+    "humanApprovalStatus": {
+      "type": "string",
+      "enum": ["pending", "approved", "rejected", "expired"]
+    }
+  }
+}

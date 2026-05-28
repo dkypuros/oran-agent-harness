@@ -1,0 +1,82 @@
+{
+  "_conforms_to": {
+    "spec": "harness-unique fault context schema. Evidence model conforms to O-RAN.WG6 Cloud Notifications.",
+    "spec_section": "Cloud Notifications, payload contract",
+    "spec_version": "WG6 Cloud Notifications, current",
+    "bibliography_ref": 31,
+    "schema_role": "Validates scenarios/*/fault_payload.json"
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/FaultPayload.json",
+  "title": "FaultPayload",
+  "description": "Synthetic platform-agent evidence bundle published as a CloudEvent upstream of the Agent Harness. Each scenario's fault_payload.json validates against this schema.",
+  "type": "object",
+  "required": ["fault_id", "timestamp", "node", "site", "evidence", "expected_classification"],
+  "properties": {
+    "fault_id": {
+      "type": "string",
+      "pattern": "^flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
+      "description": "Globally unique fault correlation id."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "node": {
+      "type": "string",
+      "description": "Fully qualified hostname of the affected worker node."
+    },
+    "site": {
+      "type": "string",
+      "description": "Edge site identifier."
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_agent", "tool_name", "finding", "raw_data"],
+        "properties": {
+          "source_agent": {
+            "type": "string",
+            "enum": ["platform", "ran", "hardware"]
+          },
+          "tool_name": {
+            "type": "string",
+            "description": "MCP tool name in dotted notation, e.g. mcp-platform.get_ptp4l_status."
+          },
+          "finding": {
+            "type": "string",
+            "description": "Human-readable summary of what the agent observed."
+          },
+          "raw_data": {
+            "type": "object",
+            "description": "Tool-specific structured data backing the finding."
+          }
+        }
+      }
+    },
+    "expected_classification": {
+      "type": "object",
+      "required": ["target_layer", "taxonomy_match", "confidence", "method"],
+      "properties": {
+        "target_layer": {
+          "type": "string",
+          "enum": ["infra", "service", "ambiguous"]
+        },
+        "taxonomy_match": {
+          "type": "string",
+          "description": "Must match a taxonomy id from harness/taxonomy.yaml."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "method": {
+          "type": "string",
+          "enum": ["deterministic", "llm_assist", "manual"]
+        }
+      }
+    }
+  }
+}

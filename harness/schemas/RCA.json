@@ -1,0 +1,83 @@
+{
+  "_conforms_to": {
+    "spec": "harness-unique Root Cause Analysis artifact. Evidence-chain pattern referenced from Ericsson multivendor agentic AI demo (Bibliography ref 35).",
+    "spec_section": "Diagnostic substrate output, per architecture_v3.mmd RCA node",
+    "spec_version": "v0",
+    "bibliography_ref": 35,
+    "schema_role": "Validates the Root Cause Analysis output flowing from the 3 domain agents (Platform, RAN, Hardware) into the Remediation Router."
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/RCA.json",
+  "title": "RCA",
+  "description": "Cross-domain evidence chain emitted by the diagnostic substrate before routing. Aggregates findings from the Platform, RAN, and Hardware domain agents into a single structured artifact the Router consumes.",
+  "type": "object",
+  "required": ["fault_id", "timestamp", "evidence", "candidate_classifications"],
+  "properties": {
+    "fault_id": {
+      "type": "string",
+      "pattern": "^flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
+      "description": "References the originating FaultPayload.fault_id."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "description": "All findings from all domain agents, in chronological order.",
+      "items": {
+        "type": "object",
+        "required": ["source_agent", "tool_name", "finding"],
+        "properties": {
+          "source_agent": {
+            "type": "string",
+            "enum": ["platform", "ran", "hardware"]
+          },
+          "tool_name": {"type": "string"},
+          "finding": {"type": "string"},
+          "raw_data": {"type": "object"}
+        }
+      }
+    },
+    "candidate_classifications": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ranked list of taxonomy matches with confidence. The Router selects the top entry unless ambiguous.",
+      "items": {
+        "type": "object",
+        "required": ["taxonomy_match", "target_layer", "confidence", "rationale"],
+        "properties": {
+          "taxonomy_match": {
+            "type": "string",
+            "description": "Must match a taxonomy id from harness/taxonomy.yaml."
+          },
+          "target_layer": {
+            "type": "string",
+            "enum": ["infra", "service", "ambiguous"]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "rationale": {
+            "type": "string",
+            "description": "One-sentence explanation of why this classification is supported by the evidence."
+          }
+        }
+      }
+    },
+    "knowledge_base_lookups": {
+      "type": "array",
+      "description": "Optional. Cites RAG playbooks or vendor knowledge base entries consulted during RCA.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {"type": "string"},
+          "doc_id": {"type": "string"},
+          "relevance": {"type": "string"}
+        }
+      }
+    }
+  }
+}

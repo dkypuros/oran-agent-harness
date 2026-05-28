@@ -1,0 +1,76 @@
+{
+  "_conforms_to": {
+    "spec": "TMF688 Event Management API",
+    "spec_section": "Event envelope and notification body",
+    "spec_version": "TMF688 current",
+    "bibliography_ref": 18,
+    "schema_role": "Validates scenarios/*/audit_event.json. Each audit event also carries a reversibility_profile field (see ReversibilityProfile.json)."
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/AuditEvent.json",
+  "title": "AuditEvent",
+  "description": "TMF688-shaped audit envelope emitted by the Guardrail engine for every RemediationProposal. Production deployments emit these to Kafka, AMQ Streams, or a TMF688-conformant broker; v0 emits stdout+file per guardrails.yaml audit_sink.",
+  "type": "object",
+  "required": ["eventId", "eventTime", "eventType", "event"],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "pattern": "^evt-flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}-\\d{3}$"
+    },
+    "eventTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "RemediationProposed",
+        "RemediationApproved",
+        "RemediationApplied",
+        "RemediationFailed",
+        "RemediationRolledBack"
+      ]
+    },
+    "event": {
+      "type": "object",
+      "required": ["correlatedEventId", "domain", "remediation"],
+      "properties": {
+        "correlatedEventId": {
+          "type": "string",
+          "pattern": "^flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
+          "description": "References the originating FaultPayload.fault_id."
+        },
+        "domain": {
+          "type": "string",
+          "const": "oran-ocloud"
+        },
+        "remediation": {
+          "type": "object",
+          "description": "Embeds the RemediationProposal shape plus optional reversibility_profile.",
+          "required": ["proposalId", "targetLayer", "actionType", "actionTarget", "actionPayloadRef", "dryRun", "requiresHumanApproval", "humanApprovalStatus"],
+          "properties": {
+            "proposalId": {"type": "string"},
+            "version": {"type": "string"},
+            "targetLayer": {"type": "string", "enum": ["infra", "service", "ambiguous"]},
+            "classificationConfidence": {"type": "string"},
+            "classificationMethod": {"type": "string"},
+            "taxonomyMatch": {"type": "string"},
+            "contributingSignals": {"type": "array", "items": {"type": "string"}},
+            "actionType": {"type": "string"},
+            "actionTarget": {"type": "string"},
+            "actionPayloadRef": {"type": "string"},
+            "ocloudInternalPath": {"type": "string"},
+            "dryRun": {"type": "boolean"},
+            "guardrailResult": {"type": "object"},
+            "requiresHumanApproval": {"type": "boolean"},
+            "humanApprovalStatus": {"type": "string"},
+            "reversibility_profile": {
+              "type": "object",
+              "description": "Optional in v0. When present, conforms to harness/schemas/ReversibilityProfile.json."
+            }
+          }
+        }
+      }
+    }
+  }
+}

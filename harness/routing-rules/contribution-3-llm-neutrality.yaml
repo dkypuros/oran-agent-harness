@@ -1,0 +1,37 @@
+# Conforms to: harness-unique substrate constraint. LiteLLM-style provider abstraction.
+# Bibliography ref: 17
+# Purpose: declarative form of the talk's third contribution. Names the LLM-neutral substrate
+# requirement and documents how OMC's existing provider abstraction satisfies it operationally.
+
+llm_neutrality_assertion:
+  name: contribution-3-llm-neutrality
+  version: v1alpha1
+  contribution_label: "LLM-neutral substrate ensuring operators retain control over model choice and data sovereignty"
+  bibliography_refs: [17]
+
+  # The contract: no harness component embeds a specific provider. All LLM calls go through
+  # an abstraction layer.
+  abstraction_contract:
+    requirement: "Domain agents, the Router (in ambiguous_path), and the knowledge base layer MUST consume LLM capability through a provider-abstraction interface."
+    rejected_pattern: "Direct SDK imports of a specific LLM provider in any harness or skill module."
+    accepted_patterns:
+      - LiteLLM-style unified gateway
+      - OMC's omc ask provider router
+      - operator-deployed gateway (e.g., self-hosted Granite via Ollama)
+
+  # In the OMC reference operationalization at omc-skills/o-ran/, provider abstraction is
+  # already automatic. OMC routes by model tier (haiku, sonnet, opus) and supports provider
+  # swap via omc ask codex / omc ask gemini.
+  omc_reference_operationalization:
+    location: ../../omc-skills/o-ran/
+    mechanism: "OMC's Skill tool already abstracts model routing via model parameter (haiku/sonnet/opus). The skills in omc-skills/o-ran/ never import an SDK directly; they delegate via the OMC Skill tool, which the operator configures."
+    operator_controls:
+      - model_routing: "operator-configured per skill via model parameter"
+      - provider_swap: "operator-configured via omc ask <provider>"
+      - data_residency: "operator can route to self-hosted Granite via Ollama for sovereignty-sensitive deployments"
+
+  # Data sovereignty: the harness MUST permit operator-controlled routing to on-prem models
+  # for deployments under data-residency constraints (telco regulator, government carrier).
+  data_sovereignty:
+    requirement: "The harness MUST NOT make outbound API calls to a hosted LLM when the operator has configured a local backend. Verification: a local Ollama with Granite 8B should produce the same RemediationProposal shape (not necessarily the same content)."
+    test_method: "Operator runs the same scenario against (a) a hosted provider and (b) a local Granite 8B. Both runs MUST produce a RemediationProposal validating against harness/schemas/RemediationProposal.json. Decision content may differ; envelope shape must not."

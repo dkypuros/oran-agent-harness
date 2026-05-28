@@ -1,0 +1,64 @@
+{
+  "_conforms_to": {
+    "spec": "Anthropic Model Context Protocol tool-schema specification",
+    "spec_section": "tools object, per server",
+    "spec_version": "MCP current",
+    "bibliography_ref": [13, 14, 15],
+    "schema_role": "Declares the tool surface for mcp-platform, the FastMCP server exposing ptp4l, driver, and host configuration tools to the Platform Domain Agent."
+  },
+  "server_name": "mcp-platform",
+  "server_role": "platform-side diagnostic tools for the Platform Domain Agent",
+  "tools": [
+    {
+      "name": "get_ptp4l_status",
+      "description": "Returns current linuxptp daemon state, master offset samples, and PTP lock state for the named interface.",
+      "input_schema": {
+        "type": "object",
+        "required": ["interface"],
+        "properties": {
+          "interface": {"type": "string", "description": "Network interface name, e.g. ens2f0."},
+          "sample_window_seconds": {"type": "integer", "default": 60}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "list_active_services",
+      "description": "Lists active systemd services on a node, with a filter for known PTP-interfering services (fw-lldp-agent, NetworkManager-dispatcher hooks, custom timing daemons).",
+      "input_schema": {
+        "type": "object",
+        "required": ["node"],
+        "properties": {
+          "node": {"type": "string", "description": "Node FQDN."},
+          "filter": {"type": "string", "description": "Optional substring filter, e.g. 'lldp'."}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_driver_info",
+      "description": "Returns the loaded kernel module name, version, firmware version, and any known-issue matches for the named interface.",
+      "input_schema": {
+        "type": "object",
+        "required": ["interface"],
+        "properties": {
+          "interface": {"type": "string"}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    },
+    {
+      "name": "get_nic_stats",
+      "description": "Returns ethtool-style NIC counters relevant to PTP and hardware timestamping (tx_hwtstamp_timeouts, rx_hwtstamp_filter_drops) plus SR-IOV VF allocation status.",
+      "input_schema": {
+        "type": "object",
+        "required": ["interface"],
+        "properties": {
+          "interface": {"type": "string"},
+          "window_seconds": {"type": "integer", "default": 60}
+        }
+      },
+      "output_schema_ref": "../schemas/FaultPayload.json#/properties/evidence/items"
+    }
+  ]
+}

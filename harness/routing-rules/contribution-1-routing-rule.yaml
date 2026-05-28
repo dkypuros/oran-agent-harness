@@ -1,0 +1,66 @@
+# Conforms to: O-RAN.WG6 resource model (the rule's structural grounding) and TMF921 (the up-route envelope)
+# Bibliography ref: 1, 2, 3, 19
+# Purpose: declarative form of the talk's first contribution. Routes service-layer actions UP via TMF921
+# intent to partner SMOs; routes infrastructure-layer actions DOWN via O2 IMS into the O-Cloud. Ambiguous
+# entries return to the LLM-assist tier before classification.
+
+routing_rule:
+  name: contribution-1-routing-rule
+  version: v1alpha1
+  contribution_label: "Remediation routing rule following O-RAN resource layering"
+  bibliography_refs: [1, 2, 3, 19]
+
+  # The rule consults harness/taxonomy.yaml first. Decision is deterministic when the taxonomy_match
+  # resolves to a single non-ambiguous layer.
+  taxonomy_source: ../taxonomy.yaml
+
+  # ---------- Down branch: infra-layer actions enter the O-Cloud via O2 IMS ----------
+  service_to_ocloud_path:
+    when:
+      taxonomy_layer: infra
+    action_target: oran-o2ims
+    target_api: O-RAN.WG6.O2IMS-Interface
+    target_api_bibliography_ref: 3
+    delivery_paths:
+      - taxonomy_id: host_config
+        ocloud_internal: machine-config-operator
+        action_type: apply_machine_config
+        scenario_example: A_fw_lldp_agent
+      - taxonomy_id: ptp_host_stack
+        ocloud_internal: machine-config-operator
+        action_type: apply_machine_config
+        scenario_example: A_fw_lldp_agent
+      - taxonomy_id: host_driver
+        ocloud_internal: kernel-module-management
+        action_type: apply_kmm_module
+        scenario_example: A_prime_ice_driver
+      - taxonomy_id: node_firmware
+        ocloud_internal: metal3-baremetal-operator
+        action_type: apply_metal3_firmware
+      - taxonomy_id: performance_profile
+        ocloud_internal: node-tuning-operator
+        action_type: apply_performance_profile
+      - taxonomy_id: sriov_allocation
+        ocloud_internal: sriov-network-operator
+        action_type: apply_sriov_config
+
+  # ---------- Up branch: service-layer actions go to partner SMO via TMF921 intent ----------
+  service_to_smo_path:
+    when:
+      taxonomy_layer: service
+    action_target: partner-smo
+    target_api: TMF921 Intent Management API
+    target_api_bibliography_ref: 19
+    action_type: emit_smo_intent
+    rationale: "Service-layer remediation belongs to the partner orchestrator (Ericsson, Amdocs, Nokia, Mavenir, ZTE) per the talk's vendor-neutral framing. The harness does NOT execute these; it emits an intent and observes the result."
+
+  # ---------- Ambiguous: defer to LLM-assist before classification ----------
+  ambiguous_path:
+    when:
+      taxonomy_layer: ambiguous
+    next_step: llm_assist_classification
+    rationale: "The deterministic taxonomy lookup did not produce a single layer. The LLM tier consults the evidence chain (RCA artifact) plus knowledge_base_lookups to disambiguate. The Router records the LLM rationale in RemediationProposal.contributingSignals."
+
+  # ---------- Determinism contract ----------
+  determinism:
+    rule: "The Router consults this YAML BEFORE any LLM call. LLM-assist only runs when ambiguous_path is selected. The talk's research-credible move is grounding routing in O-RAN's own resource layering, not in a model's opinion."

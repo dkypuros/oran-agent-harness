@@ -1,0 +1,74 @@
+# Conforms to: harness-unique policy contract. Audit shape conforms to TMF688 Event Management API.
+# Bibliography ref: 18
+# Purpose: deterministic, LLM-free guardrail engine that gates every RemediationProposal before
+# an apply call enters the O-Cloud or a TMF921 intent is sent up to a partner SMO.
+# v0 is a CONTRACT, not a production enforcer. Production deployments wire these rules into a
+# policy engine of their choice (OPA, Kyverno, Sentinel, etc.).
+
+version: v1
+
+rules:
+  # Default to dry-run for every action class. Live application requires explicit operator
+  # promotion in the audit event.
+  dry_run_default: true
+
+  # Blast-radius caps. Hard ceilings that the harness will not cross regardless of operator
+  # authorization. These are not "default but overridable"; they are absolute limits in v0.
+  blast_radius:
+    max_nodes: 1
+    max_sites: 1
+    max_cells: 4
+
+  # Human-approval gate for every action class that mutates the O-Cloud or the RAN.
+  # An entry here means the harness will NOT apply autonomously even with dry_run_default=false.
+  require_human_approval:
+    - apply_machine_config
+    - apply_kmm_module
+    - apply_metal3_firmware
+    - reboot
+    - reimage
+    - firmware_update
+    - emit_smo_intent
+
+  # Action-type allowlist. The Router and apply-tools may only emit one of these.
+  # Anything else is rejected at the contract layer before reaching the O-Cloud.
+  action_allowlist:
+    - apply_machine_config
+    - apply_kmm_module
+    - apply_metal3_firmware
+    - apply_performance_profile
+    - apply_sriov_config
+    - emit_smo_intent
+
+  # Audit sink. v0 emits to stdout AND appends to a JSONL file. Production deployments swap
+  # the sink for Kafka, AMQ Streams, or a TMF688-conformant event broker.
+  audit_sink: stdout+file
+
+  audit_event_format:
+    spec: TMF688 Event Management API
+    spec_ref: 18
+    event_envelope_required_fields:
+      - eventId
+      - eventTime
+      - eventType
+      - event.correlatedEventId
+      - event.domain
+      - event.remediation
+
+# Operator-harness co-authorization. The harness drafts; the operator edits and commits.
+# This is NOT discrete approve/reject (HITL). It is co-authorship: the operator can modify
+# the RemediationProposal before promotion. The audit event captures both states.
+co_authorization:
+  draft_phase:
+    actor: harness
+    output: "RemediationProposal with dryRun: true and humanApprovalStatus: pending"
+  edit_phase:
+    actor: operator
+    permitted_modifications:
+      - blast_radius (within max caps)
+      - target nodes (within action_allowlist)
+      - dry_run flag (only on operator promotion)
+      - additional_safeguards (operator may ADD; never remove)
+  commit_phase:
+    actor: operator
+    output: "AuditEvent with humanApprovalStatus: approved-by-{operator-id}-at-{timestamp}"

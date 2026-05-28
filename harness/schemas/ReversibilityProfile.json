@@ -1,0 +1,93 @@
+{
+  "_conforms_to": {
+    "spec": "harness-unique trust-loop contribution. See talk/trust_loop.md for the architectural rationale.",
+    "spec_section": "v0 reversibility contract for closed-loop remediation",
+    "spec_version": "v0",
+    "bibliography_ref": null,
+    "schema_role": "Validates the reversibility_profile field added to every AuditEvent.event.remediation. Phase 4 populates this field on both walkthrough scenarios."
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/ReversibilityProfile.json",
+  "title": "ReversibilityProfile",
+  "description": "Seven-field reversibility contract between the harness and the human in the loop. Every audit event carries this so the operator can assess rollback at decision time, in the same place every time and in the same shape every time.",
+  "type": "object",
+  "required": [
+    "rollback_intent",
+    "blast_radius_if_reverse",
+    "rebuild_timeline",
+    "replication_history",
+    "validation_history",
+    "risk_profile_burn_down",
+    "confidence_in_reversibility"
+  ],
+  "properties": {
+    "rollback_intent": {
+      "type": "object",
+      "description": "The TMF921-style intent that would undo this remediation if executed.",
+      "required": ["intent_type", "intent_target", "intent_payload_ref"],
+      "properties": {
+        "intent_type": {"type": "string"},
+        "intent_target": {"type": "string"},
+        "intent_payload_ref": {"type": "string", "description": "Reference to the inverse MachineConfig, Module, or intent artifact."}
+      }
+    },
+    "blast_radius_if_reverse": {
+      "type": "object",
+      "description": "Predicted scope of the rollback action. Should not exceed blast_radius caps in guardrails.yaml.",
+      "required": ["nodes", "sites", "cells", "estimated_user_impact"],
+      "properties": {
+        "nodes": {"type": "integer", "minimum": 0},
+        "sites": {"type": "integer", "minimum": 0},
+        "cells": {"type": "integer", "minimum": 0},
+        "estimated_user_impact": {
+          "type": "string",
+          "enum": ["none", "low", "medium", "high"]
+        }
+      }
+    },
+    "rebuild_timeline": {
+      "type": "object",
+      "description": "Expected time to fully reverse and reach the pre-remediation state.",
+      "required": ["estimated_minutes", "confidence_band"],
+      "properties": {
+        "estimated_minutes": {"type": "number", "minimum": 0},
+        "confidence_band": {"type": "string", "enum": ["tight", "loose", "open"]}
+      }
+    },
+    "replication_history": {
+      "type": "object",
+      "description": "How many times this remediation pattern has been applied and reversed in this fleet.",
+      "required": ["applies_in_window", "rollbacks_in_window", "window_days"],
+      "properties": {
+        "applies_in_window": {"type": "integer", "minimum": 0},
+        "rollbacks_in_window": {"type": "integer", "minimum": 0},
+        "window_days": {"type": "integer", "minimum": 1}
+      }
+    },
+    "validation_history": {
+      "type": "object",
+      "description": "Sandbox / digital-twin validation runs for this remediation class. See talk/trust_loop.md sect 2.",
+      "required": ["twin_runs", "twin_pass_rate", "last_twin_run_at"],
+      "properties": {
+        "twin_runs": {"type": "integer", "minimum": 0},
+        "twin_pass_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "last_twin_run_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "risk_profile_burn_down": {
+      "type": "object",
+      "description": "How the risk surface shrinks as the remediation rolls out and validates. EvalOps signal; see talk/trust_loop.md sect 1.",
+      "required": ["initial_risk_score", "current_risk_score", "burn_down_rate_per_minute"],
+      "properties": {
+        "initial_risk_score": {"type": "number", "minimum": 0, "maximum": 1},
+        "current_risk_score": {"type": "number", "minimum": 0, "maximum": 1},
+        "burn_down_rate_per_minute": {"type": "number"}
+      }
+    },
+    "confidence_in_reversibility": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "Operator-facing summary. The single field the operator reads first."
+    }
+  }
+}
