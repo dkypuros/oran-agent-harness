@@ -7,8 +7,6 @@ license: Apache-2.0
 status: canonical submission
 ---
 
-# From Multivendor Diagnosis to Closed-Loop Remediation: An Agent Harness for Cloud RAN Day-2
-
 Multivendor Cloud RAN faults routinely span RAN software, the cloud platform, and underlying hardware,
 making Day-2 triage slow and brittle. Agentic systems integrated through an Agentic Gateway over MCP have
 begun to address the diagnosis half of the problem by coordinating domain-specific agents over controlled
