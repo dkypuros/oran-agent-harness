@@ -16,11 +16,13 @@ Checks:
   6. Leakage guard: git ls-files must contain no .local/, python_demo/, .pdf, .env
   7. README structure: 80-130 lines, three goals in the lede
   8. File counts: harness/ has 20 files, omc-skills/o-ran/ has 6 markdown files
+  9. Schema validation: scenario data validates against declared harness/schemas/ (optional, requires jsonschema)
 
 Dependencies:
   - Python 3.8 or later (uses pathlib, f-strings)
   - PyYAML (pip install pyyaml)
   - git (must be runnable from the repo root for the leakage check)
+  - jsonschema (pip install jsonschema) for check 9; if missing, check 9 is skipped with a warning
 
 Excluded from the public tree scans: .git, .local, .omc, python_demo.
 """
@@ -197,6 +199,49 @@ def main():
         ok,
         f"harness={harness_count}/20, omc-skills md={omc_count}/6",
     )
+
+    # 9. Schema validation (optional, requires jsonschema)
+    print("\n--- schema validation (scenarios vs harness/schemas/) ---")
+    try:
+        import jsonschema
+    except ImportError:
+        print("  SKIP: jsonschema not installed (pip install jsonschema). Check 9 not run.")
+    else:
+        rp_schema = json.loads((REPO_ROOT / "harness/schemas/RemediationProposal.json").read_text())
+        fp_schema = json.loads((REPO_ROOT / "harness/schemas/FaultPayload.json").read_text())
+        rev_schema = json.loads((REPO_ROOT / "harness/schemas/ReversibilityProfile.json").read_text())
+        fails = []
+        # Validate fault payloads against FaultPayload schema
+        for path in [
+            "scenarios/A_fw_lldp_agent/fault_payload.json",
+            "scenarios/A_prime_ice_driver/fault_payload.json",
+        ]:
+            data = json.loads((REPO_ROOT / path).read_text())
+            data_no_meta = {k: v for k, v in data.items() if k != "_conforms_to"}
+            try:
+                jsonschema.validate(data_no_meta, fp_schema)
+            except jsonschema.ValidationError as e:
+                fails.append(f"{path}: {e.message}")
+        # Validate audit_event.event.remediation against RemediationProposal schema
+        for path in [
+            "scenarios/A_fw_lldp_agent/audit_event.json",
+            "scenarios/A_prime_ice_driver/audit_event.json",
+        ]:
+            data = json.loads((REPO_ROOT / path).read_text())
+            remediation = data["event"]["remediation"]
+            # ReversibilityProfile is a harness-unique extension on RemediationProposal
+            rem_for_validation = {k: v for k, v in remediation.items() if k != "reversibility_profile"}
+            try:
+                jsonschema.validate(rem_for_validation, rp_schema)
+            except jsonschema.ValidationError as e:
+                fails.append(f"{path}: {e.message}")
+            # Validate the reversibility_profile portion against ReversibilityProfile schema
+            if "reversibility_profile" in remediation:
+                try:
+                    jsonschema.validate(remediation["reversibility_profile"], rev_schema)
+                except jsonschema.ValidationError as e:
+                    fails.append(f"{path} reversibility_profile: {e.message}")
+        record("schema_validation", not fails, f"{len(fails)} failures" + (": " + "; ".join(fails) if fails else ""))
 
     # Summary
     print()

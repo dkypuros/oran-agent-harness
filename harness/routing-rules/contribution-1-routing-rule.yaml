@@ -15,7 +15,7 @@ routing_rule:
   taxonomy_source: ../taxonomy.yaml
 
   # ---------- Down branch: infra-layer actions enter the O-Cloud via O2 IMS ----------
-  service_to_ocloud_path:
+  infra_to_ocloud_path:
     when:
       taxonomy_layer: infra
     action_target: oran-o2ims

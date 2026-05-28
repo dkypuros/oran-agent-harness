@@ -30,7 +30,7 @@
       "actionType": "apply_kmm_module",
       "actionTarget": "worker-ran-02.dallas.example.com",
       "actionPayloadRef": "ice-driver-update",
-      "ocloudInternalPath": "kmm",
+      "ocloudInternalPath": "kernel-module-management",
       "dryRun": true,
       "guardrailResult": {
         "outcome": "pass",

@@ -79,13 +79,15 @@ file is stale documentation. The verify gate runs the cross-check in both direct
 Run the gate locally with:
 
 ```
-pip install pyyaml
+pip install pyyaml jsonschema
 python3 scripts/verify.py
 ```
 
-It runs 8 deterministic checks (citation headers, JSON parse, YAML parse, conformance.md bidirectional
-completeness, em dash audit, leakage guard, README structure, file counts) and exits non-zero on any
-failure. See the script header for the full list.
+It runs 9 deterministic checks (citation headers, JSON parse, YAML parse, conformance.md bidirectional
+completeness, em dash audit, leakage guard, README structure, file counts, and schema validation of
+scenario data against the declared harness schemas) and exits non-zero on any failure. The schema
+validation check is optional, skipped with a warning if `jsonschema` is not installed. See the script
+header for the full list.
 
 ## Running the walkthroughs (OMC reference operationalization)
 
