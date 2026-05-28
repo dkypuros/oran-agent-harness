@@ -26,6 +26,18 @@ Schema and YAML.
 The reference O2 IMS implementation cited throughout is Red Hat's open-source O-Cloud Manager
 (openshift-kni/oran-o2ims, bibliography ref 6 in `references.md`).
 
+## How the system works (one paragraph)
+
+An observation loop on the edge (Intel NIC PHC, the linuxptp daemon, and cloud-event-proxy publishing
+O-RAN CloudEvents) captures PTP drift evidence. The agent harness in the middle (an Agentic Gateway
+over MCP, three domain agents for Platform, RAN, and Hardware, and a deterministic taxonomy with
+LLM-assist on ambiguous edges) classifies the fault. A routing rule then splits actions by O-RAN
+resource layer: service-layer fixes route UP to the partner SMO as a TMF921 intent; infrastructure
+fixes route DOWN to the O-Cloud via the O-RAN O2 IMS API, where the Machine Config Operator or the
+Kernel Module Management Operator delivers the artifact. Before any live action, the proposal runs
+against a digital-twin sandbox; only sandbox-passing proposals reach the human operator with a
+populated reversibility profile. Full walkthrough at `talk/architecture_narrative.md`.
+
 ## Repository map
 
 ```
