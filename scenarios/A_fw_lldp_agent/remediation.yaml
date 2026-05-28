@@ -1,3 +1,5 @@
+# Conforms to: machineconfiguration.openshift.io/v1 MachineConfig
+# Bibliography ref: 9, 41
 # Scenario A remediation
 # Disable fw-lldp-agent.service on RAN worker nodes via MachineConfig.
 # Delivered by Machine Config Operator after ACM propagates the cluster

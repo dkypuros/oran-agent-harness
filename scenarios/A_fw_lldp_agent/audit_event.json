@@ -1,4 +1,13 @@
 {
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/AuditEvent.json (TMF688) and harness/schemas/ReversibilityProfile.json",
+    "spec_section": "Event envelope and notification body, plus reversibility_profile",
+    "spec_version": "TMF688 current, ReversibilityProfile v0",
+    "bibliography_ref": [
+      18
+    ],
+    "scenario": "A_fw_lldp_agent"
+  },
   "eventId": "evt-flt-2026-05-14-001-001",
   "eventTime": "2026-05-14T10:42:18Z",
   "eventType": "RemediationProposed",
@@ -37,7 +46,40 @@
         }
       },
       "requiresHumanApproval": true,
-      "humanApprovalStatus": "pending"
+      "humanApprovalStatus": "pending",
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_machine_config",
+          "intent_target": "worker-ran-01.dallas.example.com",
+          "intent_payload_ref": "99-worker-ran-restore-fw-lldp-agent (inverse of original)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 0,
+          "estimated_user_impact": "none"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 5,
+          "confidence_band": "tight"
+        },
+        "replication_history": {
+          "applies_in_window": 12,
+          "rollbacks_in_window": 0,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 8,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-14T10:30:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.18,
+          "current_risk_score": 0.02,
+          "burn_down_rate_per_minute": 0.02
+        },
+        "confidence_in_reversibility": "high"
+      }
     }
   }
 }

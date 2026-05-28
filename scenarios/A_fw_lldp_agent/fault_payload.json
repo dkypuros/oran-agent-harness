@@ -1,4 +1,13 @@
 {
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/FaultPayload.json. Evidence model conforms to O-RAN.WG6 Cloud Notifications.",
+    "spec_section": "FaultPayload schema",
+    "spec_version": "v0",
+    "bibliography_ref": [
+      31
+    ],
+    "scenario": "A_fw_lldp_agent"
+  },
   "fault_id": "flt-2026-05-14-001",
   "timestamp": "2026-05-14T10:42:13Z",
   "node": "worker-ran-01.dallas.example.com",
@@ -11,10 +20,34 @@
       "raw_data": {
         "interface": "ens2f0",
         "samples": [
-          {"t": "10:42:00Z", "rms_ns": 14, "max_ns": 25, "freq_ppb": -5765, "state": "LOCKED"},
-          {"t": "10:42:05Z", "rms_ns": 4440, "max_ns": 7880, "freq_ppb": -13325, "state": "LOCKED"},
-          {"t": "10:42:10Z", "rms_ns": 8920, "max_ns": 12350, "freq_ppb": -18001, "state": "FREE_RUNNING"},
-          {"t": "10:42:13Z", "rms_ns": 11200, "max_ns": 14800, "freq_ppb": -19500, "state": "FREE_RUNNING"}
+          {
+            "t": "10:42:00Z",
+            "rms_ns": 14,
+            "max_ns": 25,
+            "freq_ppb": -5765,
+            "state": "LOCKED"
+          },
+          {
+            "t": "10:42:05Z",
+            "rms_ns": 4440,
+            "max_ns": 7880,
+            "freq_ppb": -13325,
+            "state": "LOCKED"
+          },
+          {
+            "t": "10:42:10Z",
+            "rms_ns": 8920,
+            "max_ns": 12350,
+            "freq_ppb": -18001,
+            "state": "FREE_RUNNING"
+          },
+          {
+            "t": "10:42:13Z",
+            "rms_ns": 11200,
+            "max_ns": 14800,
+            "freq_ppb": -19500,
+            "state": "FREE_RUNNING"
+          }
         ]
       }
     },

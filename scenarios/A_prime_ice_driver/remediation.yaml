@@ -1,3 +1,5 @@
+# Conforms to: kmm.sigs.x-k8s.io/v1beta1 Module
+# Bibliography ref: 10, 42
 # Scenario A-prime remediation
 # Replace in-tree ice driver with a known-good OOT build (1.13.7) on RAN
 # worker nodes via Kernel Module Management Operator (KMM).
