@@ -76,6 +76,17 @@ upstream spec, section, version, and bibliography reference number. A file in `h
 that lacks a citation header is incomplete metadata; a row in the index that points to a non-existent
 file is stale documentation. The verify gate runs the cross-check in both directions before publication.
 
+Run the gate locally with:
+
+```
+pip install pyyaml
+python3 scripts/verify.py
+```
+
+It runs 8 deterministic checks (citation headers, JSON parse, YAML parse, conformance.md bidirectional
+completeness, em dash audit, leakage guard, README structure, file counts) and exits non-zero on any
+failure. See the script header for the full list.
+
 ## Running the walkthroughs (OMC reference operationalization)
 
 ```

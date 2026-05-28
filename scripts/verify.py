@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""
+Phase 6 verify gate for the O-RAN Agent Harness public repo.
+
+Runs 8 deterministic checks against the repository contents and exits 0 if all
+pass, non-zero if any fail. Designed for any reviewer to run after cloning:
+
+    python3 scripts/verify.py
+
+Checks:
+  1. Citation headers on every authored YAML and JSON in harness/ and scenarios/
+  2. JSON parse on every .json in the public tree
+  3. YAML parse on every .yaml and .yml in the public tree
+  4. harness/conformance.md bidirectional completeness (no stale rows, no missing files)
+  5. Em dash (U+2014) audit across the public tree, must be zero
+  6. Leakage guard: git ls-files must contain no .local/, python_demo/, .pdf, .env
+  7. README structure: 80-130 lines, three goals in the lede
+  8. File counts: harness/ has 20 files, omc-skills/o-ran/ has 6 markdown files
+
+Dependencies:
+  - Python 3.8 or later (uses pathlib, f-strings)
+  - PyYAML (pip install pyyaml)
+  - git (must be runnable from the repo root for the leakage check)
+
+Excluded from the public tree scans: .git, .local, .omc, python_demo.
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print("ERROR: PyYAML not installed. Run: pip install pyyaml", file=sys.stderr)
+    sys.exit(2)
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+EM_DASH = chr(0x2014)
+CHECK_PATHS = ["harness", "scenarios"]
+PUBLIC_TREE_EXCLUDES = {".git", ".local", ".omc", "python_demo"}
+
+results = []
+
+
+def record(name, passed, detail=""):
+    results.append((name, passed, detail))
+    status = "PASS" if passed else "FAIL"
+    suffix = f" ({detail})" if detail else ""
+    print(f"  {status}: {name}{suffix}")
+
+
+def is_in_public_tree(p):
+    return not any(part in PUBLIC_TREE_EXCLUDES for part in p.parts)
+
+
+def main():
+    print("=" * 72)
+    print("Phase 6 verify gate: O-RAN Agent Harness")
+    print(f"Repo root: {REPO_ROOT}")
+    print("=" * 72)
+
+    # 1. Citation headers
+    print("\n--- citation headers ---")
+    missing = []
+    for d in CHECK_PATHS:
+        for p in (REPO_ROOT / d).rglob("*"):
+            if not p.is_file():
+                continue
+            if p.suffix not in {".yaml", ".yml", ".json"}:
+                continue
+            if p.name == "conformance.md":
+                continue
+            try:
+                content = p.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            if p.suffix in {".yaml", ".yml"}:
+                head = "\n".join(content.split("\n")[:5])
+                ok = "Conforms to:" in head and "Bibliography ref:" in head
+            else:
+                try:
+                    ok = "_conforms_to" in json.loads(content)
+                except Exception:
+                    ok = False
+            if not ok:
+                missing.append(str(p.relative_to(REPO_ROOT)))
+    detail = f"{len(missing)} missing"
+    if missing:
+        detail += ": " + ", ".join(missing[:5]) + ("..." if len(missing) > 5 else "")
+    record("citation_headers", not missing, detail)
+
+    # 2. JSON parse
+    print("\n--- JSON parse ---")
+    fails = []
+    for p in REPO_ROOT.rglob("*.json"):
+        if not is_in_public_tree(p.relative_to(REPO_ROOT)):
+            continue
+        try:
+            json.loads(p.read_text())
+        except Exception as e:
+            fails.append(f"{p.relative_to(REPO_ROOT)}: {str(e)[:60]}")
+    record("json_parse", not fails, f"{len(fails)} failures")
+
+    # 3. YAML parse
+    print("\n--- YAML parse ---")
+    fails = []
+    for pattern in ["*.yaml", "*.yml"]:
+        for p in REPO_ROOT.rglob(pattern):
+            if not is_in_public_tree(p.relative_to(REPO_ROOT)):
+                continue
+            try:
+                list(yaml.safe_load_all(p.read_text()))
+            except Exception as e:
+                fails.append(f"{p.relative_to(REPO_ROOT)}: {str(e)[:60]}")
+    record("yaml_parse", not fails, f"{len(fails)} failures")
+
+    # 4. conformance.md bidirectional
+    print("\n--- conformance.md bidirectional ---")
+    conf_path = REPO_ROOT / "harness/conformance.md"
+    if not conf_path.exists():
+        record("conformance_complete", False, "harness/conformance.md missing")
+    else:
+        conf = conf_path.read_text()
+        row_pattern = r"\| (harness/[^\s|]+\.(?:yaml|yml|json|md)|scenarios/[^\s|]+) "
+        rows = re.findall(row_pattern, conf)
+        expected = set()
+        for d in CHECK_PATHS:
+            for p in (REPO_ROOT / d).rglob("*"):
+                if not p.is_file():
+                    continue
+                if p.suffix in {".yaml", ".yml", ".json", ".md"}:
+                    expected.add(str(p.relative_to(REPO_ROOT)))
+        listed = set(rows)
+        missing_from_table = expected - listed
+        stale_rows = listed - expected
+        ok = not missing_from_table and not stale_rows
+        detail = (
+            f"{len(rows)} rows, "
+            f"{len(missing_from_table)} missing from table, "
+            f"{len(stale_rows)} stale"
+        )
+        record("conformance_complete", ok, detail)
+
+    # 5. Em dash audit
+    print("\n--- em dash audit ---")
+    hits = []
+    for p in REPO_ROOT.rglob("*"):
+        if not p.is_file():
+            continue
+        if not is_in_public_tree(p.relative_to(REPO_ROOT)):
+            continue
+        try:
+            if EM_DASH in p.read_text(encoding="utf-8"):
+                hits.append(str(p.relative_to(REPO_ROOT)))
+        except Exception:
+            pass
+    record("em_dashes", not hits, f"{len(hits)} files" + (f": {hits}" if hits else ""))
+
+    # 6. Leakage guard
+    print("\n--- leakage guard (git ls-files) ---")
+    try:
+        tracked = subprocess.check_output(
+            ["git", "ls-files"], cwd=str(REPO_ROOT)
+        ).decode().split()
+        pattern = re.compile(r"\.local/|python_demo/|\.pdf$|\.env$")
+        leaks = [t for t in tracked if pattern.search(t)]
+        record("no_leakage", not leaks, f"{len(leaks)} leaks" + (f": {leaks}" if leaks else ""))
+    except Exception as e:
+        record("no_leakage", False, f"git command failed: {e}")
+
+    # 7. README structure
+    print("\n--- README structure ---")
+    readme = (REPO_ROOT / "README.md").read_text()
+    line_count = readme.count("\n")
+    top25 = "\n".join(readme.split("\n")[:25])
+    g1 = "Here is my presentation" in top25
+    g2 = "Here is the example work" in top25
+    g3 = "Here is where I actually test" in top25
+    ok = 80 <= line_count <= 130 and g1 and g2 and g3
+    record(
+        "readme_structure",
+        ok,
+        f"lines={line_count}, three goals present={g1 and g2 and g3}",
+    )
+
+    # 8. File counts
+    print("\n--- file counts ---")
+    harness_count = sum(1 for p in (REPO_ROOT / "harness").rglob("*") if p.is_file())
+    omc_count = sum(1 for p in (REPO_ROOT / "omc-skills/o-ran").glob("*.md"))
+    ok = harness_count == 20 and omc_count == 6
+    record(
+        "file_counts",
+        ok,
+        f"harness={harness_count}/20, omc-skills md={omc_count}/6",
+    )
+
+    # Summary
+    print()
+    print("=" * 72)
+    passed = sum(1 for _, p, _ in results if p)
+    total = len(results)
+    print(f"SUMMARY: {passed}/{total} checks passed")
+    if passed == total:
+        print("OVERALL: PASS")
+        return 0
+    else:
+        print("OVERALL: FAIL")
+        for name, ok, detail in results:
+            if not ok:
+                print(f"  FAILED: {name} ({detail})")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
