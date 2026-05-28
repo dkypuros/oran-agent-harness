@@ -16,17 +16,17 @@ Companion documents:
 ## A. O-RAN Alliance specifications (architecture and O2 interface)
 
 1. O-RAN Alliance. O-RAN Architecture Description. Working Group 1 specification. O-RAN Alliance e.V.
-   https://www.o-ran.org. Accessed 14th [WED] MAY 2026.
+   https://www.o-ran.org/specifications. Accessed 14th [WED] MAY 2026.
 
 2. O-RAN Alliance. O-RAN O2 General Aspects and Principles. Working Group 6 specification
-   (O-RAN.WG6.O2-GAnP). O-RAN Alliance e.V. https://www.o-ran.org. Accessed 14th [WED] MAY 2026.
+   (O-RAN.WG6.O2-GAnP). O-RAN Alliance e.V. https://www.o-ran.org/specifications. Accessed 14th [WED] MAY 2026.
 
 3. O-RAN Alliance. O-RAN O2 IMS Interface Specification (Infrastructure Management Services). Working
-   Group 6 specification (O-RAN.WG6.O2IMS-Interface). O-RAN Alliance e.V. https://www.o-ran.org.
+   Group 6 specification (O-RAN.WG6.O2IMS-Interface). O-RAN Alliance e.V. https://www.o-ran.org/specifications.
    Accessed 14th [WED] MAY 2026.
 
 4. O-RAN Alliance. O-RAN O2 DMS Interface Specification (Deployment Management Services). Working Group
-   6 specification (O-RAN.WG6.O2DMS-Interface). O-RAN Alliance e.V. https://www.o-ran.org. Accessed
+   6 specification (O-RAN.WG6.O2DMS-Interface). O-RAN Alliance e.V. https://www.o-ran.org/specifications. Accessed
    14th [WED] MAY 2026.
 
 5. O-RAN Software Community. O2 IMS Compliance Test Suite. Linux Foundation, O-RAN SC.
@@ -77,17 +77,17 @@ Companion documents:
 
 ## D. TM Forum standards
 
-18. TM Forum. TMF688 Event Management API User Guide and REST Specification. https://www.tmforum.org.
-    Accessed 14th [WED] MAY 2026.
+18. TM Forum. TMF688 Event Management API User Guide and REST Specification.
+    https://www.tmforum.org/oda/open-apis/table/tmf688. Accessed 14th [WED] MAY 2026.
 
 19. TM Forum. TMF921 Intent Management API User Guide and REST Specification.
-    https://www.tmforum.org. Accessed 14th [WED] MAY 2026.
+    https://www.tmforum.org/oda/open-apis/table/tmf921. Accessed 14th [WED] MAY 2026.
 
-20. TM Forum. TMF634 Resource Inventory Management API Specification. https://www.tmforum.org.
-    Accessed 14th [WED] MAY 2026.
+20. TM Forum. TMF634 Resource Inventory Management API Specification.
+    https://www.tmforum.org/oda/open-apis/table/tmf634. Accessed 14th [WED] MAY 2026.
 
-21. TM Forum. TMF642 Alarm Management API Specification. https://www.tmforum.org. Accessed 14th [WED]
-    MAY 2026.
+21. TM Forum. TMF642 Alarm Management API Specification.
+    https://www.tmforum.org/oda/open-apis/table/tmf642. Accessed 14th [WED] MAY 2026.
 
 22. TM Forum. GB922 Information Framework (SID) Concepts and Principles. https://www.tmforum.org.
     Accessed 14th [WED] MAY 2026.
@@ -121,7 +121,7 @@ Companion documents:
     specification for describing event data. CNCF. https://cloudevents.io. Accessed 14th [WED] MAY 2026.
 
 31. O-RAN Alliance. O-RAN Cloud Notifications specification. Working Group 6
-    (O-RAN.WG6.Cloud-Notifications). O-RAN Alliance e.V. https://www.o-ran.org. Accessed 14th [WED]
+    (O-RAN.WG6.Cloud-Notifications). O-RAN Alliance e.V. https://www.o-ran.org/specifications. Accessed 14th [WED]
     MAY 2026.
 
 ## F. RAN performance counters and 5G management

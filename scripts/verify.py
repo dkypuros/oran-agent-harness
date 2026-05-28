@@ -2,8 +2,10 @@
 """
 Phase 6 verify gate for the O-RAN Agent Harness public repo.
 
-Runs 8 deterministic checks against the repository contents and exits 0 if all
-pass, non-zero if any fail. Designed for any reviewer to run after cloning:
+Runs 9 deterministic checks against the repository contents and exits 0 if all
+pass, non-zero if any fail. Check 9 (JSON Schema validation) is optional and
+auto-skipped if `jsonschema` is not installed. Designed for any reviewer to
+run after cloning:
 
     python3 scripts/verify.py
 
