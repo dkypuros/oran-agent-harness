@@ -78,7 +78,7 @@ co_authorization:
 # regional power loss, security incidents) where the physical world is in an extreme state and
 # the harness's normal pattern matching would actively fight that reality.
 #
-# AT&T-validated operational requirement. In a traditional appliance world, the override is a
+# Informed by AT&T operations team feedback. In a traditional appliance world, the override is a
 # literal physical action (pull the power cord, pull the fiber). In a software-defined Cloud RAN,
 # the appliance is distributed across thousands of pods and hundreds of nodes; there is no cord.
 # crisis_mode is the cord.
@@ -87,7 +87,7 @@ co_authorization:
 #   ReversibilityProfile UNDOES one applied action.
 #   crisis_mode FREEZES all actions until explicitly deactivated.
 crisis_mode:
-  description: "Global override for macro events. AT&T-validated operational requirement."
+  description: "Global override for macro events. Informed by AT&T operations team feedback."
   activation:
     actors: "NOC supervisor or designated key holders"
     mechanism: "explicit operator action via UI or signed API call"

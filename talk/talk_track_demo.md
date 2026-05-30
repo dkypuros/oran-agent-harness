@@ -14,7 +14,7 @@ This file drives the build. Words first; everything else gets shaped to serve th
 | Architecture | 5 min | The macro diagram, what is on the slide |
 | Three contributions | 4 min | Routing rule, guardrail contract, LLM-neutral substrate |
 | **Demo** | **4 min** | **This file** |
-| Trust loop + killswitch | 3 min | Reversibility profile, AT&T-validated crisis_mode |
+| Trust loop + killswitch | 3 min | Reversibility profile, AT&T-reviewed crisis_mode |
 | Close | 2 min | The GitHub URL, the standards-track ask |
 
 If the talk runs long, the demo holds its 4 minutes and other blocks compress. The demo is the
@@ -79,7 +79,7 @@ piece that has to be live on screen; the rest is recoverable from slides.
 >
 > One more thing. We flip the killswitch. CrisisModeActivation envelope. Operator override. The
 > Guardrail engine refuses every write. The reversibility profile stays queryable. This is the
-> AT&T-validated pattern. Agentic systems fail safe, not catastrophic. That is the closing piece
+> AT&T operations team review pattern. Agentic systems fail safe, not catastrophic. That is the closing piece
 > of the agentic recoverability story, and that is the contract this harness is offering for
 > standards discussion.
 

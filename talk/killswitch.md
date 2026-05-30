@@ -18,6 +18,8 @@ flagged when this architecture was walked past them: what happens during a hurri
 regional lightning storm, or a power-grid event when the physical world has become something the
 agents were never trained for.
 
+This basis is informal operational feedback from an architecture walk-through with AT&T operations engineers, not a published joint endorsement.
+
 In a traditional appliance world the operator pulls the power cord or the fiber line. In a
 software-defined Cloud RAN there is no cord. The "appliance" is distributed across thousands of
 Kubernetes pods on hundreds of bare-metal nodes. An agent trained on normal anomaly patterns, faced

@@ -1,6 +1,6 @@
 {
   "_conforms_to": {
-    "spec": "harness-unique crisis-mode activation event. AT&T-validated operational contract. See talk/killswitch.md for the architectural rationale.",
+    "spec": "harness-unique crisis-mode activation event. Designed against AT&T operations team feedback. See talk/killswitch.md for the architectural rationale.",
     "spec_section": "Killswitch / Agentic Circuit Breaker activation envelope",
     "spec_version": "v0",
     "bibliography_ref": null,

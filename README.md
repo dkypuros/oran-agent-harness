@@ -71,7 +71,7 @@ oran-agent-harness/
 |   |-- sequence_agentic_recovery.mmd     behavioral: rollback sequence, per-action undo
 |   |-- state_crisis_mode.mmd             behavioral: Killswitch state transitions
 |   |-- trust_loop.md           Digital Twin substrate, EvalOps, Sandbox, Agentic Recoverability, IA
-|   |-- killswitch.md           crisis_mode global override, AT&T-validated
+|   |-- killswitch.md           crisis_mode global override, AT&T-reviewed
 |   |-- oda_mapping.md          15-element ODA Canvas reference mapping
 |   `-- slides.md               slide-deck pointer (deck out of scope here)
 |-- harness/             20 authored stub artifacts (the contract set)
