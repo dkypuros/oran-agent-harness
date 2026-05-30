@@ -57,7 +57,8 @@ piece that has to be live on screen; the rest is recoverable from slides.
 > [Beat 3, middle intelligence, 1:30 to 2:30]
 >
 > This is the part with real teeth. The Router loads taxonomy.yaml at import time. Twenty entries
-> grounded in O-RAN WG6's resource model. Twelve infra. Five service. Three ambiguous. The
+> organized around the IMS/SMO boundary established in WG6's O2 interface architecture (O2-GAnP
+> Sections 3.2 through 3.4). Twelve infra. Five service. Three ambiguous. The
 > classification feeds a routing rule. Infra routes down to the O-Cloud via O2 IMS. Service routes
 > up to the SMO as a TMF921 intent. The ambiguous path is where LLM-assist would tier in. Neither
 > scenario in this set triggers it. That is deliberate. The deterministic core is what gives this
@@ -86,9 +87,9 @@ piece that has to be live on screen; the rest is recoverable from slides.
 
 ## Word count and pacing
 
-- Actual prose count: 485 words across the 5 beats (87, 118, 114, 108, 58).
+- Actual prose count: 495 words across the 5 beats (87, 118, 124, 108, 58).
 - At a conversational technical-speaker pace of 150 to 170 words per minute, that lands at
-  2:51 to 3:14. **Still roughly one minute UNDER the 4-minute target slot.**
+  2:54 to 3:18. **Still roughly one minute UNDER the 4-minute target slot.**
 - Two options:
   1. Keep at 3 minutes. Use the extra minute as transition breathing room into the trust-loop
      block. Lower risk on talk day.
