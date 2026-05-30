@@ -1,0 +1,27 @@
+%% sequence_agentic_recovery.mmd
+%% The undo. Operator decides 30 minutes after the apply that the fix produced unintended
+%% side effects and wants to walk it back.
+%% Shows the surgical per-action nature: small blast radius, no full failover, twin-validated
+%% inverse action. This is Agentic Recoverability, not Disaster Recovery.
+%% Companion to talk/trust_loop.md (Activity 3) and harness/schemas/ReversibilityProfile.json.
+
+sequenceDiagram
+    participant Op as NOC Operator
+    participant Guard as Guardrail Engine
+    participant Twin as Digital Twin
+    participant OCloud as O-Cloud Manager (O2 IMS)
+    participant Edge as Edge (linuxptp + cloud-event-proxy)
+    participant Gateway as Agentic Gateway
+
+    Op->>Op: decides rollback needed
+    Op->>Guard: rollback request citing AuditEvent eventId
+    Guard->>Guard: load event.remediation.reversibility_profile
+    Note over Guard: 7 fields read at decision time, no vendor doc lookup needed
+    Guard->>Twin: inverse action validation request
+    Twin->>Twin: run inverse against current cluster state snapshot
+    Twin-->>Guard: rollback-safe signal
+    Guard->>OCloud: apply inverse via O2 IMS
+    OCloud->>Edge: inverse MachineConfig or KMM Module CR
+    Edge-->>Gateway: CloudEvent confirming pre-remediation state restored
+    Gateway->>Op: AuditEvent eventType RemediationRolledBack
+    Note over Op,Gateway: Surgical, per-action, no full-failover step. Not DR.

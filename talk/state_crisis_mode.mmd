@@ -1,0 +1,54 @@
+%% state_crisis_mode.mmd
+%% State-transition diagram for the Killswitch (crisis_mode global override).
+%% Shows the system shifting from Normal Ops to Crisis Mode Active and back, with annotations
+%% naming the concrete effects per harness/guardrails.yaml crisis_mode block.
+%% Companion to talk/killswitch.md and harness/schemas/CrisisModeActivation.json.
+
+stateDiagram-v2
+
+    [*] --> NormalOps
+
+    NormalOps : Normal Ops
+    NormalOps : dry_run_default per rules (true in v0)
+    NormalOps : write access available subject to co_authorization
+    NormalOps : EvalOps confidence flows normally
+    NormalOps : telemetry routes through Agent Harness
+
+    NormalOps --> CrisisActivationPending : operator activation (NOC supervisor or key holder)
+
+    CrisisActivationPending : Crisis Activation Pending
+    CrisisActivationPending : CrisisModeActivation event emitted
+    CrisisActivationPending : waiting up to 5s for agent fleet acknowledgement
+    CrisisActivationPending : (acknowledgement_latency_max_seconds in guardrails.yaml)
+
+    CrisisActivationPending --> CrisisModeActive : all expected agents ack within 5s
+    CrisisActivationPending --> EscalatedPaging : ack timeout, non-responsive agents listed
+
+    EscalatedPaging : Escalated Paging
+    EscalatedPaging : operator may force-kill stuck containers
+    EscalatedPaging : or operator may proceed regardless
+
+    EscalatedPaging --> CrisisModeActive : operator overrides
+
+    CrisisModeActive : Crisis Mode Active
+    CrisisModeActive : dry_run_default forced_true
+    CrisisModeActive : require_human_approval forced_all
+    CrisisModeActive : write_access_o2ims revoked
+    CrisisModeActive : write_access_smo_tmf921 revoked
+    CrisisModeActive : evalops_confidence_floor 0.0
+    CrisisModeActive : telemetry_routing manual_queues
+
+    CrisisModeActive --> CrisisDeactivationPending : operator deactivation (multi-key recommended)
+
+    CrisisDeactivationPending : Crisis Deactivation Pending
+    CrisisDeactivationPending : diagnostic re-baseline in progress
+    CrisisDeactivationPending : agents reload taxonomy and EvalOps state
+
+    CrisisDeactivationPending --> RecoveryDrill : re-baseline complete
+
+    RecoveryDrill : Recovery Drill
+    RecoveryDrill : agents continue with elevated approval requirements
+    RecoveryDrill : EvalOps confidence climbing back toward normal
+    RecoveryDrill : telemetry rejoins Agent Harness routing
+
+    RecoveryDrill --> NormalOps : observation window clean

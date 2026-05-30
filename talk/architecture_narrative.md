@@ -120,11 +120,15 @@ you want to understand:
 | `talk/architecture_zoom_governance.mmd`| Open when reading section 4 of this narrative. TM Forum governance, TMF688 audit, ReversibilityProfile, co-authorization, and the Killswitch (crisis_mode) all live here. Pairs with `talk/trust_loop.md` and `talk/killswitch.md`. |
 | `talk/architecture_zoom_cognitive.mmd` | Open when reading section 2 of this narrative. Agentic Gateway, four MCP servers, three domain agents, the deterministic Router and taxonomy, the LLM-neutral substrate, plus the Digital Twin substrate with EvalOps, Sandbox, and Agentic Recoverability as activities on it. Pairs with `talk/trust_loop.md`. |
 | `talk/architecture_zoom_ocloud.mmd`    | Open when reading section 3 of this narrative (low side). Hub cluster O-Cloud, ACM, all seven spoke operators (MCO, KMM, PTP, NTO, Metal3, SR-IOV, NFD), and the worker node with linuxptp, cloud-event-proxy, kernel driver, fw-lldp-agent, Intel E810 NIC, BMC. Where Scenario A and Scenario A-prime actually execute. |
+| `talk/sequence_anomaly_lifecycle.mmd`  | Open when you want to see the TEMPORAL flow of a PTP anomaly from CloudEvent detection through twin-validated remediation to operator commit to apply call. The operator step is visibly the bottleneck. Shows that the human is the gatekeeper in the timeline. |
+| `talk/sequence_agentic_recovery.mmd`   | Open when you want to see the UNDO sequence. Operator decides 30 minutes after the apply that the fix produced unintended side effects and walks it back. Surgical, per-action, no full failover. Makes the Agentic Recoverability vs Disaster Recovery distinction visual. |
+| `talk/state_crisis_mode.mmd`           | Open when you want to see the Killswitch state transitions. Normal Ops to Crisis Activation Pending to Crisis Mode Active to Crisis Deactivation Pending to Recovery Drill back to Normal Ops. Each state annotated with concrete effects per guardrails.yaml crisis_mode. The AT&T audience answer. |
 | `talk/architecture_full.mmd`           | LAST. The comprehensive 30+ component reference (formerly architecture v3). Open this when you want every component visible at once on a single canvas (12K wide PNG). Not the entry point; a deep-dive aid. |
 
-Sequence diagrams (a day in the life of a PTP anomaly; the agentic recovery undo sequence) and the
-crisis_mode state-transition diagram are deferred to v0.2 (see follow-up GitHub issues). The macro
-plus three zooms above are sufficient for the v0 talk.
+The three behavioral views above (two sequence diagrams plus the crisis_mode state transition) round
+out the diagram set. Together with the macro and the three topological zooms, they give the audience
+a complete view: WHERE things live (macro + zooms), HOW they move (sequences), and HOW the system
+behaves under duress (state).
 
 ## Where to look for detail
 

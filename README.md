@@ -56,6 +56,9 @@ oran-agent-harness/
 |   |-- architecture_zoom_governance.mmd  zoom diagram: TM Forum, audit, Killswitch
 |   |-- architecture_zoom_cognitive.mmd   zoom diagram: Gateway, agents, Digital Twin substrate
 |   |-- architecture_zoom_ocloud.mmd      zoom diagram: O-Cloud, spoke operators, worker
+|   |-- sequence_anomaly_lifecycle.mmd    behavioral: anomaly to apply, temporal flow
+|   |-- sequence_agentic_recovery.mmd     behavioral: rollback sequence, per-action undo
+|   |-- state_crisis_mode.mmd             behavioral: Killswitch state transitions
 |   |-- trust_loop.md           Digital Twin substrate, EvalOps, Sandbox, Agentic Recoverability, IA
 |   |-- killswitch.md           crisis_mode global override, AT&T-validated
 |   |-- oda_mapping.md          15-element ODA Canvas reference mapping
