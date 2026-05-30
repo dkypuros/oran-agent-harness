@@ -18,6 +18,21 @@ The pinned snapshot is the O-Cloud Manager release used as the reference O2 IMS 
 walkthroughs, resolved against main HEAD on 2026-05-30. The upstream is authoritative if the pinned commit
 diverges from a later upstream release.
 
+## Canonical URI structure
+
+Per O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11, Section 3.4.3 and Section 3.4.4.2.2 (p. 118),
+Table 3.4.3-1, the canonical ProvisioningRequest REST resource URI is:
+
+  {apiRoot}/O2ims_infrastructureProvisioning/{apiMajorVersion}/provisioningRequests
+
+apiName is `O2ims_infrastructureProvisioning`. apiMajorVersion shall be `1`. The collection
+resource is `provisioningRequests` (camelCase, no underscore). The instance resource is
+`{apiRoot}/O2ims_infrastructureProvisioning/v1/provisioningRequests/{provisioningRequestId}`.
+
+Any harness demo stub that mocks this endpoint MUST follow this URI structure to remain spec
+conformant on the URI dimension. HTTP semantics (response codes, status callbacks) MAY be
+simplified for demo purposes.
+
 ## How the harness consumes this contract
 
 - `harness/mcp-tool-schemas/mcp-ocloud.json` declares the MCP tool surface that the harness uses to call
