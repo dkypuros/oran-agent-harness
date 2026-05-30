@@ -63,7 +63,7 @@ header, the verify gate fails.
 | scenarios/E_nic_firmware_update/rca.json                 | validates against harness/schemas/RCA.json                      | Diagnostic substrate output isolating firmware as root cause | v0              | 35               |
 | scenarios/E_nic_firmware_update/remediation_proposal.json | validates against harness/schemas/RemediationProposal.json plus companion_intent extension | Router output with TMF921 companion intent for dual-route | v0              | 3, 7, 8, 19, 46 |
 | scenarios/E_nic_firmware_update/remediation.yaml         | metal3.io/v1alpha1 HostFirmwareComponents                       | Metal3 BMO firmware update CR for Intel E810 NIC          | metal3v1alpha1 current | 7, 8           |
-| scenarios/E_nic_firmware_update/audit_event.json         | TMF688 Event Management API, ReversibilityProfile, companion_intent | Event envelope with elevated blast (cells:8) and SMO companion intent | TMF688 current | 18, 19          |
+| scenarios/E_nic_firmware_update/audit_event.json         | TMF688 Event Management API, ReversibilityProfile, companion_intent | Event envelope at blast (cells:4) plus SMO companion intent for firmware-class action | TMF688 current | 18, 19   |
 
 ## How the verify gate uses this index
 

@@ -76,7 +76,7 @@
       "blast_radius": {
         "nodes": 1,
         "sites": 1,
-        "cells": 8
+        "cells": 4
       },
       "reversibility_profile": {
         "rollback_intent": {
@@ -87,7 +87,7 @@
         "blast_radius_if_reverse": {
           "nodes": 1,
           "sites": 1,
-          "cells": 8,
+          "cells": 4,
           "estimated_user_impact": "medium"
         },
         "rebuild_timeline": {

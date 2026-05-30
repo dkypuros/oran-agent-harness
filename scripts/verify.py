@@ -264,7 +264,12 @@ def main():
         "dryRun",
         "requiresHumanApproval",
     ]
-    for scenario in ["A_fw_lldp_agent", "A_prime_ice_driver"]:
+    for scenario in [
+        "A_fw_lldp_agent",
+        "A_prime_ice_driver",
+        "D_phc_drift_hw_only",
+        "E_nic_firmware_update",
+    ]:
         fault_path = REPO_ROOT / f"scenarios/{scenario}/fault_payload.json"
         expected_path = REPO_ROOT / f"scenarios/{scenario}/audit_event.json"
         try:

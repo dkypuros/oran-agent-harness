@@ -109,8 +109,10 @@ O2 IMS apply ([ref 3](../docs/references.md#ref-3)). The Metal3 Baremetal Operat
 firmware write via DMTF Redfish DSP0266 UpdateService.SimpleUpdate
 ([ref 46](../docs/references.md#ref-46)). The closing TMF688 audit
 ([ref 18](../docs/references.md#ref-18)) carries the elevated blast radius
-(nodes:1, sites:1, cells:8) reflecting the maintenance window. This dual-route pattern is the
-teaching moment Scenarios A and A-prime cannot show because their blast radius is too small.
+(nodes:1, sites:1, cells:4) reflecting the maintenance window. The dual-route companion intent
+fires for any node_firmware action regardless of cell count, because firmware reboots require
+SMO coordination by their semantic, not just their blast magnitude. This dual-route pattern is
+the teaching moment Scenarios A and A-prime cannot show.
 
 The two walkthrough scenarios both demonstrate the LOW branch through different internal delivery
 mechanisms. Scenario A masks a host systemd service via MachineConfig (MCO path). Scenario A-prime
