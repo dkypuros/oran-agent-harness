@@ -40,6 +40,8 @@ node_modules/
 # 5G_O-RAN_SIM shared trace layer: runtime traces gitignored, committed examples (.example.jsonl) allowed
 5G_O-RAN_SIM/shared_trace/*.jsonl
 !5G_O-RAN_SIM/shared_trace/*.example.jsonl
+# 5G_O-RAN_SIM bench runtime artifacts (per-run summary; gitignored)
+5G_O-RAN_SIM/bench/last_run_summary.md
 
 # PDF redistribution guard (NG2 from plan)
 *.pdf
