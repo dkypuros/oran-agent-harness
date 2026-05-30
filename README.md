@@ -41,8 +41,10 @@ Three goals for this repository, in the author's words:
    exercise the harness against host-platform PTP faults (A, A-prime, D, E). A research bench at
    `5G_O-RAN_SIM/bench/` runs them all end to end with platform stubs firing and trace files
    accumulating. A static HTML trace viewer at `5G_O-RAN_SIM/dashboard/trace_view/` shows the
-   per-scenario timelines side by side. The OMC skill bundle under `omc-skills/o-ran/` is the
-   reference operationalization for prose-driven runs.
+   per-scenario timelines side by side. Two OMC skill bundles complement the harness: the
+   action-oriented bundle at `omc-skills/o-ran/` (troubleshoot, remediate, sandbox-validation,
+   plan) and the discovery-oriented bundle at `omc-skills/oran-discover/` (`:ptp`, `:metal3`,
+   `:redfish`, `:smo`, `:taxonomy`, `:guardrail`, `:plan` for pre-flight survey).
 
 ## What this repository is
 
@@ -296,7 +298,11 @@ reproducibility bounded by provider determinism settings.
 /o-ran:plan scenarios/A_prime_ice_driver/fault_payload.json
 ```
 
-See `omc-skills/o-ran/README.md` for installation and the per-skill input and output contract.
+See `omc-skills/o-ran/README.md` (action-oriented) and `omc-skills/oran-discover/README.md`
+(read-only platform survey) for installation and the per-skill input / output contracts.
+Discovery walks: `/oran-discover:plan` invokes the seven-step pre-flight; individual surfaces are
+reachable via `/oran-discover:ptp`, `/oran-discover:metal3`, `/oran-discover:redfish`,
+`/oran-discover:smo`, `/oran-discover:taxonomy`, `/oran-discover:guardrail`.
 
 Each end-to-end run reads a FaultPayload, walks the evidence chain across three domain agents (Platform,
 RAN, Hardware), picks a routing direction via the deterministic taxonomy lookup (with LLM-assist on
