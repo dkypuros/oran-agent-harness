@@ -18,24 +18,24 @@ sandbox that runs before any live action.
 ## 1. The observation loop (the left side of the diagram)
 
 PTP synchronization on a Cloud RAN site flows downward from a GNSS source disciplining a PTP
-Grandmaster (T-GM, profile G.8275.1), optionally through a Boundary Clock, and into the worker node's
-NIC, where the PTP Hardware Clock (PHC) handles hardware timestamping. On the host, the linuxptp
+Grandmaster (T-GM, profile [G.8275.1](../docs/references.md#ref-44)), optionally through a Boundary Clock, and into the worker node's
+NIC, where the PTP Hardware Clock (PHC) handles hardware timestamping. On the host, the [linuxptp](../docs/references.md#ref-27)
 daemon (`ptp4l` plus `phc2sys`) runs as an Ordinary or Boundary Clock and disciplines the system clock
 to the network's time source. The vDU consumes that timing via `clock_gettime(CLOCK_TAI)`.
 
-When PTP starts to drift, the cloud-event-proxy sidecar observes the linuxptp state transitions
+When PTP starts to drift, the [cloud-event-proxy](../docs/references.md#ref-29) sidecar observes the linuxptp state transitions
 (LOCKED, UNCALIBRATED, FREE_RUNNING, master offset spikes, PHC frequency drift in parts per billion)
-and publishes O-RAN CloudEvents conforming to O-RAN.WG6 Cloud Notifications on top of CNCF
-CloudEvents 1.0. Those events are the empirical evidence that something is wrong. They are the inbound
+and publishes O-RAN CloudEvents conforming to [O-RAN.WG6 Cloud Notifications](../docs/references.md#ref-31) on top of
+[CNCF CloudEvents 1.0](../docs/references.md#ref-30). Those events are the empirical evidence that something is wrong. They are the inbound
 contract the harness reads. The schema each event populates is `harness/schemas/FaultPayload.json`.
 
 ## 2. The cognitive middle (the harness itself)
 
 The Agentic Gateway terminates the CloudEvents stream and exposes vendor-private tooling under
-controlled MCP interfaces (mTLS, OAuth2, IP allowlist). Three FastMCP servers run behind the gateway:
+controlled MCP interfaces (mTLS, OAuth2, IP allowlist). Three [FastMCP](../docs/references.md#ref-15) servers run behind the gateway:
 mcp-platform (linuxptp, host services, driver versions, NIC stats), mcp-ran (cell sync, PM counters,
-RAN parameters), and mcp-hardware (NIC PHC introspection, BMC Redfish, CPU performance counters). A
-fourth, mcp-ocloud, surfaces the O-Cloud Manager Inventory and Alarms.
+RAN parameters), and mcp-hardware (NIC PHC introspection, [BMC Redfish](../docs/references.md#ref-46), CPU performance counters). A
+fourth, mcp-ocloud, surfaces the [O-Cloud Manager](../docs/references.md#ref-6) Inventory and Alarms.
 
 A telemetry-boundary note. The data these MCP servers consume (linuxptp daemon state, MachineConfig
 pool status, KMM Module load state, kernel driver versions, NIC PHC counters) is O-Cloud-internal
@@ -43,12 +43,12 @@ platform telemetry. It is NOT governed by O-RAN O1 ([ref 49](../docs/references.
 SMO-to-managed-element OAM where managed elements are O-CU, O-DU, and O-RU. The O-Cloud platform
 layer sits below the managed-element boundary; how it surfaces its own state to local consumers
 is implementation specific. The standardized SMO-facing flow downstream of the harness IS
-spec-governed: the guardrail engine emits a TMF688 AuditEvent and the O-Cloud Manager exposes
+spec-governed: the guardrail engine emits a [TMF688](../docs/references.md#ref-18) AuditEvent and the O-Cloud Manager exposes
 alarms via the O2 IMS AlarmEventRecord (O2IMS-INTERFACE R005-v11 Section 3.3.6.2.2,
 [ref 3](../docs/references.md#ref-3)). MCP servers and O1 do not overlap.
 
 Three domain agents (Platform, RAN, Hardware) consult those servers and a shared Knowledge Base (RAG,
-mapped to TMF GB922 SID for telecom context). Each agent produces structured findings that converge
+mapped to [TMF GB922 SID](../docs/references.md#ref-22) for telecom context). Each agent produces structured findings that converge
 into a Root Cause Analysis artifact (`harness/schemas/RCA.json`). The Remediation Router consults
 `harness/taxonomy.yaml` first: a deterministic lookup against the O-RAN WG6 O-Cloud resource model
 that produces an unambiguous classification for the great majority of faults. LLM reasoning is invoked
@@ -71,12 +71,12 @@ by O-RAN resource layer:
 
 **High side, service-layer.** Cell re-home, RAN parameter changes, slice intent updates, vDU software
 version rollouts. These belong to the partner SMO (Ericsson, Amdocs, Nokia, Mavenir, ZTE). The harness
-does not execute them. It emits a TMF921 intent and observes the result. This is the harness's
+does not execute them. It emits a [TMF921](../docs/references.md#ref-19) intent and observes the result. This is the harness's
 respect for the service-execution boundary.
 
-**Low side, infrastructure-layer.** Host configuration via MachineConfig (delivered by the Machine
-Config Operator), driver swaps via KMM Module CRs (delivered by the Kernel Module Management
-Operator), node firmware via Metal3 HostFirmwareComponents, PerformanceProfile updates via the Node
+**Low side, infrastructure-layer.** Host configuration via [MachineConfig](../docs/references.md#ref-9) (delivered by the Machine
+Config Operator), driver swaps via [KMM Module](../docs/references.md#ref-10) CRs (delivered by the Kernel Module Management
+Operator), node firmware via [Metal3](../docs/references.md#ref-7) HostFirmwareComponents, PerformanceProfile updates via the Node
 Tuning Operator, SR-IOV reconfiguration. Every one of these flows into the O-Cloud via the O-RAN O2
 IMS API. Red Hat's open-source O-Cloud Manager (`openshift-kni/oran-o2ims`) is the reference O2 IMS
 implementation cited in this work.
@@ -104,7 +104,7 @@ operator authorizes the action class, the twin authorizes the specific payload. 
 `talk/trust_loop.md` (the twin is the substrate; the three activities run on top of it under the
 explicit banner of Intelligence Augmentation).
 
-What the operator finally sees is a TMF688-shaped AuditEvent (`harness/schemas/AuditEvent.json`)
+What the operator finally sees is a [TMF688](../docs/references.md#ref-18)-shaped AuditEvent (`harness/schemas/AuditEvent.json`)
 carrying the proposed action plus a populated ReversibilityProfile
 (`harness/schemas/ReversibilityProfile.json`): rollback intent, blast radius if reverse, rebuild
 timeline, replication history, validation history, risk profile burn-down, and confidence in
