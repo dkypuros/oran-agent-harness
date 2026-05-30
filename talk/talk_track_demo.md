@@ -49,9 +49,10 @@ piece that has to be live on screen; the rest is recoverable from slides.
 > tx_hwtstamp_timeouts climbing past threshold. A Platform Domain Agent reshapes this into an
 > RCA. Candidate classification: ptp_host_stack, target layer infra, confidence high. The
 > contract is what matters here. The FaultPayload validates against harness/schemas/FaultPayload.
-> The MCP tool surface is declared in harness/mcp-tool-schemas/mcp-platform.json. Every claim has
-> a bibliography reference. If you read the verbose output during the recorded run, every
-> artifact at every seam parses.
+> The MCP tool surface is declared in harness/mcp-tool-schemas/mcp-platform.json. Every spec-derived
+> claim has a bibliography reference. The reversibility profile and the crisis_mode envelope are
+> explicitly harness-unique and labeled as such. If you read the verbose output during the recorded
+> run, every artifact at every seam parses.
 
 > [Beat 3, middle intelligence, 1:30 to 2:30]
 >
@@ -85,9 +86,9 @@ piece that has to be live on screen; the rest is recoverable from slides.
 
 ## Word count and pacing
 
-- Actual prose count: 467 words across the 5 beats (87, 103, 114, 108, 55).
+- Actual prose count: 485 words across the 5 beats (87, 118, 114, 108, 58).
 - At a conversational technical-speaker pace of 150 to 170 words per minute, that lands at
-  2:45 to 3:10. **Roughly one minute UNDER the 4-minute target slot.**
+  2:51 to 3:14. **Still roughly one minute UNDER the 4-minute target slot.**
 - Two options:
   1. Keep at 3 minutes. Use the extra minute as transition breathing room into the trust-loop
      block. Lower risk on talk day.
