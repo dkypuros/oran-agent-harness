@@ -136,9 +136,9 @@ services:
       retries: 3
 
   dashboard:
-    # The React dashboard lives at macbook_lab/dashboard/ (lands in Issue #57).
-    # If you are running this compose BEFORE #57 lands, run with --profile core
-    # to skip this service: docker compose --profile core up
+    # React + Vite + shadcn dashboard at macbook_lab/dashboard/.
+    # Gated behind --profile dashboard so the core lab can come up without it.
+    # run.sh enables this profile automatically when dashboard/package.json is present.
     profiles:
       - dashboard
     build:
