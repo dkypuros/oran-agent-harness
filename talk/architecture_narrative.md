@@ -181,4 +181,4 @@ behaves under duress (state).
 - Killswitch (crisis_mode global override): `talk/killswitch.md`
 - ODA Canvas reference mapping: `talk/oda_mapping.md`
 - Citation index for every authored file: `harness/conformance.md`
-- Bibliography (47 numbered AMA refs): `docs/references.md`
+- Bibliography (numbered AMA refs): `docs/references.md`
