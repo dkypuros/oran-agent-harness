@@ -39,13 +39,13 @@ fourth, mcp-ocloud, surfaces the O-Cloud Manager Inventory and Alarms.
 
 A telemetry-boundary note. The data these MCP servers consume (linuxptp daemon state, MachineConfig
 pool status, KMM Module load state, kernel driver versions, NIC PHC counters) is O-Cloud-internal
-platform telemetry. It is NOT governed by O-RAN O1 (bibliography ref 49), which standardizes
+platform telemetry. It is NOT governed by O-RAN O1 ([ref 49](../docs/references.md#ref-49)), which standardizes
 SMO-to-managed-element OAM where managed elements are O-CU, O-DU, and O-RU. The O-Cloud platform
 layer sits below the managed-element boundary; how it surfaces its own state to local consumers
 is implementation specific. The standardized SMO-facing flow downstream of the harness IS
 spec-governed: the guardrail engine emits a TMF688 AuditEvent and the O-Cloud Manager exposes
-alarms via the O2 IMS AlarmEventRecord (O2IMS-INTERFACE R005-v11 Section 3.3.6.2.2, bibliography
-ref 3). MCP servers and O1 do not overlap.
+alarms via the O2 IMS AlarmEventRecord (O2IMS-INTERFACE R005-v11 Section 3.3.6.2.2,
+[ref 3](../docs/references.md#ref-3)). MCP servers and O1 do not overlap.
 
 Three domain agents (Platform, RAN, Hardware) consult those servers and a shared Knowledge Base (RAG,
 mapped to TMF GB922 SID for telecom context). Each agent produces structured findings that converge
@@ -123,26 +123,29 @@ Killswitch freezes all of them. The two compose; they answer different questions
 
 The harness operates within the scope of the SMO. Specifically, it corresponds to a candidate
 Closed-Loop Remediation SMOS (SMO Service) per O-RAN.WG1.TR.Decoupled-SMO-Architecture
-(R004-v03.00) (bibliography ref 48). The infra route terminates at the O2 IMS
+(R004-v03.00) ([ref 48](../docs/references.md#ref-48)). The infra route terminates at the O2 IMS
 ProvisioningRequest service per O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11 Section 3.4
-(bibliography ref 3). In a production deployment, the harness's ProvisioningRequests would be
+([ref 3](../docs/references.md#ref-3)). In a production deployment, the harness's ProvisioningRequests would be
 submitted through FOCOM (Federated O-Cloud Orchestration and Management), the SMO function that
 consumes O2 IMS for infrastructure management per O-RAN.WG6.O2-GAnP-v01.02 Section 2.2
-(Figure 2.2-2: IMS managed by FOCOM, DMS consumed by NFO; bibliography ref 2). FOCOM is not
+(Figure 2.2-2: IMS managed by FOCOM, DMS consumed by NFO; [ref 2](../docs/references.md#ref-2)). FOCOM is not
 bypassed by this harness; the harness acts as a candidate orchestrator that FOCOM (or the SMO
 equivalent) composes into its workflow.
 
-Three layers operate at distinct abstractions. The O-RAN management-plane interfaces (O1 ref 49,
-A1 ref 50, R1 ref 51, E2, O2 ref 3) standardize how the SMO interacts with managed elements, the
-Near-RT RIC, rApps, and the O-Cloud. MCP (Anthropic Model Context Protocol, ref 13) is a
+Three layers operate at distinct abstractions. The O-RAN management-plane interfaces
+(O1 [ref 49](../docs/references.md#ref-49), A1 [ref 50](../docs/references.md#ref-50),
+R1 [ref 51](../docs/references.md#ref-51), E2, O2 [ref 3](../docs/references.md#ref-3))
+standardize how the SMO interacts with managed elements, the Near-RT RIC, rApps, and the
+O-Cloud. MCP (Anthropic Model Context Protocol, [ref 13](../docs/references.md#ref-13)) is a
 separate, lower-layer protocol the harness uses to orchestrate its internal LLM agents. MCP does
 not replace, bypass, or compete with the O-RAN interfaces; it composes at a different layer.
 An rApp realization of this harness pattern would use MCP internally and expose its capabilities
 via R1 to the rest of the SMO.
 
-A1 policies (ref 50) target Near-RT RIC behavior (traffic steering, QoS optimization, slice
-SLAs). This harness targets infrastructure remediation (host configuration, kernel drivers,
-firmware) via the O2 IMS interface (ref 3), which is a different layer of the architecture. The
+A1 policies ([ref 50](../docs/references.md#ref-50)) target Near-RT RIC behavior (traffic
+steering, QoS optimization, slice SLAs). This harness targets infrastructure remediation (host
+configuration, kernel drivers, firmware) via the O2 IMS interface
+([ref 3](../docs/references.md#ref-3)), which is a different layer of the architecture. The
 two compose; they do not compete.
 
 ## How to read this repo's diagrams
