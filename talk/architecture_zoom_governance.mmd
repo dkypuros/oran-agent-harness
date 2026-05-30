@@ -1,0 +1,66 @@
+%% architecture_zoom_governance.mmd
+%% Companion zoom diagram to talk/architecture.mmd (the macro view).
+%% Top half of the closed-loop system: TM Forum governance plus the human boundary.
+%% Covers TMF688 audit, Reversibility Profile, co-authorization, and the Killswitch (crisis_mode).
+%% Read alongside: talk/trust_loop.md, talk/killswitch.md, talk/oda_mapping.md.
+
+flowchart TB
+
+    subgraph Outside["Outside the harness boundary"]
+        direction LR
+        Operator["NOC Operator<br/>(reads AuditEvent at decision time,<br/>holds the Killswitch key)"]:::human
+        Peers["Peer reviewers<br/>(optional, per co_authorization edit_phase)"]:::human
+        SMO["Partner SMO<br/>(Ericsson, Amdocs, Nokia, Mavenir, ZTE)<br/>service-layer execution owner"]:::external
+    end
+
+    subgraph Governance["TM Forum governance layer (top half of the harness)"]
+        direction TB
+
+        subgraph KillLayer["Killswitch (global override, crisis_mode)"]
+            CrisisMode["crisis_mode block<br/>(harness/guardrails.yaml)"]:::killswitch
+            CrisisActivation["CrisisModeActivation<br/>(harness/schemas/CrisisModeActivation.json)<br/>5s acknowledgement contract"]:::artifact
+            CrisisMode --> CrisisActivation
+        end
+
+        subgraph CoAuthLayer["Co-authorization (per-action boundary)"]
+            CoAuth["co_authorization block<br/>(harness/guardrails.yaml)<br/>draft / edit / commit phases"]:::guard
+            EditPermissions["permitted_modifications<br/>(blast_radius, target nodes,<br/>dry_run, additional_safeguards)"]:::config
+            CoAuth --> EditPermissions
+        end
+
+        subgraph AuditLayer["Audit trail (TMF688)"]
+            AuditEvent["AuditEvent<br/>(harness/schemas/AuditEvent.json)<br/>TMF688-shaped envelope"]:::artifact
+            ReversibilityProfile["ReversibilityProfile<br/>(harness/schemas/ReversibilityProfile.json)<br/>per-action undo contract (7 fields)"]:::artifact
+            AuditSink["audit_sink<br/>(stdout+file in v0;<br/>Kafka/AMQ/TMF688 broker in prod)"]:::artifact
+            AuditEvent --> ReversibilityProfile
+            AuditEvent --> AuditSink
+        end
+
+        subgraph IntentLayer["Intent emission (up-route to SMO)"]
+            IntentEvent["TMF921 Intent<br/>(emit_smo_intent action_type)"]:::artifact
+        end
+    end
+
+    %% Flows from the cognitive middle into governance (incoming edges from the macro view)
+    Proposal["RemediationProposal<br/>(from the Remediation Router,<br/>see architecture_zoom_cognitive.mmd)"]:::artifact
+
+    %% Decision flow
+    Proposal --> CoAuth
+    CoAuth --> AuditEvent
+    AuditEvent --> Operator
+    AuditEvent --> Peers
+    AuditEvent --> IntentEvent
+    IntentEvent --> SMO
+
+    %% Killswitch overrides everything
+    Operator -. "activates" .-> CrisisMode
+    CrisisMode == "freezes all write paths" ==> CoAuth
+    CrisisMode == "revokes write access" ==> IntentEvent
+
+    %% Styling
+    classDef human fill:#dbeafe,stroke:#1e40af,color:#000,stroke-width:3px
+    classDef external fill:#fde8e8,stroke:#c53030,color:#000,stroke-width:2px
+    classDef killswitch fill:#fee2e2,stroke:#991b1b,color:#000,stroke-width:4px
+    classDef guard fill:#fbcfe8,stroke:#9d174d,color:#000,stroke-width:2px
+    classDef config fill:#f3e8ff,stroke:#6b21a8,color:#000
+    classDef artifact fill:#fae8ff,stroke:#86198f,color:#000

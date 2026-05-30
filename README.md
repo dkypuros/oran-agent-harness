@@ -48,10 +48,14 @@ oran-agent-harness/
 |-- .gitignore           defense-in-depth against .local/, python_demo/, .pdf, .env
 |-- talk/                presentation artifacts
 |   |-- abstract.md             canonical nGRG submission
-|   |-- architecture.mmd        architecture diagram source (v3, Mermaid)
-|   |-- architecture.png        12K-wide rendered diagram
-|   |-- architecture_narrative.md  prose walkthrough of the diagram
-|   |-- trust_loop.md           EvalOps, sandboxing, Reversibility Profile narrative
+|   |-- architecture.mmd        macro architecture diagram source (v3, Mermaid)
+|   |-- architecture.png        12K-wide rendered macro diagram
+|   |-- architecture_narrative.md   prose walkthrough of the diagram
+|   |-- architecture_zoom_governance.mmd  zoom diagram: TM Forum, audit, Killswitch
+|   |-- architecture_zoom_cognitive.mmd   zoom diagram: Gateway, agents, Digital Twin substrate
+|   |-- architecture_zoom_ocloud.mmd      zoom diagram: O-Cloud, spoke operators, worker
+|   |-- trust_loop.md           Digital Twin substrate, EvalOps, Sandbox, Agentic Recoverability, IA
+|   |-- killswitch.md           crisis_mode global override, AT&T-validated
 |   |-- oda_mapping.md          15-element ODA Canvas reference mapping
 |   `-- slides.md               slide-deck pointer (deck out of scope here)
 |-- harness/             20 authored stub artifacts (the contract set)

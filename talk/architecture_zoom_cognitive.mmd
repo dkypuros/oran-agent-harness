@@ -1,0 +1,101 @@
+%% architecture_zoom_cognitive.mmd
+%% Companion zoom diagram to talk/architecture.mmd (the macro view).
+%% Middle of the closed-loop system: Agentic Gateway, MCP servers, domain agents,
+%% Remediation Router, and the Digital Twin substrate that supports EvalOps, Sandbox,
+%% and Agentic Recoverability.
+%% Read alongside: talk/trust_loop.md, talk/architecture_narrative.md sections 2 and 4.
+
+flowchart TB
+
+    %% Inbound: CloudEvents from the observation loop (see macro view)
+    Inbound["O-RAN CloudEvents<br/>(WG6 Cloud Notifications,<br/>from cloud-event-proxy on the worker)"]:::external
+
+    subgraph Cognitive["Cognitive middle (Agent Harness)"]
+        direction TB
+
+        subgraph GatewayLayer["Agentic Gateway over MCP"]
+            Gateway["Agentic Gateway<br/>(mTLS + OAuth2 + IP allowlist,<br/>vendor-private tool exposure)"]:::gateway
+            McpPlat["mcp-platform<br/>(ptp4l, services,<br/>driver, NIC stats)"]:::mcp
+            McpRan["mcp-ran<br/>(cell sync, PM counters,<br/>RAN params)"]:::mcp
+            McpHw["mcp-hardware<br/>(NIC PHC, BMC Redfish,<br/>CPU perf counters)"]:::mcp
+            McpOcloud["mcp-ocloud<br/>(O2 IMS Inventory + Alarms,<br/>gated apply)"]:::mcp
+            Gateway --> McpPlat
+            Gateway --> McpRan
+            Gateway --> McpHw
+            Gateway --> McpOcloud
+        end
+
+        subgraph AgentLayer["Domain Agents (LangGraph nodes)"]
+            PlatA["Platform Agent"]:::agent
+            RanA["RAN Domain Agent"]:::agent
+            HwA["Hardware Domain Agent"]:::agent
+        end
+
+        KB["Knowledge Base (RAG)<br/>NOC playbooks plus SID context<br/>(maps to TMF GB922)"]:::kb
+
+        subgraph RouterLayer["Remediation Router"]
+            RCA["Root Cause Analysis<br/>(harness/schemas/RCA.json,<br/>cross-domain evidence chain)"]:::artifact
+            Taxonomy["taxonomy.yaml<br/>(O-RAN WG6 resource model,<br/>~20 entries)"]:::config
+            Router["Remediation Router<br/>(deterministic lookup first,<br/>LLM-assist on ambiguous edges)"]:::router
+            Proposal["RemediationProposal<br/>(harness/schemas/RemediationProposal.json)"]:::artifact
+            RCA --> Router
+            Taxonomy -- "lookup" --> Router
+            Router --> Proposal
+        end
+
+        subgraph LlmLayer["LLM-neutral substrate (LiteLLM-style)"]
+            LiteLLM["Provider abstraction<br/>(OMC routes by model tier,<br/>operator swappable)"]:::llm
+        end
+
+        McpPlat --> PlatA
+        McpRan --> RanA
+        McpHw --> HwA
+        McpOcloud -. "inventory + alarm context" .-> PlatA
+        PlatA --> RCA
+        RanA --> RCA
+        HwA --> RCA
+        KB -. "playbook lookup" .-> PlatA
+        KB -. "playbook lookup" .-> RanA
+        KB -. "playbook lookup" .-> HwA
+        KB -. "SID context" .-> Router
+        PlatA -. "LLM reasoning" .-> LiteLLM
+        RanA -. "LLM reasoning" .-> LiteLLM
+        HwA -. "LLM reasoning" .-> LiteLLM
+        Router -. "LLM-assist on<br/>ambiguous edges only" .-> LiteLLM
+    end
+
+    %% Digital Twin substrate (trust_loop.md content)
+    subgraph TwinSubstrate["Digital Twin substrate (trust layer, talk/trust_loop.md)"]
+        direction LR
+        Twin["Digital Twin<br/>(same-topology mirrored cluster<br/>or simulated subset)"]:::twin
+        EvalOps["EvalOps<br/>(continuous measurement<br/>on the twin, confidence telemetry)"]:::activity
+        Sandbox["Sandbox<br/>(forward-direction test flight<br/>on the twin per action)"]:::activity
+        Recoverability["Agentic Recoverability<br/>(undo validation on the twin,<br/>per-action only, not DR)"]:::activity
+        Twin --> EvalOps
+        Twin --> Sandbox
+        Twin --> Recoverability
+    end
+
+    %% Flows
+    Inbound ==> Gateway
+    Proposal -. "evaluated against" .-> Twin
+    EvalOps -. "confidence floor" .-> Router
+    Sandbox -. "apply-allowed signal" .-> Proposal
+    Recoverability -. "validates inverse intent" .-> Proposal
+
+    %% Outbound: Proposal flows out to governance + execution
+    Proposal == "to governance zoom" ==> Outbound["to architecture_zoom_governance.mmd<br/>(AuditEvent, ReversibilityProfile, Killswitch)"]:::external
+    Proposal == "to ocloud zoom" ==> Outbound2["to architecture_zoom_ocloud.mmd<br/>(MCO, KMM, Metal3, NTO)"]:::external
+
+    %% Styling
+    classDef external fill:#f5f5f4,stroke:#44403c,color:#000
+    classDef gateway fill:#fef3c7,stroke:#b45309,color:#000,stroke-width:3px
+    classDef mcp fill:#fef9c3,stroke:#854d0e,color:#000,stroke-width:2px
+    classDef agent fill:#dbeafe,stroke:#1e40af,color:#000,stroke-width:2px
+    classDef router fill:#fed7aa,stroke:#c2410c,color:#000,stroke-width:3px
+    classDef artifact fill:#fae8ff,stroke:#86198f,color:#000
+    classDef config fill:#f3e8ff,stroke:#6b21a8,color:#000
+    classDef kb fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:2px
+    classDef llm fill:#e9d5ff,stroke:#6b21a8,color:#000,stroke-width:2px
+    classDef twin fill:#d1fae5,stroke:#065f46,color:#000,stroke-width:4px
+    classDef activity fill:#a7f3d0,stroke:#047857,color:#000,stroke-width:2px

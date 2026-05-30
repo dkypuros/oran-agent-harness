@@ -101,13 +101,31 @@ crisis_mode revokes write access to O2 IMS and the SMO, pins EvalOps confidence 
 telemetry to manual human queues. The ReversibilityProfile rewinds one applied action; the
 Killswitch freezes all of them. The two compose; they answer different questions.
 
+## How to read this repo's diagrams
+
+The repo ships one macro diagram plus three zoom diagrams. Read them in this order based on what
+you want to understand:
+
+| Diagram                                | When to open                                                                          |
+|----------------------------------------|----------------------------------------------------------------------------------------|
+| `talk/architecture.mmd`                | First. The macro topology billboard view: Left (observation), Middle (harness), Right (routing + execution). Sets the mental map for everything else. |
+| `talk/architecture_zoom_governance.mmd`| Open when reading section 4 of this narrative. TM Forum governance, TMF688 audit, ReversibilityProfile, co-authorization, and the Killswitch (crisis_mode) all live here. Pairs with `talk/trust_loop.md` and `talk/killswitch.md`. |
+| `talk/architecture_zoom_cognitive.mmd` | Open when reading section 2 of this narrative. Agentic Gateway, four MCP servers, three domain agents, the deterministic Router and taxonomy, the LLM-neutral substrate, plus the Digital Twin substrate with EvalOps, Sandbox, and Agentic Recoverability as activities on it. Pairs with `talk/trust_loop.md`. |
+| `talk/architecture_zoom_ocloud.mmd`    | Open when reading section 3 of this narrative (low side). Hub cluster O-Cloud, ACM, all seven spoke operators (MCO, KMM, PTP, NTO, Metal3, SR-IOV, NFD), and the worker node with linuxptp, cloud-event-proxy, kernel driver, fw-lldp-agent, Intel E810 NIC, BMC. Where Scenario A and Scenario A-prime actually execute. |
+
+Sequence diagrams (a day in the life of a PTP anomaly; the agentic recovery undo sequence) and the
+crisis_mode state-transition diagram are deferred to v0.2 (see follow-up GitHub issues). The macro
+plus three zooms above are sufficient for the v0 talk.
+
 ## Where to look for detail
 
-- Architecture diagram source: `talk/architecture.mmd` (open as text or render with mermaid-cli)
+- Macro architecture diagram source: `talk/architecture.mmd` (open as text or render with mermaid-cli)
+- Zoom diagrams: `talk/architecture_zoom_governance.mmd`, `talk/architecture_zoom_cognitive.mmd`, `talk/architecture_zoom_ocloud.mmd`
 - Routing rule, declarative form: `harness/routing-rules/contribution-1-routing-rule.yaml`
 - Guardrail contract: `harness/routing-rules/contribution-2-guardrail-contract.yaml` plus `harness/guardrails.yaml`
 - LLM-neutrality assertion: `harness/routing-rules/contribution-3-llm-neutrality.yaml`
-- Trust loop (EvalOps + sandbox + reversibility): `talk/trust_loop.md`
+- Trust loop (Digital Twin substrate plus EvalOps, Sandbox, Agentic Recoverability, plus IA principle): `talk/trust_loop.md`
+- Killswitch (crisis_mode global override): `talk/killswitch.md`
 - ODA Canvas reference mapping: `talk/oda_mapping.md`
 - Citation index for every authored file: `harness/conformance.md`
-- Bibliography (43 numbered AMA refs): `references.md`
+- Bibliography (47 numbered AMA refs): `references.md`

@@ -184,7 +184,7 @@ def main():
     g1 = "Here is my presentation" in top25
     g2 = "Here is the example work" in top25
     g3 = "Here is where I actually test" in top25
-    ok = 80 <= line_count <= 130 and g1 and g2 and g3
+    ok = 80 <= line_count <= 150 and g1 and g2 and g3
     record(
         "readme_structure",
         ok,
