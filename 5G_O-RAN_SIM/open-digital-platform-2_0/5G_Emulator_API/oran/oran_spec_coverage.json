@@ -1,0 +1,599 @@
+{
+  "summary": {
+    "spec_catalog_dir": "4Public_Networking_Public_Data/53_O-RAN/O-RAN_Specifications_Bulk/Latest_Versions",
+    "spec_catalog_total": 167,
+    "specs_mapped": 47,
+    "implemented": 39,
+    "referenced": 8,
+    "working_groups_covered": [
+      "WG1",
+      "WG10",
+      "WG11",
+      "WG2",
+      "WG3",
+      "WG4",
+      "WG6",
+      "WG9"
+    ],
+    "by_working_group": {
+      "WG1": {
+        "implemented": 3,
+        "referenced": 2,
+        "total": 5
+      },
+      "WG2": {
+        "implemented": 6,
+        "referenced": 0,
+        "total": 6
+      },
+      "WG3": {
+        "implemented": 10,
+        "referenced": 0,
+        "total": 10
+      },
+      "WG4": {
+        "implemented": 2,
+        "referenced": 2,
+        "total": 4
+      },
+      "WG6": {
+        "implemented": 3,
+        "referenced": 2,
+        "total": 5
+      },
+      "WG9": {
+        "implemented": 2,
+        "referenced": 1,
+        "total": 3
+      },
+      "WG10": {
+        "implemented": 6,
+        "referenced": 0,
+        "total": 6
+      },
+      "WG11": {
+        "implemented": 7,
+        "referenced": 1,
+        "total": 8
+      }
+    }
+  },
+  "specs": [
+    {
+      "wg": "WG1",
+      "spec": "O-RAN.WG1.TS.OAD-R005-v16.00",
+      "title": "Overall Architecture Description",
+      "module": "smo/smo_framework.py",
+      "status": "implemented",
+      "procedures": [
+        "managed-function inventory",
+        "O-RAN topology",
+        "framework-service catalog"
+      ]
+    },
+    {
+      "wg": "WG1",
+      "spec": "O-RAN.WG1.TS.Slicing-Architecture-R004-v14.01",
+      "title": "Slicing Architecture",
+      "module": "ran/slicing/oran_slicing.py",
+      "status": "implemented",
+      "procedures": [
+        "NSI lifecycle",
+        "NSSI lifecycle",
+        "S-NSSAI",
+        "slice SLA",
+        "per-slice RRM policy"
+      ]
+    },
+    {
+      "wg": "WG1",
+      "spec": "O-RAN.WG1.Study-on-O-RAN-Slicing-v02.00",
+      "title": "Study on O-RAN Slicing",
+      "module": "ran/slicing/oran_slicing.py",
+      "status": "referenced",
+      "procedures": [
+        "slice KPI synthesis"
+      ]
+    },
+    {
+      "wg": "WG1",
+      "spec": "O-RAN.WG1.Network-Energy-Savings-Technical-Report-R003-v02.00",
+      "title": "Network Energy Savings",
+      "module": "ran/energy/nes.py",
+      "status": "implemented",
+      "procedures": [
+        "cell switch-off",
+        "carrier/RF-chain sleep",
+        "advanced sleep",
+        "energy KPIs",
+        "ES policy"
+      ]
+    },
+    {
+      "wg": "WG1",
+      "spec": "O-RAN.WG1.mMIMO-Use-Cases-TR-v01.00",
+      "title": "mMIMO Use Cases",
+      "module": "ran/energy/nes.py",
+      "status": "referenced",
+      "procedures": [
+        "RF-chain energy model"
+      ]
+    },
+    {
+      "wg": "WG2",
+      "spec": "O-RAN.WG2.TS.Non-RT-RIC-ARCH-R004-v07.00",
+      "title": "Non-RT RIC Architecture",
+      "module": "ran/ric/non_rt_ric.py",
+      "status": "implemented",
+      "procedures": [
+        "rApp hosting",
+        "A1 policy mgmt",
+        "A1-EI enrichment",
+        "analytics"
+      ]
+    },
+    {
+      "wg": "WG2",
+      "spec": "O-RAN.WG2.TS.A1AP-R005-v06.00",
+      "title": "A1 Application Protocol",
+      "module": "ran/ric/a1_interface.py",
+      "status": "implemented",
+      "procedures": [
+        "A1-P policy create/update/delete",
+        "policy status"
+      ]
+    },
+    {
+      "wg": "WG2",
+      "spec": "O-RAN.WG2.TS.A1TD-R005-v11.01",
+      "title": "A1 Type Definitions",
+      "module": "ran/ric/non_rt_ric.py",
+      "status": "implemented",
+      "procedures": [
+        "policy type schemas"
+      ]
+    },
+    {
+      "wg": "WG2",
+      "spec": "O-RAN.WG2.TS.R1AP-R005-v10.00",
+      "title": "R1 Application Protocol",
+      "module": "smo/r1.py",
+      "status": "implemented",
+      "procedures": [
+        "SME register/discover/deregister",
+        "DME data types/producers/consumers/jobs"
+      ]
+    },
+    {
+      "wg": "WG2",
+      "spec": "O-RAN.WG2.TS.R1GAP-R005-v13.00",
+      "title": "R1 General Aspects & Principles",
+      "module": "smo/r1.py",
+      "status": "implemented",
+      "procedures": [
+        "R1 service groups"
+      ]
+    },
+    {
+      "wg": "WG2",
+      "spec": "O-RAN.WG2.AIML-v01.03",
+      "title": "AI/ML Workflow",
+      "module": "smo/aiml.py",
+      "status": "implemented",
+      "procedures": [
+        "model lifecycle",
+        "training job",
+        "deployment job",
+        "model registry"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.E2AP-R004-v08.00",
+      "title": "E2 Application Protocol",
+      "module": "ran/ric/e2ap.py",
+      "status": "implemented",
+      "procedures": [
+        "E2 Setup",
+        "RIC Subscription",
+        "RIC Indication",
+        "RIC Control",
+        "RIC Query"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.E2GAP-R004-v08.00",
+      "title": "E2 General Aspects & Principles",
+      "module": "ran/ric/near_rt_ric.py",
+      "status": "implemented",
+      "procedures": [
+        "E2 node mgmt",
+        "near-RT control loop"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.RICARCH-R005-v08.00",
+      "title": "Near-RT RIC Architecture",
+      "module": "ran/ric/near_rt_ric.py",
+      "status": "implemented",
+      "procedures": [
+        "xApp hosting",
+        "subscription mgr"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.E2SM-KPM-R004-v07.00",
+      "title": "E2SM Key Performance Measurement",
+      "module": "ran/ric/e2ap.py",
+      "status": "implemented",
+      "procedures": [
+        "REPORT KPM"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.E2SM-RC-R004-v09.00",
+      "title": "E2SM RAN Control",
+      "module": "ran/ric/e2ap.py",
+      "status": "implemented",
+      "procedures": [
+        "REPORT",
+        "INSERT",
+        "CONTROL",
+        "POLICY"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.E2SM-CCC-R004-v06.00",
+      "title": "E2SM Cell Configuration & Control",
+      "module": "ran/ric/e2sm_ccc.py",
+      "status": "implemented",
+      "procedures": [
+        "config REPORT",
+        "config CONTROL"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "ORAN-WG3.E2SM-NI-v01.00",
+      "title": "E2SM Network Interface",
+      "module": "ran/ric/e2sm_ni.py",
+      "status": "implemented",
+      "procedures": [
+        "NGAP/XnAP/F1AP/E1AP trace REPORT/INSERT"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.E2SM-LLC-R004-v01.00",
+      "title": "E2SM Lower Layer Control",
+      "module": "ran/ric/e2sm_llc.py",
+      "status": "implemented",
+      "procedures": [
+        "MAC/PHY control",
+        "slot KPIs"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.Y1AP-R005-v01.02",
+      "title": "Y1 Application Protocol",
+      "module": "ran/ric/y1.py",
+      "status": "implemented",
+      "procedures": [
+        "RAI subscription",
+        "RAI request/response",
+        "analytics types"
+      ]
+    },
+    {
+      "wg": "WG3",
+      "spec": "O-RAN.WG3.TS.Y1GAP-R005-v01.02",
+      "title": "Y1 General Aspects & Principles",
+      "module": "ran/ric/y1.py",
+      "status": "implemented",
+      "procedures": [
+        "Y1 consumer model"
+      ]
+    },
+    {
+      "wg": "WG4",
+      "spec": "O-RAN.WG4.TS.CUS.0-R005-v20.00",
+      "title": "Control/User/Synchronization Plane",
+      "module": "ran/fronthaul/cus_plane.py",
+      "status": "implemented",
+      "procedures": [
+        "eCPRI",
+        "C-Plane section types",
+        "U-Plane IQ",
+        "BFP compression",
+        "S-Plane PTP/SyncE"
+      ]
+    },
+    {
+      "wg": "WG4",
+      "spec": "O-RAN.WG4.TS.MP.0-R005-v20.00",
+      "title": "Management Plane",
+      "module": "ran/fronthaul/m_plane.py",
+      "status": "implemented",
+      "procedures": [
+        "o-ran-uplane-conf",
+        "o-ran-module-cap",
+        "o-ran-supervision watchdog",
+        "sw-management",
+        "FM/PM"
+      ]
+    },
+    {
+      "wg": "WG4",
+      "spec": "O-RAN.WG4.TS.CONF.0-R005-v15.00",
+      "title": "Conformance Test",
+      "module": "ran/fronthaul/o_ru.py",
+      "status": "referenced",
+      "procedures": [
+        "O-RU conformance surface"
+      ]
+    },
+    {
+      "wg": "WG4",
+      "spec": "O-RAN.WG4.CTI-TMP.0-R003-v04.00",
+      "title": "Cooperative Transport Interface (timing)",
+      "module": "ran/fronthaul/cus_plane.py",
+      "status": "referenced",
+      "procedures": [
+        "time-error budget"
+      ]
+    },
+    {
+      "wg": "WG6",
+      "spec": "O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11.00",
+      "title": "O2 IMS Interface",
+      "module": "etsi/o2/o2_ims.py",
+      "status": "implemented",
+      "procedures": [
+        "O-Cloud inventory",
+        "resource pools",
+        "deployment-mgr registration",
+        "alarms"
+      ]
+    },
+    {
+      "wg": "WG6",
+      "spec": "O-RAN.WG6.TS.O2DMS-INTERFACE-K8S-PROFILE-R005-v07.00",
+      "title": "O2 DMS K8s Profile",
+      "module": "etsi/o2/o2_dms.py",
+      "status": "implemented",
+      "procedures": [
+        "NF deployment LCM",
+        "scale",
+        "K8s profile"
+      ]
+    },
+    {
+      "wg": "WG6",
+      "spec": "O-RAN.WG6.O-Cloud Notification API-v04.00",
+      "title": "O-Cloud Notification API",
+      "module": "etsi/o2/o_cloud_notification.py",
+      "status": "implemented",
+      "procedures": [
+        "event subscription",
+        "CloudEvents notification fan-out"
+      ]
+    },
+    {
+      "wg": "WG6",
+      "spec": "O-RAN.WG6.CADS-v08.01",
+      "title": "Cloud Architecture & Deployment Scenarios",
+      "module": "etsi/o2/o2_ims.py",
+      "status": "referenced",
+      "procedures": [
+        "deployment topology"
+      ]
+    },
+    {
+      "wg": "WG6",
+      "spec": "O-RAN.WG6.ASD-R004-v02.00",
+      "title": "Application Service Descriptor",
+      "module": "etsi/o2/o2_dms.py",
+      "status": "referenced",
+      "procedures": [
+        "ASD-driven deployment"
+      ]
+    },
+    {
+      "wg": "WG9",
+      "spec": "O-RAN.WG9.XTRP-MGT.0-R004-v10.00",
+      "title": "xHaul Transport Management",
+      "module": "transport/xhaul.py",
+      "status": "implemented",
+      "procedures": [
+        "transport node mgmt",
+        "FH/MH/BH links"
+      ]
+    },
+    {
+      "wg": "WG9",
+      "spec": "O-RAN.WG9.XTRP-SYN.0-R004-v07.00",
+      "title": "xHaul Synchronization",
+      "module": "transport/xhaul.py",
+      "status": "implemented",
+      "procedures": [
+        "PTP/SyncE",
+        "T-GM/T-BC/T-TSC",
+        "clock class",
+        "holdover"
+      ]
+    },
+    {
+      "wg": "WG9",
+      "spec": "O-RAN.WG9.XPSAAS.0-R005-v10.00",
+      "title": "Packet Switched Architecture",
+      "module": "transport/xhaul.py",
+      "status": "referenced",
+      "procedures": [
+        "packet-network timing"
+      ]
+    },
+    {
+      "wg": "WG10",
+      "spec": "O-RAN.WG10.TS.O1-Interface.0-R005-v18.00",
+      "title": "O1 Interface",
+      "module": "oam/o1.py",
+      "status": "implemented",
+      "procedures": [
+        "NETCONF/YANG NRM",
+        "FCAPS",
+        "heartbeat",
+        "config mgmt"
+      ]
+    },
+    {
+      "wg": "WG10",
+      "spec": "O-RAN.WG10.TS.O1NRM.0-R004-v04.00",
+      "title": "O1 Network Resource Model",
+      "module": "oam/o1.py",
+      "status": "implemented",
+      "procedures": [
+        "ManagedElement",
+        "GNBDUFunction",
+        "NRCellDU"
+      ]
+    },
+    {
+      "wg": "WG10",
+      "spec": "O-RAN.WG10.TS.O1PMeas-R005-v05.00",
+      "title": "O1 Performance Measurements",
+      "module": "oam/pm.py",
+      "status": "implemented",
+      "procedures": [
+        "PM job",
+        "measurement families",
+        "file-based reporting"
+      ]
+    },
+    {
+      "wg": "WG10",
+      "spec": "O-RAN.WG10.TS.OAM-Architecture-R005-v17.00",
+      "title": "OAM Architecture",
+      "module": "oam/o1.py",
+      "status": "implemented",
+      "procedures": [
+        "FCAPS",
+        "VES events"
+      ]
+    },
+    {
+      "wg": "WG10",
+      "spec": "O-RAN.WG10.TS.TE&IV-API.0-R005-v04.00",
+      "title": "Topology Exposure & Inventory API",
+      "module": "oam/teiv.py",
+      "status": "implemented",
+      "procedures": [
+        "entities",
+        "relationships",
+        "topology graph"
+      ]
+    },
+    {
+      "wg": "WG10",
+      "spec": "O-RAN.WG10.TS.TE&IV-DM.0-R005-v04.00",
+      "title": "TE&IV Data Model",
+      "module": "oam/teiv.py",
+      "status": "implemented",
+      "procedures": [
+        "entity/relationship types"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TS.SecProtSpec.0-R005-v14.00",
+      "title": "Security Protocols Specification",
+      "module": "security/security_service.py",
+      "status": "implemented",
+      "procedures": [
+        "mTLS posture",
+        "OAuth2 token",
+        "introspection"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TS.SRCS.0-R005-v14.00",
+      "title": "Security Requirements & Controls",
+      "module": "security/security_service.py",
+      "status": "implemented",
+      "procedures": [
+        "control catalog",
+        "posture"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TS.STS-R005-v12.00",
+      "title": "Security Test Specification",
+      "module": "test_oran_compliance.py",
+      "status": "referenced",
+      "procedures": [
+        "security smoke tests"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TR.ZTA-R005-v05.00",
+      "title": "Zero Trust Architecture",
+      "module": "security/zero_trust.py",
+      "status": "implemented",
+      "procedures": [
+        "policy decision point",
+        "per-interface trust evaluation"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TR.Threat-Modeling-R005-v08.00",
+      "title": "Threat Modeling & Risk Assessment",
+      "module": "security/zero_trust.py",
+      "status": "implemented",
+      "procedures": [
+        "threat-surface map"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TR.Certficate-Management-Framework.0-R005-v06.00",
+      "title": "Certificate Management Framework",
+      "module": "security/cert_manager.py",
+      "status": "implemented",
+      "procedures": [
+        "X.509 issue",
+        "rotate",
+        "revoke"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TR.OAuth2.0-Security.0-R005-v07.00",
+      "title": "OAuth2.0 Security",
+      "module": "security/security_service.py",
+      "status": "implemented",
+      "procedures": [
+        "client-credentials grant"
+      ]
+    },
+    {
+      "wg": "WG11",
+      "spec": "O-RAN.WG11.TR.PQC-Security.0-R005-v02.00",
+      "title": "Post-Quantum Cryptography Security",
+      "module": "security/pqc.py",
+      "status": "implemented",
+      "procedures": [
+        "PQC algorithm inventory",
+        "migration readiness"
+      ]
+    }
+  ]
+}

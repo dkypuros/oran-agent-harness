@@ -92,9 +92,14 @@ oran-agent-harness/
 |   `-- walker.py             orchestrator with CLI entry point
 |-- omc-skills/          reference operationalization (OMC)
 |   `-- o-ran/                4 skills + README + conformance index
-`-- scripts/             executable verify gate and demo runner
-    |-- verify.py             10 deterministic checks, exits non-zero on any failure
-    `-- demo.sh               walks both scenarios end to end with --verbose
+|-- scripts/             executable verify gate and demo runner
+|   |-- verify.py             10 deterministic checks, exits non-zero on any failure
+|   `-- demo.sh               walks both scenarios end to end with --verbose
+`-- 5G_O-RAN_SIM/        platform substrate (BF3-5G-Demo, Apache 2.0 re-licensed)
+    |-- open-digital-platform-2_0/   13 O-RAN service implementations across WG1-WG11
+    |-- demo_front-end/              React dashboard
+    |-- docs/                        O-RAN architecture and compliance docs
+    `-- llm/                         (added by #48) LLM inference client and fake vLLM mock
 ```
 
 ## Citation discipline
