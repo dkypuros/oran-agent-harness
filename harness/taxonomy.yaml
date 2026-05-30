@@ -4,6 +4,17 @@
 # The Router does a lookup here first; LLM-assist only resolves ambiguous edges.
 # Each entry: id (taxonomy key), layer (infra | service | ambiguous), description, oran_wg6_section.
 # Total entries: 20 (12 infra, 5 service, 3 ambiguous).
+#
+# Taxonomy grounding disclaimer:
+# O-RAN.WG6.O2-GAnP-v01.02 Figure 3.4-1 (p. 21) defines three broad resource classes:
+# Physical Resource (Server Hardware, Accelerator HW, RAN Hardware), Logical Resource
+# (Container Cluster, OS Cluster, Underlay Network), and Managed O-Cloud Service (Boot
+# Service, Upgrade Service, Management Svc). The 20 entries below are harness-defined
+# subtypes within those three classes, mapped onto OpenShift operator semantics.
+# Where oran_wg6_section cites a subtype name (e.g. "host configuration"), that name
+# is the harness's interpretive mapping, not a spec-defined subtype. The normative
+# grounding is the three-class model and the IMS/SMO boundary established at
+# O2-GAnP Section 3.2 and Figure 3.4-1.
 
 resource_taxonomy:
 
@@ -12,12 +23,12 @@ resource_taxonomy:
     - id: host_config
       layer: infra
       description: "Host-level system configuration delivered as MachineConfig (kernel args, systemd units, NetworkManager files, sysctls). Path: MCO."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "host configuration"
+      oran_wg6_section: O2 IMS Provisioning, Physical/Logical Resource per O2-GAnP Fig 3.4-1 (harness-defined host config subtype)
 
     - id: host_driver
       layer: infra
       description: "Out-of-tree kernel module updates (ice, mlx5, iavf) delivered as KMM Module CRs. Path: KMM."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "kernel driver"
+      oran_wg6_section: O2 IMS Provisioning, Physical/Logical Resource per O2-GAnP Fig 3.4-1 (harness-defined kernel driver subtype)
 
     - id: node_firmware
       layer: infra
@@ -27,22 +38,22 @@ resource_taxonomy:
     - id: ptp_host_stack
       layer: infra
       description: "linuxptp daemon configuration (ptp4l, phc2sys) and PTP-related host services interfering with timing. Path: PTP Operator + MCO when service mask required."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "ptp_host_stack"
+      oran_wg6_section: O2 IMS Provisioning, Physical/Logical Resource per O2-GAnP Fig 3.4-1 (harness-defined PTP host stack subtype)
 
     - id: container_platform
       layer: infra
       description: "kubelet, CRI-O, OVN-Kubernetes runtime configuration delivered via MachineConfig or Node Tuning Operator profiles. Path: MCO + NTO."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "container_platform"
+      oran_wg6_section: O2 IMS Provisioning, Logical Resource (Container Cluster) per O2-GAnP Fig 3.4-1 (harness-defined container platform subtype)
 
     - id: performance_profile
       layer: infra
       description: "CPU pinning, NUMA topology, huge pages, realtime kernel selection delivered via Node Tuning Operator PerformanceProfile. Path: NTO."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "performance_profile"
+      oran_wg6_section: O2 IMS Provisioning, Managed O-Cloud Service per O2-GAnP Fig 3.4-1 (harness-defined performance profile subtype)
 
     - id: sriov_allocation
       layer: infra
       description: "SR-IOV VF allocation, hardware tagging, NIC partitioning delivered via SR-IOV Network Operator. Path: SR-IOV Operator."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "sriov_allocation"
+      oran_wg6_section: O2 IMS Provisioning, Physical Resource (Accelerator HW) per O2-GAnP Fig 3.4-1 (harness-defined SR-IOV allocation subtype)
 
     - id: node_feature_labels
       layer: infra
@@ -52,7 +63,7 @@ resource_taxonomy:
     - id: cluster_networking
       layer: infra
       description: "Primary CNI configuration (OVN-Kubernetes) and secondary networks (Multus) for DPDK or SR-IOV pod attachments. Path: ACM-propagated policy."
-      oran_wg6_section: O2 IMS Provisioning, infrastructure resource type "cluster_networking"
+      oran_wg6_section: O2 IMS Provisioning, Logical Resource (Underlay Network) per O2-GAnP Fig 3.4-1 (harness-defined cluster networking subtype)
 
     - id: gitops_pipeline
       layer: infra
