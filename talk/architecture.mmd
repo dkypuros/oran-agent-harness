@@ -39,8 +39,8 @@ flowchart LR
     Harness -. "append per stage" .-> TraceLayer
     UpRoute -. "envelope" .-> TraceLayer
     DownRoute -. "phases" .-> TraceLayer
-    Discover -. "GET only<br/>(no mutation)" .-> Harness
-    Discover -. "GET only" .-> TraceLayer
+    Harness -. "state served via GET<br/>(no mutation by Discover)" .-> Discover
+    TraceLayer -. "history served via GET" .-> Discover
 
     classDef observation fill:#dbeafe,stroke:#1e40af,color:#000,stroke-width:3px
     classDef harness fill:#fef3c7,stroke:#b45309,color:#000,stroke-width:3px

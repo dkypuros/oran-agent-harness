@@ -111,9 +111,9 @@ flowchart TB
     Router -. "append routing decision" .-> Trace
     Proposal -. "append proposal" .-> Trace
 
-    %% oran-discover reads (no writes)
-    Discover -. "GET /history" .-> Trace
-    Discover -. "GET /state" .-> Gateway
+    %% oran-discover reads (no writes); arrows show data-flow direction
+    Trace -. "history served via GET" .-> Discover
+    Gateway -. "state served via GET" .-> Discover
 
     %% Proposal flows outward to the other zooms
     Proposal == "to architecture_zoom_governance.mmd" ==> OutGov["to governance zoom<br/>AuditEvent + Reversibility + Killswitch"]:::external

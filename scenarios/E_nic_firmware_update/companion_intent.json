@@ -1,0 +1,20 @@
+{
+  "_conforms_to": {
+    "spec": "TMF921 Intent Management API envelope, companion intent. Standalone extract of the companion_intent nested field from this scenario's remediation_proposal.json, exposed as a fixture so the documentation can reference it directly.",
+    "spec_section": "Intent expression between Intent Owner and Intent Handler",
+    "spec_version": "TMF921 current",
+    "bibliography_ref": [19],
+    "scenario": "E_nic_firmware_update",
+    "source_of_truth": "scenarios/E_nic_firmware_update/remediation_proposal.json field companion_intent"
+  },
+  "intent_id": "INT-flt-E-001-companion",
+  "intent_type": "MaintenanceWindowNotification",
+  "affected_resources": [
+    "worker-ran-02.dallas.example.com"
+  ],
+  "service_impact_hint": "reduced_capacity",
+  "expected_outage_window_minutes": 8,
+  "issuer": "oran-agent-harness/router._maybe_build_companion_intent",
+  "dispatch_route": "smo-tmf921-endpoint",
+  "rationale": "Firmware update via Metal3 requires host reboot; the partner SMO is notified in parallel so it can pre-handover cells and gate downstream alarms during the maintenance window."
+}
