@@ -119,8 +119,8 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
 
 ## After the talk
 
-- Twitter / LinkedIn post template with the repo URL is in `narratives/post_ngrg_handoff.md` (to
-  be authored).
+- Twitter / LinkedIn / Slack / email post templates with the repo URL live in
+  `talk/post_ngrg_handoff.md`.
 - Anyone who asks for the slides is pointed at the repo, not sent the deck. The repo has more.
 - A short follow-up note in `0.Log_Master_Catalog/` on David's personal repo (not this repo)
   captures live audience reactions.

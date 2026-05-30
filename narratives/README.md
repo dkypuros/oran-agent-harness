@@ -11,10 +11,10 @@ appearance of the bench; these narratives carry the broader teaching weight.
 |--------------------------------------------|---------------------------------------------|-------------------|
 | `operator_day_without_harness.md`          | The "From" half of the talk title made concrete. Operations engineers, SREs, day-2 leads. | Landed |
 | `trust_loop_framing.md`                    | Trust layer above the three core contributions. Architects, working group reviewers. | Landed |
-| `standards_conformance_walkthrough.md`     | The citation pyramid as the artifact. Working-group chairs, academic reviewers. | Planned |
-| `multivendor_interop_narrative.md`         | The partner SMO contracts, why TMF921 carries the high side, why O2 IMS carries the low side. Vendor PMs, integration leads. | Planned |
-| `trajectory_what_day_3_looks_like.md`      | Post-Day-2 roadmap, multi-site coordination, cross-vendor shared learning. Workshop reviewers, funding bodies. | Planned |
-| `post_ngrg_handoff.md`                     | Public-facing handoff template for social channels after the talk. | Planned |
+| `standards_conformance_walkthrough.md`     | The citation pyramid as the artifact. Working-group chairs, academic reviewers. | Landed |
+| `multivendor_interop_narrative.md`         | The partner SMO contracts, why TMF921 carries the high side, why O2 IMS carries the low side. Vendor PMs, integration leads. | Landed |
+| `trajectory_what_day_3_looks_like.md`      | Post-Day-2 roadmap, multi-site coordination, cross-vendor shared learning. Workshop reviewers, funding bodies. | Landed |
+| `../talk/post_ngrg_handoff.md`             | Public-facing handoff template for social channels after the talk. Lives under talk/ not narratives/ because it is talk-bound. | Landed |
 
 ## Reading order if you have time
 
