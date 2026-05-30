@@ -1,0 +1,23 @@
+# Conforms to: metal3.io/v1alpha1 HostFirmwareComponents CRD
+# Bibliography ref: 7, 8, 46
+# Scenario: E_nic_firmware_update
+# Purpose: push Intel E810 NIC firmware from 4.40 (known-bad per Intel KB 8731) to 4.50+.
+# Metal3 Baremetal Operator drives the apply; under the hood the BMC handles the firmware
+# write via Redfish DSP0266 UpdateService.SimpleUpdate. The host reboots during activation
+# so the harness emits a TMF921 companion intent to the partner SMO in parallel.
+---
+apiVersion: metal3.io/v1alpha1
+kind: HostFirmwareComponents
+metadata:
+  name: worker-ran-02-nic-firmware-update
+  namespace: openshift-machine-api
+spec:
+  updates:
+    - component: nic.intel.e810.ens2f0
+      url: registry.redhat.io/firmware/intel-e810:1.13.7-fw-4.50
+status:
+  components:
+    - component: nic.intel.e810.ens2f0
+      currentVersion: "4.40 0x8001b743 1.3429.0"
+      lastVersionFlashed: ""
+      initialVersion: "4.40 0x8001b743 1.3429.0"

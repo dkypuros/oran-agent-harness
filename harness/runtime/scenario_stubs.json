@@ -60,6 +60,58 @@
         "confidence_in_reversibility": "high"
       }
     },
+    "flt-E-001": {
+      "fault_id": "flt-E-001",
+      "proposalId": "prop-E-001",
+      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionPayloadRef": "intel-e810-firmware-update-4.50",
+      "contributingSignals": [
+        "platform.phc2sys.drift_persistent_post_kmm",
+        "hardware.nic.firmware_known_regression_kb_8731",
+        "hardware.bmc.redfish_update_service_reachable"
+      ],
+      "rca_timestamp": "2026-05-30T11:25:30Z",
+      "rca_rationale": "Drift persists after the KMM driver swap, isolating root cause to NIC firmware. Intel KB 8731 confirms a PHC hardware-timestamp queue bug at firmware 4.40 fixed in 4.50+. Metal3 HostFirmwareComponents apply via BMC Redfish UpdateService. Host reboots during firmware activation, so the dispatcher emits a TMF921 companion intent in parallel.",
+      "event_time": "2026-05-30T11:25:45Z",
+      "blast_radius": {
+        "nodes": 1,
+        "sites": 1,
+        "cells": 8
+      },
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_metal3_firmware",
+          "intent_target": "worker-ran-02.dallas.example.com",
+          "intent_payload_ref": "intel-e810-firmware-revert-4.40 (vendor allows downgrade with operator confirmation)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 8,
+          "estimated_user_impact": "medium"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 12,
+          "confidence_band": "loose"
+        },
+        "replication_history": {
+          "applies_in_window": 1,
+          "rollbacks_in_window": 0,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 1,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-30T11:10:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.55,
+          "current_risk_score": 0.30,
+          "burn_down_rate_per_minute": 0.006
+        },
+        "confidence_in_reversibility": "medium"
+      }
+    },
     "flt-D-001": {
       "fault_id": "flt-D-001",
       "proposalId": "prop-D-001",

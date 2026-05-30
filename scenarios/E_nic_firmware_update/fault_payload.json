@@ -1,0 +1,55 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/FaultPayload.json. Payload shape approximates the O-RAN.WG6 O-Cloud Notification API alarm envelope.",
+    "spec_section": "FaultPayload schema; payload pattern aligned with O-Cloud Notification API v04.00",
+    "spec_version": "v0",
+    "bibliography_ref": [26, 28, 29, 30, 31, 34, 44, 46],
+    "scenario": "E_nic_firmware_update"
+  },
+  "fault_id": "flt-E-001",
+  "timestamp": "2026-05-30T11:25:00Z",
+  "node": "worker-ran-02.dallas.example.com",
+  "site": "dallas-edge-01",
+  "evidence": [
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_phc2sys_drift",
+      "finding": "phc2sys reports persistent PPB drift not resolved by prior KMM driver update; drift signature now traces to NIC-firmware-layer timestamp queue management.",
+      "raw_data": {
+        "interface": "ens2f0",
+        "drift_samples_ppb": [38, 44, 51, 58, 64, 71],
+        "post_kmm_update": true,
+        "verdict": "firmware_anomaly"
+      }
+    },
+    {
+      "source_agent": "hardware",
+      "tool_name": "mcp-hardware.get_nic_firmware",
+      "finding": "Intel E810 NIC firmware version 4.40 0x8001b743 1.3429.0; vendor advisory KB 8731 documents PHC hardware-timestamp queue bug at this firmware level; fixed in 4.50+.",
+      "raw_data": {
+        "interface": "ens2f0",
+        "vendor": "intel",
+        "model": "E810-CQDA2",
+        "firmware_version": "4.40 0x8001b743 1.3429.0",
+        "firmware_advisory": "Intel KB 8731",
+        "fixed_in_firmware": "4.50+"
+      }
+    },
+    {
+      "source_agent": "hardware",
+      "tool_name": "mcp-hardware.get_bmc_redfish",
+      "finding": "BMC Redfish UpdateService available and reachable; HostFirmwareSettings CR confirms firmware is operator-managed via Metal3.",
+      "raw_data": {
+        "bmc_endpoint": "https://bmc-worker-ran-02.dallas.example.com/redfish/v1",
+        "update_service_status": "Enabled",
+        "managed_by": "metal3-baremetal-operator"
+      }
+    }
+  ],
+  "expected_classification": {
+    "target_layer": "infra",
+    "taxonomy_match": "node_firmware",
+    "confidence": "high",
+    "method": "deterministic"
+  }
+}

@@ -59,6 +59,11 @@ header, the verify gate fails.
 | scenarios/D_phc_drift_hw_only/remediation_proposal.json  | validates against harness/schemas/RemediationProposal.json      | Router output for the D scenario                        | v0                   | 3, 19            |
 | scenarios/D_phc_drift_hw_only/remediation.yaml           | kmm.sigs.x-k8s.io/v1beta1 Module                                | KMM Module CR swapping ice 1.11.17 for 1.13.7+          | kmmv1beta1 current   | 10, 42           |
 | scenarios/D_phc_drift_hw_only/audit_event.json           | TMF688 Event Management API and ReversibilityProfile            | Event envelope plus reversibility_profile field         | TMF688 current       | 18               |
+| scenarios/E_nic_firmware_update/fault_payload.json       | validates against harness/schemas/FaultPayload.json             | NIC firmware regression alarm; PHC drift persistent post-KMM | v0              | 26, 28, 29, 30, 31, 34, 44, 46 |
+| scenarios/E_nic_firmware_update/rca.json                 | validates against harness/schemas/RCA.json                      | Diagnostic substrate output isolating firmware as root cause | v0              | 35               |
+| scenarios/E_nic_firmware_update/remediation_proposal.json | validates against harness/schemas/RemediationProposal.json plus companion_intent extension | Router output with TMF921 companion intent for dual-route | v0              | 3, 7, 8, 19, 46 |
+| scenarios/E_nic_firmware_update/remediation.yaml         | metal3.io/v1alpha1 HostFirmwareComponents                       | Metal3 BMO firmware update CR for Intel E810 NIC          | metal3v1alpha1 current | 7, 8           |
+| scenarios/E_nic_firmware_update/audit_event.json         | TMF688 Event Management API, ReversibilityProfile, companion_intent | Event envelope with elevated blast (cells:8) and SMO companion intent | TMF688 current | 18, 19          |
 
 ## How the verify gate uses this index
 

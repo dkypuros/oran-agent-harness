@@ -99,6 +99,19 @@ Tuning Operator, SR-IOV reconfiguration. Every one of these flows into the O-Clo
 IMS API. Red Hat's open-source O-Cloud Manager (`openshift-kni/oran-o2ims`) is the reference O2 IMS
 implementation cited in this work.
 
+The routing rule fires the LOW branch alone for most infra remediations, but a higher-blast
+case forces both branches in parallel. Scenario E (`scenarios/E_nic_firmware_update/`) shows
+this dual-route pattern: an NIC firmware update via Metal3 ([ref 7](../docs/references.md#ref-7))
+takes the host offline for a reboot window, so the harness emits a TMF921 companion intent
+([ref 19](../docs/references.md#ref-19)) UP to the partner SMO in parallel with the DOWN-route
+O2 IMS apply ([ref 3](../docs/references.md#ref-3)). The Metal3 Baremetal Operator
+([ref 8](../docs/references.md#ref-8)) drives the apply; under the hood the BMC handles the
+firmware write via DMTF Redfish DSP0266 UpdateService.SimpleUpdate
+([ref 46](../docs/references.md#ref-46)). The closing TMF688 audit
+([ref 18](../docs/references.md#ref-18)) carries the elevated blast radius
+(nodes:1, sites:1, cells:8) reflecting the maintenance window. This dual-route pattern is the
+teaching moment Scenarios A and A-prime cannot show because their blast radius is too small.
+
 The two walkthrough scenarios both demonstrate the LOW branch through different internal delivery
 mechanisms. Scenario A masks a host systemd service via MachineConfig (MCO path). Scenario A-prime
 swaps an in-tree kernel module for an out-of-tree build via a KMM Module CR (KMM path). Same routing

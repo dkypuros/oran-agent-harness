@@ -1,0 +1,45 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RemediationProposal.json. Router output for the firmware update scenario, with companion_intent extension for the dual-route case.",
+    "spec_section": "RemediationProposal schema; approximates O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11 Section 3.4 ProvisioningRequest envelope. companion_intent is a harness-unique optional extension carrying a TMF921 envelope.",
+    "spec_version": "v0",
+    "bibliography_ref": [3, 7, 8, 19, 46],
+    "scenario": "E_nic_firmware_update"
+  },
+  "proposalId": "prop-E-001",
+  "version": "v1alpha1",
+  "targetLayer": "infra",
+  "classificationConfidence": "high",
+  "classificationMethod": "deterministic",
+  "taxonomyMatch": "node_firmware",
+  "contributingSignals": [
+    "platform.phc2sys.drift_persistent_post_kmm",
+    "hardware.nic.firmware_known_regression_kb_8731",
+    "hardware.bmc.redfish_update_service_reachable"
+  ],
+  "actionTarget": "worker-ran-02.dallas.example.com",
+  "actionPayloadRef": "intel-e810-firmware-update-4.50",
+  "dryRun": true,
+  "requiresHumanApproval": true,
+  "humanApprovalStatus": "pending",
+  "actionType": "apply_metal3_firmware",
+  "ocloudInternalPath": "metal3-baremetal-operator",
+  "companion_intent": {
+    "_conforms_to": {
+      "spec": "TMF921 Intent Management API envelope, companion intent",
+      "spec_section": "Intent expression between Intent Owner and Intent Handler",
+      "spec_version": "TMF921 current",
+      "bibliography_ref": [19]
+    },
+    "intent_id": "INT-flt-E-001-companion",
+    "intent_type": "MaintenanceWindowNotification",
+    "affected_resources": [
+      "worker-ran-02.dallas.example.com"
+    ],
+    "service_impact_hint": "reduced_capacity",
+    "expected_outage_window_minutes": 8,
+    "issuer": "oran-agent-harness/router._maybe_build_companion_intent",
+    "dispatch_route": "smo-tmf921-endpoint",
+    "rationale": "Firmware update via Metal3 requires host reboot; the partner SMO is notified in parallel so it can pre-handover cells and gate downstream alarms during the maintenance window."
+  }
+}

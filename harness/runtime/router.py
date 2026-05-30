@@ -97,6 +97,10 @@ def route(rca: dict[str, Any]) -> dict[str, Any]:
     else:
         raise ValueError(f"unknown target_layer {layer}")
 
+    companion = _maybe_build_companion_intent(rca, proposal, scenario)
+    if companion is not None:
+        proposal["companion_intent"] = companion
+
     return proposal
 
 
@@ -139,3 +143,52 @@ def _resolve_ambiguous(rca: dict[str, Any]) -> str:
         f"and explain in one sentence."
     )
     return completion(prompt, tier="medium")
+
+
+def _maybe_build_companion_intent(
+    rca: dict[str, Any],
+    proposal: dict[str, Any],
+    scenario: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Attach a TMF921 SMO companion intent for high-blast infra remediation.
+
+    Returns a TMF921-shaped intent envelope when the proposal's blast radius
+    forces SMO awareness (e.g. a node-rebooting firmware update). Returns None
+    otherwise. The harness emits this alongside the down-route O2 IMS apply so
+    the partner SMO can pre-handover, suppress alarms downstream, or adjust
+    slice SLAs during the maintenance window.
+
+    Trigger rule for v0: taxonomyMatch == "node_firmware" AND blast_radius
+    nodes >= 1. Cell-level reach is the secondary teaching signal: firmware
+    updates take a full host offline for the reboot window, so service-layer
+    impact is non-trivial even if the deterministic classification is infra.
+
+    Bibliography refs: 19 (TMF921 Intent Management API)
+    """
+    if proposal.get("taxonomyMatch") != "node_firmware":
+        return None
+    blast = scenario.get("blast_radius") or {}
+    if blast.get("nodes", 0) < 1:
+        return None
+    return {
+        "_conforms_to": {
+            "spec": "TMF921 Intent Management API envelope, companion intent",
+            "spec_section": "Intent expression between Intent Owner and Intent Handler",
+            "spec_version": "TMF921 current",
+            "bibliography_ref": [19],
+        },
+        "intent_id": f"INT-{rca.get('fault_id', 'unknown')}-companion",
+        "intent_type": "MaintenanceWindowNotification",
+        "affected_resources": [
+            proposal.get("actionTarget", "node/unknown"),
+        ],
+        "service_impact_hint": "reduced_capacity",
+        "expected_outage_window_minutes": 8,
+        "issuer": "oran-agent-harness/router._maybe_build_companion_intent",
+        "dispatch_route": "smo-tmf921-endpoint",
+        "rationale": (
+            "Firmware update via Metal3 requires host reboot; the partner SMO is "
+            "notified in parallel so it can pre-handover cells and gate downstream "
+            "alarms during the maintenance window."
+        ),
+    }

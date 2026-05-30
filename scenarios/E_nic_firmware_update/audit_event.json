@@ -1,0 +1,89 @@
+{
+  "_conforms_to": {
+    "spec": "TMF688 Event Management API envelope plus harness-unique reversibility_profile and companion_intent extension",
+    "spec_section": "Event envelope and notification body, plus reversibility_profile and companion_intent",
+    "spec_version": "TMF688 current, ReversibilityProfile v0",
+    "bibliography_ref": [18, 19],
+    "scenario": "E_nic_firmware_update"
+  },
+  "eventId": "evt-flt-E-001-001",
+  "eventTime": "2026-05-30T11:25:45Z",
+  "eventType": "RemediationProposed",
+  "event": {
+    "correlatedEventId": "flt-E-001",
+    "domain": "oran-ocloud",
+    "remediation": {
+      "proposalId": "prop-E-001",
+      "version": "v1alpha1",
+      "targetLayer": "infra",
+      "classificationConfidence": "high",
+      "classificationMethod": "deterministic",
+      "taxonomyMatch": "node_firmware",
+      "contributingSignals": [
+        "platform.phc2sys.drift_persistent_post_kmm",
+        "hardware.nic.firmware_known_regression_kb_8731",
+        "hardware.bmc.redfish_update_service_reachable"
+      ],
+      "actionType": "apply_metal3_firmware",
+      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionPayloadRef": "intel-e810-firmware-update-4.50",
+      "ocloudInternalPath": "metal3-baremetal-operator",
+      "dryRun": true,
+      "guardrailResult": {
+        "outcome": "pass",
+        "rulesEvaluated": [
+          "blast_radius.max_nodes",
+          "blast_radius.max_sites",
+          "action_allowlist"
+        ],
+        "blastRadius": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 8
+        }
+      },
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending",
+      "companion_intent": {
+        "intent_id": "INT-flt-E-001-companion",
+        "intent_type": "MaintenanceWindowNotification",
+        "affected_resources": ["worker-ran-02.dallas.example.com"],
+        "expected_outage_window_minutes": 8,
+        "dispatch_route": "smo-tmf921-endpoint"
+      },
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_metal3_firmware",
+          "intent_target": "worker-ran-02.dallas.example.com",
+          "intent_payload_ref": "intel-e810-firmware-revert-4.40 (vendor allows downgrade with operator confirmation)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 8,
+          "estimated_user_impact": "medium"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 12,
+          "confidence_band": "loose"
+        },
+        "replication_history": {
+          "applies_in_window": 1,
+          "rollbacks_in_window": 0,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 1,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-30T11:10:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.55,
+          "current_risk_score": 0.30,
+          "burn_down_rate_per_minute": 0.006
+        },
+        "confidence_in_reversibility": "medium"
+      }
+    }
+  }
+}
