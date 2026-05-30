@@ -1,0 +1,29 @@
+# Conforms to: kmm.sigs.x-k8s.io/v1beta1 Module CRD
+# Bibliography ref: 10, 42
+# Scenario: D_phc_drift_hw_only
+# Purpose: swap ice 1.11.17 (known-bad for PHC hardware timestamping per Intel KB 730421)
+# for ice 1.13.7+ on worker-ran-02. Out-of-tree build via KMM; in-tree removal triggers a
+# linuxptp-daemon restart so the NIC re-binds to the fixed driver.
+---
+apiVersion: kmm.sigs.x-k8s.io/v1beta1
+kind: Module
+metadata:
+  name: ice-driver-update-1-13-7
+  namespace: openshift-kmm
+spec:
+  moduleLoader:
+    container:
+      modprobe:
+        moduleName: ice
+        parameters:
+          - 'fwlldp_enable=0'
+      kernelMappings:
+        - regexp: '^5\.14\.0-427.*'
+          containerImage: quay.io/dkypuros/ice-oot:1.13.7-rhel9-5.14.0-427
+      inTreeRemoval:
+        kernelModuleNames:
+          - ice
+  imageRepoSecret:
+    name: kmm-image-pull-secret
+  selector:
+    node-role.kubernetes.io/worker-ran: ''

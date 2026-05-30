@@ -1,0 +1,45 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RCA.json. Diagnostic substrate output (stubbed_agents).",
+    "spec_section": "RCA schema",
+    "spec_version": "v0",
+    "bibliography_ref": [35],
+    "scenario": "D_phc_drift_hw_only"
+  },
+  "fault_id": "flt-D-001",
+  "timestamp": "2026-05-30T11:00:15Z",
+  "evidence": [
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_ptp4l_status",
+      "finding": "ptp4l reports SYNCHRONIZED with nominal master_offset_ns. Software view says PTP is fine.",
+      "raw_data": {"state": "SYNCHRONIZED", "verdict": "software_ok"}
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_phc2sys_drift",
+      "finding": "phc2sys reports monotonic PPB drift growing despite ptp4l SYNCHRONIZED state.",
+      "raw_data": {"latest_ppb": 61, "verdict": "hardware_anomaly"}
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_nic_stats",
+      "finding": "tx_hwtstamp_timeouts climbing without LLDP or host-service correlation.",
+      "raw_data": {"tx_hwtstamp_timeouts": 1241, "verdict": "hardware_anomaly"}
+    },
+    {
+      "source_agent": "hardware",
+      "tool_name": "mcp-hardware.get_driver_info",
+      "finding": "ice 1.11.17 matches Intel KB 730421 PHC regression; fixed in 1.13.7+.",
+      "raw_data": {"driver_version": "1.11.17", "fixed_in": "ice 1.13.7+"}
+    }
+  ],
+  "candidate_classifications": [
+    {
+      "taxonomy_match": "host_driver",
+      "target_layer": "infra",
+      "confidence": "high",
+      "rationale": "Divergence between software-LOCKED (ptp4l SYNCHRONIZED) and hardware-NOT-OK (phc2sys monotonic drift plus rising tx_hwtstamp_timeouts) is the diagnostic signature for driver-side PHC timestamp queue mismanagement. ice 1.11.17 is the known-bad version. Resolution path is kernel module swap via KMM."
+    }
+  ]
+}

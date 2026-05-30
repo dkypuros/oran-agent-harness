@@ -1,0 +1,83 @@
+{
+  "_conforms_to": {
+    "spec": "TMF688 Event Management API envelope plus harness-unique reversibility_profile",
+    "spec_section": "Event envelope and notification body, plus reversibility_profile",
+    "spec_version": "TMF688 current, ReversibilityProfile v0",
+    "bibliography_ref": [18],
+    "scenario": "D_phc_drift_hw_only"
+  },
+  "eventId": "evt-flt-D-001-001",
+  "eventTime": "2026-05-30T11:00:30Z",
+  "eventType": "RemediationProposed",
+  "event": {
+    "correlatedEventId": "flt-D-001",
+    "domain": "oran-ocloud",
+    "remediation": {
+      "proposalId": "prop-D-001",
+      "version": "v1alpha1",
+      "targetLayer": "infra",
+      "classificationConfidence": "high",
+      "classificationMethod": "deterministic",
+      "taxonomyMatch": "host_driver",
+      "contributingSignals": [
+        "platform.ptp4l.state_synchronized_persistent",
+        "platform.phc2sys.drift_monotonic_ppb",
+        "platform.host_nic.tx_hwtstamp_timeouts_climbing",
+        "hardware.driver.ice_1_11_17_known_regression"
+      ],
+      "actionType": "apply_kmm_module",
+      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionPayloadRef": "ice-driver-update-1.13.7",
+      "ocloudInternalPath": "kernel-module-management",
+      "dryRun": true,
+      "guardrailResult": {
+        "outcome": "pass",
+        "rulesEvaluated": [
+          "blast_radius.max_nodes",
+          "blast_radius.max_sites",
+          "action_allowlist"
+        ],
+        "blastRadius": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 4
+        }
+      },
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending",
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_kmm_module",
+          "intent_target": "worker-ran-02.dallas.example.com",
+          "intent_payload_ref": "ice-driver-revert-1.11.17 (in-tree restore Module CR)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 4,
+          "estimated_user_impact": "low"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 25,
+          "confidence_band": "loose"
+        },
+        "replication_history": {
+          "applies_in_window": 3,
+          "rollbacks_in_window": 1,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 2,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-30T10:45:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.42,
+          "current_risk_score": 0.20,
+          "burn_down_rate_per_minute": 0.008
+        },
+        "confidence_in_reversibility": "medium"
+      }
+    }
+  }
+}

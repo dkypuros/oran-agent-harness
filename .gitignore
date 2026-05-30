@@ -37,6 +37,9 @@ node_modules/
 !.env.example
 # 5G_O-RAN_SIM runtime trace logs (created by the fake vLLM mock, never committed)
 5G_O-RAN_SIM/llm/mock_traces.jsonl
+# 5G_O-RAN_SIM shared trace layer: runtime traces gitignored, committed examples (.example.jsonl) allowed
+5G_O-RAN_SIM/shared_trace/*.jsonl
+!5G_O-RAN_SIM/shared_trace/*.example.jsonl
 
 # PDF redistribution guard (NG2 from plan)
 *.pdf

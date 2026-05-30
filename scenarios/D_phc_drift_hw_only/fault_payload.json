@@ -1,0 +1,70 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/FaultPayload.json. Payload shape approximates the O-RAN.WG6 O-Cloud Notification API alarm envelope.",
+    "spec_section": "FaultPayload schema; payload pattern aligned with O-Cloud Notification API v04.00 published by the PTP Operator + cloud-event-proxy stack",
+    "spec_version": "v0",
+    "bibliography_ref": [26, 28, 29, 30, 31, 44],
+    "scenario": "D_phc_drift_hw_only"
+  },
+  "fault_id": "flt-D-001",
+  "timestamp": "2026-05-30T11:00:00Z",
+  "node": "worker-ran-02.dallas.example.com",
+  "site": "dallas-edge-01",
+  "evidence": [
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_ptp4l_status",
+      "finding": "ptp4l reports SYNCHRONIZED with nominal master_offset_ns. Software view says PTP is fine.",
+      "raw_data": {
+        "interface": "ens2f0",
+        "state": "SYNCHRONIZED",
+        "master_offset_ns_samples": [12, 11, 13, 12, 14, 13, 12],
+        "g_8275_1_profile": true,
+        "verdict": "software_ok"
+      }
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_phc2sys_drift",
+      "finding": "phc2sys reports monotonic PPB drift growing despite ptp4l SYNCHRONIZED state. Hardware clock is wandering.",
+      "raw_data": {
+        "interface": "ens2f0",
+        "drift_samples_ppb": [22, 28, 35, 41, 47, 53, 61],
+        "state": "DRIFTING",
+        "verdict": "hardware_anomaly"
+      }
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_nic_stats",
+      "finding": "tx_hwtstamp_timeouts climbing without LLDP or host-service correlation. NIC hardware timestamping is failing at the driver layer.",
+      "raw_data": {
+        "interface": "ens2f0",
+        "tx_hwtstamp_timeouts": 1241,
+        "rx_hwtstamp_filter_drops_per_min": 24,
+        "fw_lldp_agent_active": false,
+        "host_services_with_phc_access": [],
+        "verdict": "hardware_anomaly"
+      }
+    },
+    {
+      "source_agent": "hardware",
+      "tool_name": "mcp-hardware.get_driver_info",
+      "finding": "Intel E810 driver ice 1.11.17, matches known PHC hardware-timestamp regression (Intel KB 730421); fixed in ice 1.13.7+.",
+      "raw_data": {
+        "interface": "ens2f0",
+        "driver": "ice",
+        "driver_version": "1.11.17",
+        "firmware_version": "4.40 0x8001b743 1.3429.0",
+        "kernel_version": "5.14.0-427.50.1.el9_4.x86_64",
+        "fixed_in": "ice 1.13.7+"
+      }
+    }
+  ],
+  "expected_classification": {
+    "target_layer": "infra",
+    "taxonomy_match": "host_driver",
+    "confidence": "high",
+    "method": "deterministic"
+  }
+}

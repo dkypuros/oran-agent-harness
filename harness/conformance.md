@@ -54,6 +54,11 @@ header, the verify gate fails.
 | scenarios/A_prime_ice_driver/rca.json                    | validates against harness/schemas/RCA.json                      | Diagnostic substrate output (stubbed_agents fixture)   | v0                   | 35               |
 | scenarios/A_prime_ice_driver/remediation_proposal.json   | validates against harness/schemas/RemediationProposal.json      | Router output before guardrail evaluation              | v0                   | 3, 19            |
 | scenarios/README.md                                      | walkthrough narrative (not a contract artifact)                 | Documents pipeline stages and stub vs real boundaries  | v0                   | n/a              |
+| scenarios/D_phc_drift_hw_only/fault_payload.json         | validates against harness/schemas/FaultPayload.json             | Software-LOCKED + hardware-NOT-OK divergence pattern    | v0                   | 26, 28, 29, 30, 31, 44 |
+| scenarios/D_phc_drift_hw_only/rca.json                   | validates against harness/schemas/RCA.json                      | Diagnostic substrate output for the D scenario          | v0                   | 35               |
+| scenarios/D_phc_drift_hw_only/remediation_proposal.json  | validates against harness/schemas/RemediationProposal.json      | Router output for the D scenario                        | v0                   | 3, 19            |
+| scenarios/D_phc_drift_hw_only/remediation.yaml           | kmm.sigs.x-k8s.io/v1beta1 Module                                | KMM Module CR swapping ice 1.11.17 for 1.13.7+          | kmmv1beta1 current   | 10, 42           |
+| scenarios/D_phc_drift_hw_only/audit_event.json           | TMF688 Event Management API and ReversibilityProfile            | Event envelope plus reversibility_profile field         | TMF688 current       | 18               |
 
 ## How the verify gate uses this index
 

@@ -17,6 +17,24 @@ sandbox that runs before any live action.
 
 ## 1. The observation loop (the left side of the diagram)
 
+The PTP sync alarm format is a standards stack. The Red Hat PTP Operator
+([ref 28](../docs/references.md#ref-28)) runs the linuxptp daemon
+([ref 27](../docs/references.md#ref-27)) on each node and the cloud-event-proxy sidecar
+([ref 29](../docs/references.md#ref-29)) publishes CloudEvents
+([ref 30](../docs/references.md#ref-30)) carrying the
+O-RAN.WG6 O-Cloud Notification API payload
+([ref 31](../docs/references.md#ref-31)). The PTP state machine itself
+([IEEE 1588-2019, ref 26](../docs/references.md#ref-26)) defines the
+SYNCHRONIZED / HOLDOVER / FREE_RUNNING / UNCALIBRATED transitions; the
+G.8275.1 telecom profile ([ref 44](../docs/references.md#ref-44)) is the
+full-timing-support shape Cloud RAN deployments use. Scenario D
+(`scenarios/D_phc_drift_hw_only/`) shows the divergence pattern: ptp4l
+reports SYNCHRONIZED (software view OK) while phc2sys reports monotonic PPB
+drift AND the NIC reports rising tx_hwtstamp_timeouts (hardware view NOT
+OK). Each stage of the harness pipeline appends one JSON record to the
+shared trace layer at `5G_O-RAN_SIM/shared_trace/{scenario_id}.jsonl` for
+post-run replay analysis.
+
 PTP synchronization on a Cloud RAN site flows downward from a GNSS source disciplining a PTP
 Grandmaster (T-GM, profile [G.8275.1](../docs/references.md#ref-44)), optionally through a Boundary Clock, and into the worker node's
 NIC, where the PTP Hardware Clock (PHC) handles hardware timestamping. On the host, the [linuxptp](../docs/references.md#ref-27)

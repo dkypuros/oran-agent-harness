@@ -1,0 +1,28 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RemediationProposal.json. Router output before guardrail evaluation.",
+    "spec_section": "RemediationProposal schema; approximates O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11 Section 3.4 ProvisioningRequest envelope shape",
+    "spec_version": "v0",
+    "bibliography_ref": [3, 19],
+    "scenario": "D_phc_drift_hw_only"
+  },
+  "proposalId": "prop-D-001",
+  "version": "v1alpha1",
+  "targetLayer": "infra",
+  "classificationConfidence": "high",
+  "classificationMethod": "deterministic",
+  "taxonomyMatch": "host_driver",
+  "contributingSignals": [
+    "platform.ptp4l.state_synchronized_persistent",
+    "platform.phc2sys.drift_monotonic_ppb",
+    "platform.host_nic.tx_hwtstamp_timeouts_climbing",
+    "hardware.driver.ice_1_11_17_known_regression"
+  ],
+  "actionTarget": "worker-ran-02.dallas.example.com",
+  "actionPayloadRef": "ice-driver-update-1.13.7",
+  "dryRun": true,
+  "requiresHumanApproval": true,
+  "humanApprovalStatus": "pending",
+  "actionType": "apply_kmm_module",
+  "ocloudInternalPath": "kernel-module-management"
+}

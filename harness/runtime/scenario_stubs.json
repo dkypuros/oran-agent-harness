@@ -60,6 +60,59 @@
         "confidence_in_reversibility": "high"
       }
     },
+    "flt-D-001": {
+      "fault_id": "flt-D-001",
+      "proposalId": "prop-D-001",
+      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionPayloadRef": "ice-driver-update-1.13.7",
+      "contributingSignals": [
+        "platform.ptp4l.state_synchronized_persistent",
+        "platform.phc2sys.drift_monotonic_ppb",
+        "platform.host_nic.tx_hwtstamp_timeouts_climbing",
+        "hardware.driver.ice_1_11_17_known_regression"
+      ],
+      "rca_timestamp": "2026-05-30T11:00:15Z",
+      "rca_rationale": "Divergence between software-LOCKED (ptp4l SYNCHRONIZED) and hardware-NOT-OK (phc2sys monotonic drift plus rising tx_hwtstamp_timeouts) signatures driver-side PHC timestamp queue mismanagement. ice 1.11.17 is the known-bad version per Intel KB 730421.",
+      "event_time": "2026-05-30T11:00:30Z",
+      "blast_radius": {
+        "nodes": 1,
+        "sites": 1,
+        "cells": 4
+      },
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_kmm_module",
+          "intent_target": "worker-ran-02.dallas.example.com",
+          "intent_payload_ref": "ice-driver-revert-1.11.17 (in-tree restore Module CR)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 4,
+          "estimated_user_impact": "low"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 25,
+          "confidence_band": "loose"
+        },
+        "replication_history": {
+          "applies_in_window": 3,
+          "rollbacks_in_window": 1,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 2,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-30T10:45:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.42,
+          "current_risk_score": 0.20,
+          "burn_down_rate_per_minute": 0.008
+        },
+        "confidence_in_reversibility": "medium"
+      }
+    },
     "flt-2026-05-14-002": {
       "fault_id": "flt-2026-05-14-002",
       "proposalId": "prop-2026-05-14-002",
