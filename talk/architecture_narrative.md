@@ -108,10 +108,11 @@ you want to understand:
 
 | Diagram                                | When to open                                                                          |
 |----------------------------------------|----------------------------------------------------------------------------------------|
-| `talk/architecture.mmd`                | First. The macro topology billboard view: Left (observation), Middle (harness), Right (routing + execution). Sets the mental map for everything else. |
+| `talk/architecture.mmd`                | FIRST. The macro / billboard. Seven boxes only: Observation on the left, Agent Harness in the middle with the Human Operator co-present and the Digital Twin substrate beneath, Killswitch as an override badge, and the right side forked into UP (TMF921 to SMO) and DOWN (O2 IMS to O-Cloud). Read this in 30 seconds; everything else is a double-click. |
 | `talk/architecture_zoom_governance.mmd`| Open when reading section 4 of this narrative. TM Forum governance, TMF688 audit, ReversibilityProfile, co-authorization, and the Killswitch (crisis_mode) all live here. Pairs with `talk/trust_loop.md` and `talk/killswitch.md`. |
 | `talk/architecture_zoom_cognitive.mmd` | Open when reading section 2 of this narrative. Agentic Gateway, four MCP servers, three domain agents, the deterministic Router and taxonomy, the LLM-neutral substrate, plus the Digital Twin substrate with EvalOps, Sandbox, and Agentic Recoverability as activities on it. Pairs with `talk/trust_loop.md`. |
 | `talk/architecture_zoom_ocloud.mmd`    | Open when reading section 3 of this narrative (low side). Hub cluster O-Cloud, ACM, all seven spoke operators (MCO, KMM, PTP, NTO, Metal3, SR-IOV, NFD), and the worker node with linuxptp, cloud-event-proxy, kernel driver, fw-lldp-agent, Intel E810 NIC, BMC. Where Scenario A and Scenario A-prime actually execute. |
+| `talk/architecture_full.mmd`           | LAST. The comprehensive 30+ component reference (formerly architecture v3). Open this when you want every component visible at once on a single canvas (12K wide PNG). Not the entry point; a deep-dive aid. |
 
 Sequence diagrams (a day in the life of a PTP anomaly; the agentic recovery undo sequence) and the
 crisis_mode state-transition diagram are deferred to v0.2 (see follow-up GitHub issues). The macro

@@ -48,9 +48,11 @@ oran-agent-harness/
 |-- .gitignore           defense-in-depth against .local/, python_demo/, .pdf, .env
 |-- talk/                presentation artifacts
 |   |-- abstract.md             canonical nGRG submission
-|   |-- architecture.mmd        macro architecture diagram source (v3, Mermaid)
-|   |-- architecture.png        12K-wide rendered macro diagram
-|   |-- architecture_narrative.md   prose walkthrough of the diagram
+|   |-- architecture.mmd        macro / billboard, 7 boxes, the mental map (the entry point)
+|   |-- architecture.png        rendered macro diagram
+|   |-- architecture_full.mmd   comprehensive 30+ component detail reference (former v3)
+|   |-- architecture_full.png   12K-wide rendered detail diagram
+|   |-- architecture_narrative.md   prose walkthrough of the diagrams
 |   |-- architecture_zoom_governance.mmd  zoom diagram: TM Forum, audit, Killswitch
 |   |-- architecture_zoom_cognitive.mmd   zoom diagram: Gateway, agents, Digital Twin substrate
 |   |-- architecture_zoom_ocloud.mmd      zoom diagram: O-Cloud, spoke operators, worker
