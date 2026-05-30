@@ -207,3 +207,27 @@ d. Reference 35 is included as the proof point that an MCP-coordinated multivend
 
 e. References 39 through 43 use placeholder commit-SHA notation. These will be pinned to actual SHAs
    before publication. Until then, the live URLs (refs 5, 6, 9, 10, 13, 29) remain authoritative.
+
+f. References 44 through 47 cover standards named in the architecture diagram and tool descriptions
+   (ITU-T G.8275.1 PTP telecom profile, O-RAN WG4 Open Fronthaul, DMTF Redfish, TMF902 AI Model
+   Management). These are diagram context labels rather than primary conformance claims; the harness
+   does not author content directly against these specs.
+
+---
+
+## K. Additional standards referenced in diagrams and tool descriptions
+
+44. International Telecommunication Union, Telecommunication Standardization Sector. ITU-T G.8275.1:
+    Precision time protocol telecom profile for phase / time synchronization with full timing support
+    from the network. ITU-T; 2022. https://www.itu.int/rec/T-REC-G.8275.1. Accessed 14th [WED] MAY 2026.
+
+45. O-RAN Alliance. O-RAN Open Fronthaul Interface Specifications. Working Group 4 (O-RAN.WG4).
+    Covers Control, User, Synchronization, and Management planes carried over eCPRI. O-RAN Alliance e.V.
+    https://www.o-ran.org/specifications. Accessed 14th [WED] MAY 2026.
+
+46. Distributed Management Task Force. Redfish Specification. DMTF DSP0266. Standard for out-of-band
+    management of servers and infrastructure. https://www.dmtf.org/standards/redfish. Accessed 14th
+    [WED] MAY 2026.
+
+47. TM Forum. TMF902 AI Model Management API. https://www.tmforum.org/oda/open-apis/table/tmf902.
+    Accessed 14th [WED] MAY 2026.

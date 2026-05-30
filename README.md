@@ -44,15 +44,16 @@ populated reversibility profile. Full walkthrough at `talk/architecture_narrativ
 oran-agent-harness/
 |-- README.md            this file
 |-- LICENSE              Apache-2.0
-|-- references.md        public bibliography, 43 numbered AMA refs, URLs only
+|-- references.md        public bibliography, 47 numbered AMA refs, URLs only
 |-- .gitignore           defense-in-depth against .local/, python_demo/, .pdf, .env
 |-- talk/                presentation artifacts
-|   |-- abstract.md      canonical nGRG submission
-|   |-- architecture.mmd architecture diagram source (v3, Mermaid)
-|   |-- architecture.png 12K-wide rendered diagram
-|   |-- trust_loop.md    EvalOps, sandboxing, Reversibility Profile narrative
-|   |-- oda_mapping.md   15-element ODA Canvas reference mapping
-|   `-- slides.md        slide-deck pointer (deck out of scope here)
+|   |-- abstract.md             canonical nGRG submission
+|   |-- architecture.mmd        architecture diagram source (v3, Mermaid)
+|   |-- architecture.png        12K-wide rendered diagram
+|   |-- architecture_narrative.md  prose walkthrough of the diagram
+|   |-- trust_loop.md           EvalOps, sandboxing, Reversibility Profile narrative
+|   |-- oda_mapping.md          15-element ODA Canvas reference mapping
+|   `-- slides.md               slide-deck pointer (deck out of scope here)
 |-- harness/             20 authored stub artifacts (the contract set)
 |   |-- taxonomy.yaml    20 entries grounded in O-RAN WG6 resource model
 |   |-- guardrails.yaml  LLM-free policy contract, TMF688-shaped audit
@@ -64,8 +65,10 @@ oran-agent-harness/
 |-- scenarios/           2 PTP host-platform walkthroughs
 |   |-- A_fw_lldp_agent/      fw-lldp-agent service interferes with PTP
 |   `-- A_prime_ice_driver/   ice driver 1.11.x causes PHC drift
-`-- omc-skills/          reference operationalization (OMC)
-    `-- o-ran/                4 skills + README + conformance index
+|-- omc-skills/          reference operationalization (OMC)
+|   `-- o-ran/                4 skills + README + conformance index
+`-- scripts/             executable verify gate
+    `-- verify.py             9 deterministic checks, exits non-zero on any failure
 ```
 
 ## Citation discipline
