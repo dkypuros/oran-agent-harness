@@ -18,13 +18,11 @@ flagged when this architecture was walked past them: what happens during a hurri
 regional lightning storm, or a power-grid event when the physical world has become something the
 agents were never trained for.
 
-In a traditional appliance world the operator response is concrete and physical: a technician walks
-to the data center, pulls the power cord, or pulls the fiber line. In a software-defined Cloud RAN
-there is no cord. The "appliance" is distributed across thousands of Kubernetes pods on hundreds of
-bare-metal nodes across multiple orchestrators. An agent trained on normal anomaly patterns, faced
+In a traditional appliance world the operator pulls the power cord or the fiber line. In a
+software-defined Cloud RAN there is no cord. The "appliance" is distributed across thousands of
+Kubernetes pods on hundreds of bare-metal nodes. An agent trained on normal anomaly patterns, faced
 with a hurricane, will try to "fix" the degraded network by re-homing cells and shifting workloads.
-That creates a control-plane storm that actively fights the physical reality and makes the outage
-worse.
+That creates a control-plane storm that fights physical reality and makes the outage worse.
 
 The Killswitch (formally crisis_mode in guardrails.yaml) is the cord.
 
