@@ -18,8 +18,12 @@ Companion documents:
 <a id="ref-1"></a>1. O-RAN Alliance. O-RAN Architecture Description. Working Group 1 specification. O-RAN Alliance e.V.
    https://www.o-ran.org/specifications. Accessed 14th [WED] MAY 2026.
 
-<a id="ref-2"></a>2. O-RAN Alliance. O-RAN O2 General Aspects and Principles. Working Group 6 specification
-   (O-RAN.WG6.O2-GAnP). O-RAN Alliance e.V. https://www.o-ran.org/specifications. Accessed 14th [WED] MAY 2026.
+<a id="ref-2"></a>2. O-RAN Alliance. O-RAN O2 General Aspects and Principles, version 01.02. Working Group 6
+   specification (O-RAN.WG6.O2-GAnP-v01.02). O-RAN Alliance e.V.
+   https://www.o-ran.org/specifications. Accessed 14th [WED] MAY 2026. A successor exists in
+   the R005 release train (O-RAN.WG6.TS.O2-GA&P-R005-v10.00); the section numbers cited in
+   talk/architecture_narrative.md and harness/taxonomy.yaml (Section 2.2 Figure 2.2-2,
+   Section 3.2 through 3.4, Figure 3.4-1) are stable across both versions.
 
 <a id="ref-3"></a>3. O-RAN Alliance. O-RAN O2 IMS Interface Specification (Infrastructure Management Services). Working
    Group 6 specification (O-RAN.WG6.O2IMS-Interface). O-RAN Alliance e.V. https://www.o-ran.org/specifications.
