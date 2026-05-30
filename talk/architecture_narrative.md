@@ -76,12 +76,15 @@ node, one site, four cells in v0), action allowlist, operator-harness co-authori
 is the deliberate framing: the harness drafts; the operator edits and commits. Not discrete HITL
 approve/reject.
 
-The proposal is then run against a digital-twin sandbox, a same-topology test cluster (or a simulated
-linuxptp plus NIC driver stack) that receives the same MachineConfig or Module CR the harness would
-apply live. The harness observes the twin's PTP state, NIC counters, and pod readiness after a settle
-interval. Only twins that converge inside the expected envelope produce the apply-allowed signal.
-This is the two-key gate: the operator authorizes the action class, the sandbox authorizes the
-specific payload. Full discussion in `talk/trust_loop.md` (Pillar 2).
+The proposal is then exercised against the Digital Twin substrate, a same-topology mirrored cluster
+(or a simulated linuxptp plus NIC driver stack) that supports three concurrent activities: the
+Sandbox runs the forward-direction action to verify it lands cleanly, EvalOps measures the agents'
+historical accuracy on this scenario class, and Agentic Recoverability validates that the inverse
+action will land if the operator needs to walk this back. Only twins that converge inside the
+expected envelope on all three produce the apply-allowed signal. This is the two-key gate: the
+operator authorizes the action class, the twin authorizes the specific payload. Full discussion in
+`talk/trust_loop.md` (the twin is the substrate; the three activities run on top of it under the
+explicit banner of Intelligence Augmentation).
 
 What the operator finally sees is a TMF688-shaped AuditEvent (`harness/schemas/AuditEvent.json`)
 carrying the proposed action plus a populated ReversibilityProfile

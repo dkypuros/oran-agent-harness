@@ -9,7 +9,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/ReversibilityProfile.json",
   "title": "ReversibilityProfile",
-  "description": "Seven-field reversibility contract between the harness and the human in the loop. Every audit event carries this so the operator can assess rollback at decision time, in the same place every time and in the same shape every time.",
+  "description": "Seven-field reversibility contract between the harness and the human in the loop. Every audit event carries this so the operator can assess rollback at decision time, in the same place every time and in the same shape every time. Distinct from Disaster Recovery: this is Agentic Recoverability, a targeted undo for one applied remediation action. RTO and RPO concepts do not apply here; the contract is per-action and validated on the Digital Twin substrate (see talk/trust_loop.md) before the operator commits.",
   "type": "object",
   "required": [
     "rollback_intent",
