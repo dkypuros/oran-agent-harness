@@ -46,6 +46,14 @@ only when the taxonomy resolves to the `ambiguous` layer. The single most resear
 this design is right there: the routing decision is grounded in O-RAN's own resource layering, not in
 a model's opinion.
 
+All of this sits on top of the Digital Twin substrate (visible in
+`talk/architecture_zoom_cognitive.mmd` as the wide horizontal foundation at the bottom). The twin is
+not a service the cognitive layer calls into. It is the floor the cognitive layer stands on. EvalOps
+runs continuously between the twin and the agents (dashed bidirectional arrows in the zoom diagram),
+producing the confidence telemetry that travels with every RemediationProposal. Sandbox is a
+forward-direction test flight on the twin; Agentic Recoverability is the inverse-action validation
+on the twin. Both flow back UP into the Proposal artifact before it leaves the cognitive layer.
+
 ## 3. The routing decision (right side, high vs low)
 
 `harness/routing-rules/contribution-1-routing-rule.yaml` declares the rule. The harness splits actions

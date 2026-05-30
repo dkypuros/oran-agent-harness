@@ -1,24 +1,26 @@
 %% architecture_zoom_cognitive.mmd
-%% Companion zoom diagram to talk/architecture.mmd (the macro view).
-%% Middle of the closed-loop system: Agentic Gateway, MCP servers, domain agents,
-%% Remediation Router, and the Digital Twin substrate that supports EvalOps, Sandbox,
-%% and Agentic Recoverability.
+%% Companion zoom diagram to talk/architecture.mmd (the macro).
+%% Double-click on the Agent Harness box of the macro: the Agentic Gateway, four MCP servers,
+%% three domain agents, the Remediation Router, the LLM-neutral substrate, all sitting on top
+%% of the Digital Twin substrate as their foundation.
+%% The twin runs horizontally across the bottom of the diagram. EvalOps is a continuous-loop
+%% activity, drawn with dashed bidirectional arrows up to the cognitive components.
+%% Sandbox and Agentic Recoverability are actions on the twin that inform the Proposal artifact.
 %% Read alongside: talk/trust_loop.md, talk/architecture_narrative.md sections 2 and 4.
 
 flowchart TB
 
-    %% Inbound: CloudEvents from the observation loop (see macro view)
-    Inbound["O-RAN CloudEvents<br/>(WG6 Cloud Notifications,<br/>from cloud-event-proxy on the worker)"]:::external
+    Inbound["O-RAN CloudEvents inbound<br/>from cloud-event-proxy on the worker<br/>(WG6 Cloud Notifications)"]:::external
 
-    subgraph Cognitive["Cognitive middle (Agent Harness)"]
+    subgraph CognitiveLayer["Cognitive layer (sits on the Digital Twin substrate below)"]
         direction TB
 
         subgraph GatewayLayer["Agentic Gateway over MCP"]
-            Gateway["Agentic Gateway<br/>(mTLS + OAuth2 + IP allowlist,<br/>vendor-private tool exposure)"]:::gateway
-            McpPlat["mcp-platform<br/>(ptp4l, services,<br/>driver, NIC stats)"]:::mcp
-            McpRan["mcp-ran<br/>(cell sync, PM counters,<br/>RAN params)"]:::mcp
-            McpHw["mcp-hardware<br/>(NIC PHC, BMC Redfish,<br/>CPU perf counters)"]:::mcp
-            McpOcloud["mcp-ocloud<br/>(O2 IMS Inventory + Alarms,<br/>gated apply)"]:::mcp
+            Gateway["Agentic Gateway<br/>mTLS + OAuth2 + IP allowlist<br/>vendor-private tool exposure"]:::gateway
+            McpPlat["mcp-platform<br/>ptp4l, services,<br/>driver, NIC stats"]:::mcp
+            McpRan["mcp-ran<br/>cell sync, PM counters,<br/>RAN params"]:::mcp
+            McpHw["mcp-hardware<br/>NIC PHC, BMC Redfish,<br/>CPU perf counters"]:::mcp
+            McpOcloud["mcp-ocloud<br/>O2 IMS Inventory + Alarms,<br/>gated apply"]:::mcp
             Gateway --> McpPlat
             Gateway --> McpRan
             Gateway --> McpHw
@@ -34,23 +36,21 @@ flowchart TB
         KB["Knowledge Base (RAG)<br/>NOC playbooks plus SID context<br/>(maps to TMF GB922)"]:::kb
 
         subgraph RouterLayer["Remediation Router"]
-            RCA["Root Cause Analysis<br/>(harness/schemas/RCA.json,<br/>cross-domain evidence chain)"]:::artifact
-            Taxonomy["taxonomy.yaml<br/>(O-RAN WG6 resource model,<br/>~20 entries)"]:::config
-            Router["Remediation Router<br/>(deterministic lookup first,<br/>LLM-assist on ambiguous edges)"]:::router
-            Proposal["RemediationProposal<br/>(harness/schemas/RemediationProposal.json)"]:::artifact
+            RCA["Root Cause Analysis<br/>harness/schemas/RCA.json"]:::artifact
+            Taxonomy["taxonomy.yaml<br/>O-RAN WG6 resource model<br/>~20 entries"]:::config
+            Router["Remediation Router<br/>deterministic lookup first<br/>LLM-assist on ambiguous edges"]:::router
+            Proposal["RemediationProposal<br/>harness/schemas/RemediationProposal.json"]:::artifact
             RCA --> Router
             Taxonomy -- "lookup" --> Router
             Router --> Proposal
         end
 
-        subgraph LlmLayer["LLM-neutral substrate (LiteLLM-style)"]
-            LiteLLM["Provider abstraction<br/>(OMC routes by model tier,<br/>operator swappable)"]:::llm
-        end
+        LiteLLM["LLM-neutral substrate<br/>LiteLLM-style provider abstraction<br/>OMC routes by model tier"]:::llm
 
         McpPlat --> PlatA
         McpRan --> RanA
         McpHw --> HwA
-        McpOcloud -. "inventory + alarm context" .-> PlatA
+        McpOcloud -. "inventory plus alarm context" .-> PlatA
         PlatA --> RCA
         RanA --> RCA
         HwA --> RCA
@@ -61,33 +61,36 @@ flowchart TB
         PlatA -. "LLM reasoning" .-> LiteLLM
         RanA -. "LLM reasoning" .-> LiteLLM
         HwA -. "LLM reasoning" .-> LiteLLM
-        Router -. "LLM-assist on<br/>ambiguous edges only" .-> LiteLLM
+        Router -. "LLM-assist on ambiguous edges" .-> LiteLLM
     end
 
-    %% Digital Twin substrate (trust_loop.md content)
-    subgraph TwinSubstrate["Digital Twin substrate (trust layer, talk/trust_loop.md)"]
+    subgraph TwinSubstrate["Digital Twin substrate (the foundation)"]
         direction LR
-        Twin["Digital Twin<br/>(same-topology mirrored cluster<br/>or simulated subset)"]:::twin
-        EvalOps["EvalOps<br/>(continuous measurement<br/>on the twin, confidence telemetry)"]:::activity
-        Sandbox["Sandbox<br/>(forward-direction test flight<br/>on the twin per action)"]:::activity
-        Recoverability["Agentic Recoverability<br/>(undo validation on the twin,<br/>per-action only, not DR)"]:::activity
-        Twin --> EvalOps
-        Twin --> Sandbox
-        Twin --> Recoverability
+        EvalOps["EvalOps<br/>continuous measurement<br/>confidence telemetry"]:::activity
+        Twin["Digital Twin<br/>same-topology mirrored cluster<br/>or simulated subset<br/>(the substrate underneath the cognitive layer)"]:::twin
+        Sandbox["Sandbox<br/>forward-direction test flight<br/>per proposed action"]:::activity
+        Recoverability["Agentic Recoverability<br/>inverse action validation<br/>per-action undo (not DR)"]:::activity
+        EvalOps -.- Twin
+        Twin -.- Sandbox
+        Twin -.- Recoverability
     end
 
-    %% Flows
     Inbound ==> Gateway
-    Proposal -. "evaluated against" .-> Twin
-    EvalOps -. "confidence floor" .-> Router
-    Sandbox -. "apply-allowed signal" .-> Proposal
-    Recoverability -. "validates inverse intent" .-> Proposal
 
-    %% Outbound: Proposal flows out to governance + execution
-    Proposal == "to governance zoom" ==> Outbound["to architecture_zoom_governance.mmd<br/>(AuditEvent, ReversibilityProfile, Killswitch)"]:::external
-    Proposal == "to ocloud zoom" ==> Outbound2["to architecture_zoom_ocloud.mmd<br/>(MCO, KMM, Metal3, NTO)"]:::external
+    %% EvalOps continuous loops up to agents and Router
+    EvalOps -. "continuous confidence telemetry" .-> PlatA
+    EvalOps -. "continuous confidence telemetry" .-> RanA
+    EvalOps -. "continuous confidence telemetry" .-> HwA
+    EvalOps -. "confidence floor for ambiguous_path" .-> Router
 
-    %% Styling
+    %% Sandbox and Recoverability inform the Proposal
+    Sandbox ==> Proposal
+    Recoverability ==> Proposal
+
+    %% Proposal flows outward to the other zooms
+    Proposal == "to architecture_zoom_governance.mmd" ==> OutGov["to governance zoom<br/>AuditEvent + Reversibility + Killswitch"]:::external
+    Proposal == "to architecture_zoom_ocloud.mmd" ==> OutOcloud["to ocloud zoom<br/>MCO + KMM + Metal3 + NTO"]:::external
+
     classDef external fill:#f5f5f4,stroke:#44403c,color:#000
     classDef gateway fill:#fef3c7,stroke:#b45309,color:#000,stroke-width:3px
     classDef mcp fill:#fef9c3,stroke:#854d0e,color:#000,stroke-width:2px
@@ -97,5 +100,5 @@ flowchart TB
     classDef config fill:#f3e8ff,stroke:#6b21a8,color:#000
     classDef kb fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:2px
     classDef llm fill:#e9d5ff,stroke:#6b21a8,color:#000,stroke-width:2px
-    classDef twin fill:#d1fae5,stroke:#065f46,color:#000,stroke-width:4px
+    classDef twin fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:5px
     classDef activity fill:#a7f3d0,stroke:#047857,color:#000,stroke-width:2px
