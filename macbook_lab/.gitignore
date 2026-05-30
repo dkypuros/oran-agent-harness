@@ -1,0 +1,8 @@
+# MacBook lab runtime artifacts
+.env
+*.log
+node_modules/
+dist/
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/

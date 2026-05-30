@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    fastapi==0.115.0 \
+    uvicorn[standard]==0.30.6 \
+    pyyaml==6.0.2 \
+    httpx==0.27.2 \
+    python-dotenv==1.0.1 \
+    pydantic==2.9.2
+
+COPY pyproject.toml /app/pyproject.toml
+COPY harness /app/harness
+COPY scenarios /app/scenarios
+COPY 5G_O-RAN_SIM /app/5G_O-RAN_SIM
+COPY tests /app/tests
+COPY macbook_lab/http_wrappers /app/http_wrappers
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app:/app/5G_O-RAN_SIM
+ENV PORT=8096
+EXPOSE 8096
+
+CMD ["python", "/app/http_wrappers/harness_walker_service.py"]

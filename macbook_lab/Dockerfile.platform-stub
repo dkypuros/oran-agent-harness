@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    fastapi==0.115.0 \
+    uvicorn[standard]==0.30.6 \
+    pyyaml==6.0.2 \
+    httpx==0.27.2 \
+    python-dotenv==1.0.1 \
+    pydantic==2.9.2
+
+COPY 5G_O-RAN_SIM /app/5G_O-RAN_SIM
+COPY macbook_lab/http_wrappers /app/http_wrappers
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app:/app/5G_O-RAN_SIM
+
+ARG WRAPPER_SCRIPT=ptp_operator_service.py
+ARG SERVICE_PORT=8091
+ENV WRAPPER_SCRIPT=$WRAPPER_SCRIPT
+ENV PORT=$SERVICE_PORT
+EXPOSE $SERVICE_PORT
+
+CMD ["sh", "-c", "python /app/http_wrappers/$WRAPPER_SCRIPT"]

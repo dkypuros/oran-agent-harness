@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    fastapi==0.115.0 \
+    uvicorn[standard]==0.30.6 \
+    pydantic==2.9.2
+
+COPY 5G_O-RAN_SIM/llm /app/llm
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV VLLM_MOCK_PORT=8090
+EXPOSE 8090
+
+CMD ["python", "/app/llm/fake_vllm_server.py"]

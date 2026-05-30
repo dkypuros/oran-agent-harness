@@ -1,0 +1,156 @@
+# MacBook lab docker-compose orchestration.
+# One command brings up all platform stubs, the harness walker, the trace viewer,
+# the fake vLLM mock, and (when Issue #57 lands) the React dashboard.
+#
+# Build context is the repo root (one directory up) so the Dockerfiles can COPY
+# both 5G_O-RAN_SIM/ and harness/ paths.
+
+services:
+
+  fake-vllm:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.fake-vllm
+    container_name: oran-fake-vllm
+    ports:
+      - "8090:8090"
+    environment:
+      - VLLM_MOCK_PORT=8090
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  ptp-operator-stub:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.platform-stub
+      args:
+        WRAPPER_SCRIPT: ptp_operator_service.py
+        SERVICE_PORT: "8091"
+    container_name: oran-ptp-operator-stub
+    ports:
+      - "8091:8091"
+    environment:
+      - PORT=8091
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8091/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  metal3-bmo-stub:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.platform-stub
+      args:
+        WRAPPER_SCRIPT: metal3_bmo_service.py
+        SERVICE_PORT: "8092"
+    container_name: oran-metal3-bmo-stub
+    ports:
+      - "8092:8092"
+    environment:
+      - PORT=8092
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  redfish-bmc-stub:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.platform-stub
+      args:
+        WRAPPER_SCRIPT: redfish_bmc_service.py
+        SERVICE_PORT: "8093"
+    container_name: oran-redfish-bmc-stub
+    ports:
+      - "8093:8093"
+    environment:
+      - PORT=8093
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8093/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  tmf921-smo-stub:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.platform-stub
+      args:
+        WRAPPER_SCRIPT: tmf921_smo_service.py
+        SERVICE_PORT: "8094"
+    container_name: oran-tmf921-smo-stub
+    ports:
+      - "8094:8094"
+    environment:
+      - PORT=8094
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8094/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  trace-viewer:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.trace-viewer
+    container_name: oran-trace-viewer
+    ports:
+      - "8095:8095"
+    restart: unless-stopped
+
+  harness-walker:
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.harness-walker
+    container_name: oran-harness-walker
+    ports:
+      - "8096:8096"
+    environment:
+      - PORT=8096
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-stub-replace-with-real-key}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-stub-replace-with-real-key}
+      - LLM_PROVIDER=${LLM_PROVIDER:-vllm}
+      - VLLM_BASE_URL=http://fake-vllm:8090/v1
+      - VLLM_API_KEY=demo-no-auth-required
+    depends_on:
+      - fake-vllm
+      - ptp-operator-stub
+      - metal3-bmo-stub
+      - redfish-bmc-stub
+      - tmf921-smo-stub
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8096/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  dashboard:
+    # The React dashboard lives at macbook_lab/dashboard/ (lands in Issue #57).
+    # If you are running this compose BEFORE #57 lands, run with --profile core
+    # to skip this service: docker compose --profile core up
+    profiles:
+      - dashboard
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.dashboard
+    container_name: oran-dashboard
+    ports:
+      - "8097:5173"
+    depends_on:
+      - harness-walker
+      - ptp-operator-stub
+      - metal3-bmo-stub
+      - redfish-bmc-stub
+      - tmf921-smo-stub
+    restart: unless-stopped
