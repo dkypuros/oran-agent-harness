@@ -42,7 +42,7 @@
         "blastRadius": {
           "nodes": 1,
           "sites": 1,
-          "cells": 0
+          "cells": 4
         }
       },
       "requiresHumanApproval": true,

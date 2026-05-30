@@ -14,13 +14,14 @@ Exposes:
   route(rca: dict) -> dict
     Take an RCA artifact, return a RemediationProposal that validates against the schema.
 
-Per-scenario actionTarget and actionPayloadRef values come from a small stub table because in real
-deployment the Domain Agents would attach them to the RCA's candidate_classifications. The stub
-covers the two walkthrough scenarios.
+Per-scenario actionTarget, actionPayloadRef, contributingSignals, and proposalId are sourced from
+harness/runtime/scenario_stubs.json (the single source of truth). In real deployment the Domain
+Agents would attach them to the RCA's candidate_classifications.
 """
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -28,44 +29,16 @@ import yaml
 
 _RUNTIME_DIR = Path(__file__).resolve().parent
 _HARNESS_DIR = _RUNTIME_DIR.parent
-_REPO_ROOT = _HARNESS_DIR.parent
-
-with (_HARNESS_DIR / "taxonomy.yaml").open() as _fh:
-    _TAXONOMY = yaml.safe_load(_fh)
 
 with (_HARNESS_DIR / "routing-rules" / "contribution-1-routing-rule.yaml").open() as _fh:
     _ROUTING_RULE = yaml.safe_load(_fh)
 
+with (_RUNTIME_DIR / "scenario_stubs.json").open() as _fh:
+    _SCENARIO_STUBS = json.load(_fh)["scenarios"]
+
 _INFRA_DELIVERY_PATHS = {
     entry["taxonomy_id"]: entry
     for entry in _ROUTING_RULE["routing_rule"]["infra_to_ocloud_path"]["delivery_paths"]
-}
-
-# Per-scenario actionTarget and actionPayloadRef. Real Domain Agents would emit these on the RCA.
-# Stubbed here for the two walkthrough scenarios. Keyed by fault_id.
-_SCENARIO_ACTION = {
-    "flt-2026-05-14-001": {
-        "actionTarget": "worker-ran-01.dallas.example.com",
-        "actionPayloadRef": "99-worker-ran-disable-fw-lldp-agent",
-        "contributingSignals": [
-            "platform.ptp_host_stack.master_offset_anomaly",
-            "platform.ptp_host_stack.state_unstable",
-            "platform.ptp_host_stack.fw_lldp_agent_active",
-            "platform.host_nic.tx_hwtstamp_timeouts",
-        ],
-        "proposalId": "prop-2026-05-14-001",
-    },
-    "flt-2026-05-14-002": {
-        "actionTarget": "worker-ran-02.dallas.example.com",
-        "actionPayloadRef": "ice-driver-update",
-        "contributingSignals": [
-            "platform.ptp_host_stack.phc_drift_monotonic",
-            "platform.ptp_host_stack.state_uncalibrated",
-            "platform.host_driver.version_outdated",
-            "platform.host_driver.known_issue_match",
-        ],
-        "proposalId": "prop-2026-05-14-002",
-    },
 }
 
 
@@ -83,7 +56,7 @@ def route(rca: dict[str, Any]) -> dict[str, Any]:
     top = rca["candidate_classifications"][0]
     layer = top["target_layer"]
     fault_id = rca["fault_id"]
-    scenario = _SCENARIO_ACTION.get(fault_id, {})
+    scenario = _SCENARIO_STUBS.get(fault_id, {})
 
     proposal: dict[str, Any] = {
         "proposalId": scenario.get("proposalId", f"prop-{fault_id[4:]}"),
@@ -119,12 +92,3 @@ def route(rca: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"unknown target_layer {layer}")
 
     return proposal
-
-
-def taxonomy_entry(taxonomy_match: str) -> dict[str, Any] | None:
-    """Lookup a taxonomy entry by id. Returns None if not present in any layer."""
-    for layer in ("infra_layer", "service_layer", "ambiguous"):
-        for entry in _TAXONOMY["resource_taxonomy"].get(layer, []):
-            if entry["id"] == taxonomy_match:
-                return entry
-    return None

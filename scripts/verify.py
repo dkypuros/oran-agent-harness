@@ -202,11 +202,11 @@ def main():
         and p.suffix != ".pyc"
     )
     omc_count = sum(1 for p in (REPO_ROOT / "omc-skills/o-ran").glob("*.md"))
-    ok = harness_count == 25 and omc_count == 6
+    ok = harness_count == 26 and omc_count == 6
     record(
         "file_counts",
         ok,
-        f"harness={harness_count}/25, omc-skills md={omc_count}/6",
+        f"harness={harness_count}/26, omc-skills md={omc_count}/6",
     )
 
     # 9. Schema validation (optional, requires jsonschema)

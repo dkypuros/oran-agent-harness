@@ -1,0 +1,117 @@
+{
+  "_conforms_to": {
+    "spec_family": "harness-unique consolidated stub table",
+    "section": "single source of truth for per-scenario runtime stubs (Router + Guardrail + Walker)",
+    "version": "v0",
+    "bibliography_ref": [3, 18, 19, 31, 35],
+    "notes": "In real deployment, the fields here are sourced from: Domain Agents (proposalId, actionTarget, actionPayloadRef, contributingSignals, rca_timestamp, rca_rationale); the harness clock (event_time); the proposal evaluator + O-Cloud Inventory (blast_radius); EvalOps (reversibility_profile). Stubbed here for the two walkthrough scenarios so the deterministic runtime produces output that matches the committed audit_event.json fixtures on material fields."
+  },
+  "scenarios": {
+    "flt-2026-05-14-001": {
+      "fault_id": "flt-2026-05-14-001",
+      "proposalId": "prop-2026-05-14-001",
+      "actionTarget": "worker-ran-01.dallas.example.com",
+      "actionPayloadRef": "99-worker-ran-disable-fw-lldp-agent",
+      "contributingSignals": [
+        "platform.ptp_host_stack.master_offset_anomaly",
+        "platform.ptp_host_stack.state_unstable",
+        "platform.ptp_host_stack.fw_lldp_agent_active",
+        "platform.host_nic.tx_hwtstamp_timeouts"
+      ],
+      "rca_timestamp": "2026-05-14T10:42:15Z",
+      "rca_rationale": "fw-lldp-agent.service active on PTP-bound slave interface, correlated with tx_hwtstamp_timeouts and master offset spikes. Classic host-service interference with PTP hardware timestamping.",
+      "event_time": "2026-05-14T10:42:18Z",
+      "blast_radius": {
+        "nodes": 1,
+        "sites": 1,
+        "cells": 0
+      },
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_machine_config",
+          "intent_target": "worker-ran-01.dallas.example.com",
+          "intent_payload_ref": "99-worker-ran-restore-fw-lldp-agent (inverse of original)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 0,
+          "estimated_user_impact": "none"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 5,
+          "confidence_band": "tight"
+        },
+        "replication_history": {
+          "applies_in_window": 12,
+          "rollbacks_in_window": 0,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 8,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-14T10:30:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.18,
+          "current_risk_score": 0.02,
+          "burn_down_rate_per_minute": 0.02
+        },
+        "confidence_in_reversibility": "high"
+      }
+    },
+    "flt-2026-05-14-002": {
+      "fault_id": "flt-2026-05-14-002",
+      "proposalId": "prop-2026-05-14-002",
+      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionPayloadRef": "ice-driver-update",
+      "contributingSignals": [
+        "platform.ptp_host_stack.phc_drift_monotonic",
+        "platform.ptp_host_stack.state_uncalibrated",
+        "platform.host_driver.version_outdated",
+        "platform.host_driver.known_issue_match"
+      ],
+      "rca_timestamp": "2026-05-14T11:15:10Z",
+      "rca_rationale": "ice driver 1.11.17 matches known PHC drift regression (Intel KB 730421); monotonic frequency drift with no host-service correlation. Driver swap to 1.13.7+ via KMM is the deterministic fix.",
+      "event_time": "2026-05-14T11:15:12Z",
+      "blast_radius": {
+        "nodes": 1,
+        "sites": 1,
+        "cells": 4
+      },
+      "reversibility_profile": {
+        "rollback_intent": {
+          "intent_type": "apply_kmm_module",
+          "intent_target": "worker-ran-02.dallas.example.com",
+          "intent_payload_ref": "ice-driver-revert-1.11.17 (in-tree restore Module CR)"
+        },
+        "blast_radius_if_reverse": {
+          "nodes": 1,
+          "sites": 1,
+          "cells": 4,
+          "estimated_user_impact": "low"
+        },
+        "rebuild_timeline": {
+          "estimated_minutes": 25,
+          "confidence_band": "loose"
+        },
+        "replication_history": {
+          "applies_in_window": 3,
+          "rollbacks_in_window": 1,
+          "window_days": 30
+        },
+        "validation_history": {
+          "twin_runs": 2,
+          "twin_pass_rate": 1.0,
+          "last_twin_run_at": "2026-05-14T11:00:00Z"
+        },
+        "risk_profile_burn_down": {
+          "initial_risk_score": 0.42,
+          "current_risk_score": 0.18,
+          "burn_down_rate_per_minute": 0.008
+        },
+        "confidence_in_reversibility": "medium"
+      }
+    }
+  }
+}

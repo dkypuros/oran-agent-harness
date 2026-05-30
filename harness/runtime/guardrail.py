@@ -10,19 +10,21 @@ Bibliography refs: 18
 Implements the four named elements from guardrails.yaml rules:
   dry_run_default, blast_radius, require_human_approval, action_allowlist
 Plus crisis_mode global override check (pass-through in v0 since neither walkthrough scenario
-triggers it).
+triggers it; flip _CRISIS_MODE_ACTIVE via monkey-patch in tests to exercise the branch).
 Plus structured audit emission (TMF688-shaped AuditEvent with populated reversibility_profile).
 
 Exposes:
   evaluate(proposal: dict, fault_id: str) -> dict
     Take a RemediationProposal, return an AuditEvent with populated reversibility_profile.
 
-The reversibility_profile values are sourced from a per-scenario stub table because in real
-deployment EvalOps would supply them. The SHAPE matches ReversibilityProfile.json exactly.
+Per-scenario reversibility_profile, blast_radius, and event_time values are sourced from
+harness/runtime/scenario_stubs.json (the single source of truth). In real deployment EvalOps and the
+O-Cloud Inventory supply these values.
 """
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -34,56 +36,13 @@ _HARNESS_DIR = _RUNTIME_DIR.parent
 with (_HARNESS_DIR / "guardrails.yaml").open() as _fh:
     _GUARDRAILS = yaml.safe_load(_fh)
 
-_CRISIS_MODE_ACTIVE = False  # Stub: neither walkthrough activates crisis_mode.
+with (_RUNTIME_DIR / "scenario_stubs.json").open() as _fh:
+    _SCENARIO_STUBS = json.load(_fh)["scenarios"]
 
-# Per-scenario reversibility profile values. Real deployment sources these from EvalOps telemetry.
-_REVERSIBILITY = {
-    "flt-2026-05-14-001": {
-        "rollback_intent": {
-            "intent_type": "apply_machine_config",
-            "intent_target": "worker-ran-01.dallas.example.com",
-            "intent_payload_ref": "99-worker-ran-restore-fw-lldp-agent (inverse of original)",
-        },
-        "blast_radius_if_reverse": {
-            "nodes": 1, "sites": 1, "cells": 0, "estimated_user_impact": "none",
-        },
-        "rebuild_timeline": {"estimated_minutes": 5, "confidence_band": "tight"},
-        "replication_history": {"applies_in_window": 12, "rollbacks_in_window": 0, "window_days": 30},
-        "validation_history": {
-            "twin_runs": 8, "twin_pass_rate": 1.0, "last_twin_run_at": "2026-05-14T10:30:00Z",
-        },
-        "risk_profile_burn_down": {
-            "initial_risk_score": 0.18, "current_risk_score": 0.02, "burn_down_rate_per_minute": 0.02,
-        },
-        "confidence_in_reversibility": "high",
-    },
-    "flt-2026-05-14-002": {
-        "rollback_intent": {
-            "intent_type": "apply_kmm_module",
-            "intent_target": "worker-ran-02.dallas.example.com",
-            "intent_payload_ref": "ice-driver-revert-1.11.17 (in-tree restore Module CR)",
-        },
-        "blast_radius_if_reverse": {
-            "nodes": 1, "sites": 1, "cells": 4, "estimated_user_impact": "low",
-        },
-        "rebuild_timeline": {"estimated_minutes": 25, "confidence_band": "loose"},
-        "replication_history": {"applies_in_window": 3, "rollbacks_in_window": 1, "window_days": 30},
-        "validation_history": {
-            "twin_runs": 2, "twin_pass_rate": 1.0, "last_twin_run_at": "2026-05-14T11:00:00Z",
-        },
-        "risk_profile_burn_down": {
-            "initial_risk_score": 0.42, "current_risk_score": 0.18, "burn_down_rate_per_minute": 0.008,
-        },
-        "confidence_in_reversibility": "medium",
-    },
-}
-
-# Per-scenario AuditEvent envelope timestamps. Real deployment uses datetime.now(); these match the
-# committed fixtures so verify gate check #10 diffs clean.
-_EVENT_TIME = {
-    "flt-2026-05-14-001": "2026-05-14T10:42:18Z",
-    "flt-2026-05-14-002": "2026-05-14T11:15:12Z",
-}
+# Seam: stub global override. Tests monkey-patch this to True to exercise the crisis_mode branch.
+# Real deployment wires this to a CrisisModeActivation envelope per
+# harness/schemas/CrisisModeActivation.json and the killswitch contract at talk/killswitch.md.
+_CRISIS_MODE_ACTIVE = False
 
 
 def evaluate(proposal: dict[str, Any], fault_id: str) -> dict[str, Any]:
@@ -106,29 +65,41 @@ def evaluate(proposal: dict[str, Any], fault_id: str) -> dict[str, Any]:
     if proposal["actionType"] not in rules["action_allowlist"]:
         raise ValueError(f"actionType {proposal['actionType']} not in action_allowlist")
 
-    blast = {"nodes": 1, "sites": 1, "cells": 0}
+    scenario = _SCENARIO_STUBS.get(fault_id)
+    if scenario is None:
+        raise ValueError(f"no scenario stub for fault_id {fault_id}")
+
+    blast = scenario["blast_radius"]
     caps = rules["blast_radius"]
-    if blast["nodes"] > caps["max_nodes"] or blast["sites"] > caps["max_sites"] or blast["cells"] > caps["max_cells"]:
+    if (
+        blast["nodes"] > caps["max_nodes"]
+        or blast["sites"] > caps["max_sites"]
+        or blast["cells"] > caps["max_cells"]
+    ):
         raise ValueError(f"blast_radius {blast} exceeds caps {caps}")
 
     if proposal["actionType"] in rules["require_human_approval"]:
-        assert proposal["requiresHumanApproval"] is True
+        if not proposal["requiresHumanApproval"]:
+            raise ValueError(
+                f"actionType {proposal['actionType']} requires human approval but "
+                f"requiresHumanApproval is {proposal['requiresHumanApproval']}"
+            )
 
     proposal["guardrailResult"] = {
         "outcome": "pass",
-        "rulesEvaluated": ["blast_radius.max_nodes", "blast_radius.max_sites", "action_allowlist"],
+        "rulesEvaluated": [
+            "blast_radius.max_nodes",
+            "blast_radius.max_sites",
+            "action_allowlist",
+        ],
         "blastRadius": blast,
     }
 
-    # Inject the reversibility profile (per-scenario stub).
-    rev_profile = _REVERSIBILITY.get(fault_id)
-    if rev_profile is None:
-        raise ValueError(f"no reversibility profile stub for fault_id {fault_id}")
-    proposal["reversibility_profile"] = rev_profile
+    proposal["reversibility_profile"] = scenario["reversibility_profile"]
 
     audit_event = {
         "eventId": f"evt-{fault_id}-001",
-        "eventTime": _EVENT_TIME.get(fault_id, "2026-05-14T00:00:00Z"),
+        "eventTime": scenario["event_time"],
         "eventType": "RemediationProposed",
         "event": {
             "correlatedEventId": fault_id,

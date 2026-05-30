@@ -37,6 +37,7 @@ header, the verify gate fails.
 | harness/references/mco-crd.md                   | machineconfiguration.openshift.io/v1 MachineConfig (pointer)      | MachineConfig CRD                                      | upstream SHA TBD     | 9, 12, 41        |
 | harness/references/kmm-crd.md                   | kmm.sigs.x-k8s.io/v1beta1 Module (pointer)                        | Module CRD                                             | upstream SHA TBD     | 10, 42           |
 | harness/references/mcp-spec.md                  | Anthropic Model Context Protocol Specification (pointer)          | MCP tool-schema spec                                   | upstream SHA TBD     | 13, 14, 15, 43   |
+| harness/runtime/scenario_stubs.json             | harness-unique consolidated stub table (single source of truth)   | Per-scenario stub values consumed by router + guardrail + walker | v0           | 3, 18, 19, 31, 35 |
 
 ## Scenario artifacts
 

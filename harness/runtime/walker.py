@@ -14,6 +14,9 @@ into the RCA shape. The Twin stub returns canned pass with twin_pass_rate 1.0.
 Real components: harness.runtime.router (deterministic taxonomy lookup) and
 harness.runtime.guardrail (deterministic rule evaluation, AuditEvent emission).
 
+Per-scenario rca_timestamp and rca_rationale are sourced from harness/runtime/scenario_stubs.json
+(the single source of truth). In real deployment the Domain Agents emit these on the RCA.
+
 Usage:
   python -m harness.runtime.walker scenarios/A_fw_lldp_agent/fault_payload.json
   python -m harness.runtime.walker scenarios/A_fw_lldp_agent/fault_payload.json --verbose
@@ -29,10 +32,10 @@ from typing import Any
 
 from harness.runtime import guardrail, router
 
-_RCA_TIMESTAMP = {
-    "flt-2026-05-14-001": "2026-05-14T10:42:15Z",
-    "flt-2026-05-14-002": "2026-05-14T11:15:10Z",
-}
+_RUNTIME_DIR = Path(__file__).resolve().parent
+
+with (_RUNTIME_DIR / "scenario_stubs.json").open() as _fh:
+    _SCENARIO_STUBS = json.load(_fh)["scenarios"]
 
 
 def stubbed_agents(fault_payload: dict[str, Any]) -> dict[str, Any]:
@@ -44,23 +47,11 @@ def stubbed_agents(fault_payload: dict[str, Any]) -> dict[str, Any]:
     """
     classification = fault_payload["expected_classification"]
     fault_id = fault_payload["fault_id"]
-
-    rationale_map = {
-        "ptp_host_stack": (
-            "fw-lldp-agent.service active on PTP-bound slave interface, correlated with "
-            "tx_hwtstamp_timeouts and master offset spikes. Classic host-service interference "
-            "with PTP hardware timestamping."
-        ),
-        "host_driver": (
-            "ice driver 1.11.17 matches known PHC drift regression (Intel KB 730421); monotonic "
-            "frequency drift with no host-service correlation. Driver swap to 1.13.7+ via KMM is "
-            "the deterministic fix."
-        ),
-    }
+    scenario = _SCENARIO_STUBS.get(fault_id, {})
 
     rca: dict[str, Any] = {
         "fault_id": fault_id,
-        "timestamp": _RCA_TIMESTAMP.get(fault_id, fault_payload["timestamp"]),
+        "timestamp": scenario.get("rca_timestamp", fault_payload["timestamp"]),
         "evidence": [
             {
                 "source_agent": entry["source_agent"],
@@ -75,8 +66,8 @@ def stubbed_agents(fault_payload: dict[str, Any]) -> dict[str, Any]:
                 "taxonomy_match": classification["taxonomy_match"],
                 "target_layer": classification["target_layer"],
                 "confidence": classification["confidence"],
-                "rationale": rationale_map.get(
-                    classification["taxonomy_match"],
+                "rationale": scenario.get(
+                    "rca_rationale",
                     "Taxonomy match per FaultPayload.expected_classification.",
                 ),
             }
@@ -126,6 +117,7 @@ def walk(fault_payload_path: str, verbose: bool = False) -> dict[str, Any]:
         print("\n---- Stage 3: RemediationProposal (real Router) ----")
         print(json.dumps(proposal, indent=2))
 
+    # STUB: no-op identity pass-through. Real twin would mutate twin_pass_rate / last_twin_run_at.
     proposal = stubbed_twin(proposal)
 
     audit_event = guardrail.evaluate(proposal, fault_id=fp_no_meta["fault_id"])
