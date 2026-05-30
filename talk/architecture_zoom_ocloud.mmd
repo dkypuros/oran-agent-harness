@@ -1,13 +1,18 @@
-%% architecture_zoom_ocloud.mmd
-%% Companion zoom diagram to talk/architecture.mmd (the macro view).
-%% Bottom half of the closed-loop system: O-Cloud control plane plus the spoke cluster
-%% operators that deliver infra-layer remediations to the worker.
-%% Read alongside: talk/architecture.mmd, harness/references/o2ims.md, mco-crd.md, kmm-crd.md.
+%% architecture_zoom_ocloud.mmd v2
+%% v2 changes vs v1:
+%%   added scenario E firmware flow (Metal3 -> HostFirmwareComponents -> BareMetalHost -> BMC -> NIC)
+%%   added parallel TMF921 companion intent emission for scenario E (dual-route)
+%%   added scenario D divergence annotation (software_ok vs hardware_anomaly verdict split)
+%%   added Mac-local 5G_O-RAN_SIM substrate as parallel deployment surface
+%% Companion: architecture.mmd, harness/references/o2ims.md, mco-crd.md, kmm-crd.md
 
 flowchart TB
 
     %% Inbound: infra-layer remediation flowing down from the Router
     Inbound["RemediationProposal<br/>(targetLayer: infra,<br/>from architecture_zoom_cognitive.mmd)"]:::external
+
+    %% Parallel TMF921 emission for scenario E (dual-route)
+    SmoCompanion["Partner SMO<br/>(TMF921 companion intent,<br/>fires when node_firmware AND<br/>blast.nodes >= 1)"]:::smo
 
     subgraph Hub["Red Hat O-Cloud Control Plane (Hub OpenShift Cluster)"]
         direction TB
@@ -33,7 +38,7 @@ flowchart TB
             KMM["Kernel Module<br/>Management (KMM)"]:::kmm
             PTPOp["PTP Operator"]:::ptpop
             NTO["Node Tuning Operator<br/>(PerformanceProfile,<br/>realtime kernel)"]:::nto
-            Metal3["Metal3<br/>(BareMetalHost,<br/>HostFirmwareComponents)"]:::metal3
+            Metal3["Metal3<br/>(BareMetalHost,<br/>HostFirmwareComponents,<br/>HostFirmwareSettings)"]:::metal3
             SRIOV["SR-IOV Network<br/>Operator"]:::sriov
             NFD["NodeFeatureDiscovery<br/>(NFD)"]:::nfd
         end
@@ -61,7 +66,7 @@ flowchart TB
 
             subgraph Hardware["Bare-metal hardware (NUMA-aware)"]
                 NIC["Intel E810 NIC<br/>PHC (PTP Hardware Clock),<br/>SR-IOV capable,<br/>hardware timestamping"]:::hw
-                BMC["BMC<br/>(Redfish endpoint,<br/>OOB management)"]:::bmc
+                BMC["BMC<br/>(Redfish DSP0266 endpoint,<br/>OOB management,<br/>UpdateService.SimpleUpdate)"]:::bmc
             end
 
             LinuxPtp -- "PHC adjust + timestamping" --> Kernel
@@ -71,8 +76,20 @@ flowchart TB
         end
     end
 
+    %% Mac-local parallel substrate (lab-only deployment surface)
+    subgraph MacLab["Mac-local lab (macbook_lab/ + 5G_O-RAN_SIM/, same contracts)"]
+        direction LR
+        StubM3["metal3_bmo_stub.py<br/>(:8092, phase progression:<br/>Preparing, Pushing,<br/>Rebooting, Verifying, Updated)"]:::stub
+        StubRF["redfish_bmc_stub.py<br/>(:8093, task lifecycle)"]:::stub
+        StubSMO["tmf921_intent_emitter.py<br/>(:8094, intent envelope)"]:::stub
+        StubM3 -.- StubRF
+    end
+
     %% Inbound -> Hub
     Inbound ==> O2IMS
+
+    %% Dual-route: parallel companion intent for node_firmware
+    Inbound -. "dual-route fan-out<br/>on node_firmware<br/>(scenario E)" .-> SmoCompanion
 
     %% Hub -> Spoke policy propagation
     ACM -- "policy propagation" --> MCO
@@ -89,16 +106,21 @@ flowchart TB
     PTPOp -- "PtpConfig CR" --> LinuxPtp
     PTPOp -- "deploys sidecar" --> CEProxy
     NTO -- "PerformanceProfile" --> Worker
-    Metal3 -- "BMC Redfish" --> BMC
-    BMC -- "OOB mgmt" --> NIC
+    Metal3 == "Scenario E:<br/>HostFirmwareComponents +<br/>BareMetalHost apply<br/>(Intel E810 PF0 firmware)" ==> BMC
+    BMC == "Redfish UpdateService.SimpleUpdate<br/>(NIC firmware push,<br/>9.8 MB blob, ~6 min)" ==> NIC
     SRIOV -- "SR-IOV VF allocation" --> NIC
     NFD -- "node labels" --> Worker
 
+    %% Scenario D divergence annotation
+    LinuxPtp -. "Scenario D:<br/>reports SYNCHRONIZED<br/>(software_ok)" .-> CEProxy
+    NIC -. "Scenario D:<br/>tx_hwtstamp_timeouts rising<br/>(hardware_anomaly)" .-> CEProxy
+
     %% Outbound: state notifications back up to the cognitive zoom
-    CEProxy == "O-RAN CloudEvents<br/>(WG6 Cloud Notifications)" ==> Outbound["back to<br/>architecture_zoom_cognitive.mmd<br/>(Agentic Gateway)"]:::external
+    CEProxy == "O-RAN CloudEvents<br/>(WG6 Cloud Notifications,<br/>verdicts: software_ok,<br/>hardware_anomaly, etc.)" ==> Outbound["back to<br/>architecture_zoom_cognitive.mmd<br/>(Agentic Gateway)"]:::external
 
     %% Styling
     classDef external fill:#f5f5f4,stroke:#44403c,color:#000
+    classDef smo fill:#fde8e8,stroke:#c53030,color:#000,stroke-width:3px
     classDef ocloud fill:#fee2e2,stroke:#b91c1c,color:#000,stroke-width:3px
     classDef hubop fill:#ffe4e6,stroke:#9f1239,color:#000
     classDef acm fill:#fecaca,stroke:#991b1b,color:#000,stroke-width:2px
@@ -118,3 +140,4 @@ flowchart TB
     classDef hostsvc fill:#fef2f2,stroke:#b91c1c,color:#000
     classDef hw fill:#f3f4f6,stroke:#1f2937,color:#000,stroke-width:2px
     classDef bmc fill:#e5e7eb,stroke:#374151,color:#000
+    classDef stub fill:#ecfdf5,stroke:#047857,color:#000,stroke-width:2px

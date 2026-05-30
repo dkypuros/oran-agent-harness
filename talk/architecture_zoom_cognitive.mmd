@@ -1,12 +1,12 @@
-%% architecture_zoom_cognitive.mmd
-%% Companion zoom diagram to talk/architecture.mmd (the macro).
-%% Double-click on the Agent Harness box of the macro: the Agentic Gateway, four MCP servers,
-%% three domain agents, the Remediation Router, the LLM-neutral substrate, all sitting on top
-%% of the Digital Twin substrate as their foundation.
-%% The twin runs horizontally across the bottom of the diagram. EvalOps is a continuous-loop
-%% activity, drawn with dashed bidirectional arrows up to the cognitive components.
-%% Sandbox and Agentic Recoverability are actions on the twin that inform the Proposal artifact.
-%% Read alongside: talk/trust_loop.md, talk/architecture_narrative.md sections 2 and 4.
+%% architecture_zoom_cognitive.mmd v2
+%% v2 changes vs v1:
+%%   replaced generic LiteLLM node with Unified LLM Inference Client showing the three
+%%     providers actually wired in the bench: Anthropic Claude, OpenAI GPT, fake vLLM mock
+%%     (OpenShift AI in production)
+%%   added ORAN_LLM_MODE env gate annotation (live vs default heuristic fallback)
+%%   added Trace JSONL persistence as durable output stream from Router and Agents
+%%   added oran-discover OMC bundle as parallel read-only observability surface
+%% Companion: trust_loop.md, architecture_narrative.md sections 2 and 4
 
 flowchart TB
 
@@ -38,14 +38,23 @@ flowchart TB
         subgraph RemediationRouterSection["Remediation Router"]
             RCA["Root Cause Analysis<br/>harness/schemas/RCA.json"]:::artifact
             Taxonomy["taxonomy.yaml<br/>O-RAN WG6 resource model<br/>~20 entries"]:::config
-            Router["Remediation Router<br/>deterministic lookup first<br/>LLM-assist on ambiguous edges"]:::router
+            Router["Remediation Router<br/>deterministic lookup first<br/>LLM-assist on ambiguous edges only"]:::router
             Proposal["RemediationProposal<br/>harness/schemas/RemediationProposal.json"]:::artifact
             RCA --> Router
             Taxonomy -- "lookup" --> Router
             Router --> Proposal
         end
 
-        LiteLLM["LLM-neutral substrate<br/>LiteLLM-style provider abstraction<br/>OMC routes by model tier"]:::llm
+        subgraph LlmClient["Unified LLM Inference Client (env-gated by ORAN_LLM_MODE)"]
+            direction LR
+            ClientCore["Inference Client<br/>(5G_O-RAN_SIM/llm/client.py)<br/>provider selection by env"]:::llm
+            Anthropic["Anthropic Claude<br/>(ANTHROPIC_API_KEY)"]:::llmBackend
+            OpenAI["OpenAI GPT<br/>(OPENAI_API_KEY)"]:::llmBackend
+            VLLM["vLLM<br/>(OpenShift AI in prod;<br/>fake mock at :8090 in lab)"]:::llmBackend
+            ClientCore --> Anthropic
+            ClientCore --> OpenAI
+            ClientCore --> VLLM
+        end
 
         McpPlat --> PlatA
         McpRan --> RanA
@@ -58,10 +67,10 @@ flowchart TB
         KB -. "playbook lookup" .-> RanA
         KB -. "playbook lookup" .-> HwA
         KB -. "SID context" .-> Router
-        PlatA -. "LLM reasoning" .-> LiteLLM
-        RanA -. "LLM reasoning" .-> LiteLLM
-        HwA -. "LLM reasoning" .-> LiteLLM
-        Router -. "LLM-assist on ambiguous edges" .-> LiteLLM
+        PlatA -. "LLM reasoning<br/>(only when ORAN_LLM_MODE=live)" .-> ClientCore
+        RanA -. "LLM reasoning" .-> ClientCore
+        HwA -. "LLM reasoning" .-> ClientCore
+        Router -. "LLM-assist<br/>(ambiguous_path only)" .-> ClientCore
     end
 
     subgraph TwinSubstrate["Digital Twin substrate (the foundation)"]
@@ -73,6 +82,14 @@ flowchart TB
         EvalOps -.- Twin
         Twin -.- Sandbox
         Twin -.- Recoverability
+    end
+
+    subgraph Persistence["Durable evidence layer (shared_trace JSONL)"]
+        Trace["Trace JSONL<br/>5G_O-RAN_SIM/shared_trace/*.jsonl<br/>per-scenario append-only<br/>(rca, proposal, audit, intent)"]:::trace
+    end
+
+    subgraph DiscoverBundle["oran-discover OMC bundle (read-only)"]
+        Discover["/oran-discover:plan<br/>:ptp :metal3 :redfish<br/>:smo :taxonomy :guardrail<br/>GET only, no mutation"]:::discover
     end
 
     Inbound ==> Gateway
@@ -87,6 +104,17 @@ flowchart TB
     Sandbox ==> Proposal
     Recoverability ==> Proposal
 
+    %% Trace persistence captures every cognitive output
+    PlatA -. "append finding" .-> Trace
+    RanA -. "append finding" .-> Trace
+    HwA -. "append finding" .-> Trace
+    Router -. "append routing decision" .-> Trace
+    Proposal -. "append proposal" .-> Trace
+
+    %% oran-discover reads (no writes)
+    Discover -. "GET /history" .-> Trace
+    Discover -. "GET /state" .-> Gateway
+
     %% Proposal flows outward to the other zooms
     Proposal == "to architecture_zoom_governance.mmd" ==> OutGov["to governance zoom<br/>AuditEvent + Reversibility + Killswitch"]:::external
     Proposal == "to architecture_zoom_ocloud.mmd" ==> OutOcloud["to ocloud zoom<br/>MCO + KMM + Metal3 + NTO"]:::external
@@ -100,5 +128,8 @@ flowchart TB
     classDef config fill:#f3e8ff,stroke:#6b21a8,color:#000
     classDef kb fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:2px
     classDef llm fill:#e9d5ff,stroke:#6b21a8,color:#000,stroke-width:2px
+    classDef llmBackend fill:#ede9fe,stroke:#5b21b6,color:#000
     classDef twin fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:5px
     classDef activity fill:#a7f3d0,stroke:#047857,color:#000,stroke-width:2px
+    classDef trace fill:#ecfdf5,stroke:#047857,color:#000,stroke-width:2px
+    classDef discover fill:#f3e8ff,stroke:#6b21a8,color:#000,stroke-width:2px

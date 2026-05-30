@@ -1,5 +1,16 @@
-%% O-RAN Agent Harness for Cloud RAN Day-2, fully detailed closed-loop architecture (v3)
+%% O-RAN Agent Harness for Cloud RAN Day-2, fully detailed closed-loop architecture (v4)
 %% Companion to: docs/title_and_abstract_final.txt
+%% v4 changes vs v3:
+%%   replaced generic LiteLLM cluster with Unified LLM Inference Client showing the three
+%%     providers actually wired in the bench: Anthropic Claude, OpenAI GPT, vLLM
+%%     (OpenShift AI in production; fake mock in lab) plus the ORAN_LLM_MODE env gate
+%%   added scenario E (NIC firmware) explicit edges: Metal3 -> HostFirmwareComponents
+%%     -> BareMetalHost -> BMC -> Redfish UpdateService.SimpleUpdate -> NIC firmware
+%%   added scenario D verdict divergence: linuxptp reports software_ok while NIC reports
+%%     hardware_anomaly on tx_hwtstamp_timeouts; the Hardware Agent overrides the surface signal
+%%   added durable Trace JSONL persistence layer (shared_trace/*.jsonl); every cognitive
+%%     stage appends, every audit event appends, every routing decision appends
+%%   added TMF921 companion intent emission node for dual-route node_firmware actions
 %% v3 changes vs v2: added Hardware Domain Agent + mcp-hardware; added Knowledge Base (RAG)
 %%                   shared across agents and Router; added Root Cause Analysis artifact
 %%                   between agents and Router; expanded Gateway security profile label.
@@ -71,14 +82,18 @@ flowchart TB
             Guard --> Audit
         end
 
-        subgraph LlmLayer["LLM-neutral Substrate (consumed by agents + router only)"]
-            LiteLLM["LiteLLM<br/>(provider abstraction)"]:::llm
-            Claude["Claude<br/>(Anthropic)"]:::llmBackend
-            GPT["GPT<br/>(OpenAI)"]:::llmBackend
-            Granite["Granite 8B<br/>(local Ollama,<br/>data sovereignty)"]:::llmBackend
-            LiteLLM --> Claude
-            LiteLLM --> GPT
-            LiteLLM --> Granite
+        subgraph LlmLayer["Unified LLM Inference Client (env-gated by ORAN_LLM_MODE, consumed by agents + router)"]
+            InfClient["Inference Client<br/>(5G_O-RAN_SIM/llm/client.py)<br/>provider selection by env;<br/>heuristic fallback if no key"]:::llm
+            Claude["Anthropic Claude<br/>(ANTHROPIC_API_KEY)"]:::llmBackend
+            GPT["OpenAI GPT<br/>(OPENAI_API_KEY)"]:::llmBackend
+            VLLM["vLLM<br/>(OpenShift AI in prod;<br/>fake mock at :8090 in lab)"]:::llmBackend
+            InfClient --> Claude
+            InfClient --> GPT
+            InfClient --> VLLM
+        end
+
+        subgraph TraceLayer["Durable evidence layer (shared_trace JSONL)"]
+            TraceFile["Trace JSONL<br/>(5G_O-RAN_SIM/shared_trace/*.jsonl)<br/>append-only per scenario;<br/>verify gate replays from these"]:::trace
         end
 
         McpPlat --> PlatA
@@ -93,11 +108,23 @@ flowchart TB
         KB -.playbook lookup.-> RanA
         KB -.playbook lookup.-> HwA
         KB -.SID context.-> Router
-        PlatA -.LLM reasoning.-> LiteLLM
-        RanA -.LLM reasoning.-> LiteLLM
-        HwA -.LLM reasoning.-> LiteLLM
-        Router -.LLM-assist<br/>(ambiguous edges only).-> LiteLLM
+        PlatA -.LLM reasoning<br/>(only when ORAN_LLM_MODE=live).-> InfClient
+        RanA -.LLM reasoning.-> InfClient
+        HwA -.LLM reasoning.-> InfClient
+        Router -.LLM-assist<br/>(ambiguous_path only).-> InfClient
+
+        %% Trace persistence: every cognitive stage appends
+        PlatA -. append finding .-> TraceFile
+        RanA -. append finding .-> TraceFile
+        HwA -. append finding .-> TraceFile
+        RCA -. append .-> TraceFile
+        Router -. append routing decision .-> TraceFile
+        Proposal -. append .-> TraceFile
+        Audit -. append .-> TraceFile
     end
+
+    %% Companion intent emission for dual-route node_firmware actions (scenario E)
+    CompanionIntent["TMF921 Companion Intent<br/>(scenario E; fires when<br/>action.type == apply_metal3_firmware,<br/>regardless of cell count)"]:::artifact
 
     %% ============== HUB CLUSTER (O-CLOUD CONTROL PLANE) ==============
     subgraph Hub["Red Hat O-Cloud Control Plane (Hub OpenShift Cluster)"]
@@ -211,6 +238,8 @@ flowchart TB
     %% ============== ROUTING DECISIONS ==============
     Router == "service-layer<br/>(TMF921-style intent)" ==> SMO
     Router == "infra-layer<br/>via O2 IMS" ==> O2IMS
+    Router == "dual-route fan-out<br/>(scenario E: companion intent UP<br/>while Metal3 push fires DOWN)" ==> CompanionIntent
+    CompanionIntent ==> SMO
 
     %% ============== HUB -> SPOKE POLICY PROPAGATION ==============
     ACM -- "policy propagation" --> MCO
@@ -224,12 +253,17 @@ flowchart TB
     %% ============== OPERATORS DELIVER TO WORKER ==============
     MCO == "Scenario A:<br/>MachineConfig<br/>(mask fw-lldp-agent.service)" ==> FwLldp
     KMM == "Scenario A-prime:<br/>Module CR<br/>(swap ice 1.11.x -> 1.13.7+)" ==> Driver
+    Metal3 == "Scenario E:<br/>HostFirmwareComponents +<br/>BareMetalHost apply<br/>(Intel E810 PF0 firmware,<br/>9.8 MB blob)" ==> BMC
     PTPOp -- "PtpConfig CR<br/>(ptp4l.conf, profile)" --> LinuxPtp
     PTPOp -- "deploys daemon set" --> LinuxPtp
     PTPOp -- "deploys sidecar" --> CEProxy
     NTO -- "PerformanceProfile<br/>(TopoMgr, CPU pinning,<br/>HugePages, RT kernel)" --> TopoMgr
-    Metal3 -- "BMC Redfish<br/>(BIOS + BMC firmware,<br/>vendor-dependent NIC FW)" --> BMC
+    BMC == "Scenario E:<br/>Redfish UpdateService.SimpleUpdate<br/>(DSP0266, NIC firmware push,<br/>task lifecycle: Pending -> Running -> Completed)" ==> NIC
     BMC -- "OOB mgmt plane" --> NIC
+
+    %% Scenario D verdict divergence (software_ok vs hardware_anomaly)
+    LinuxPtp -. "Scenario D:<br/>reports SYNCHRONIZED<br/>(software_ok)" .-> CEProxy
+    NIC -. "Scenario D:<br/>tx_hwtstamp_timeouts rising<br/>(hardware_anomaly,<br/>Hardware Agent overrides surface signal)" .-> CEProxy
     SRIOV -- "SR-IOV VF allocation<br/>+ hardware tagging" --> NIC
     NFD -- "node labels<br/>(sriov.capable, etc.)" --> Kubelet
     OVNK -- "pod networking" --> Kubelet
@@ -270,3 +304,4 @@ flowchart TB
     classDef kernel fill:#dbeafe,stroke:#1e3a8a,color:#000
     classDef vdu fill:#fef9c3,stroke:#a16207,color:#000,stroke-width:3px
     classDef external fill:#f5f5f4,stroke:#44403c,color:#000
+    classDef trace fill:#ecfdf5,stroke:#047857,color:#000,stroke-width:2px

@@ -1,8 +1,10 @@
-%% state_crisis_mode.mmd
+%% state_crisis_mode.mmd v2
+%% v2 changes vs v1:
+%%   added trace JSONL persistence note on every transition (shared_trace append)
+%%   no logical changes to the state machine; it was already complete in v1
 %% State-transition diagram for the Killswitch (crisis_mode global override).
-%% Shows the system shifting from Normal Ops to Crisis Mode Active and back, with annotations
-%% naming the concrete effects per harness/guardrails.yaml crisis_mode block.
-%% Companion to talk/killswitch.md and harness/schemas/CrisisModeActivation.json.
+%% Companion to killswitch.md and harness/schemas/CrisisModeActivation.json.
+%% Every transition is durably recorded in 5G_O-RAN_SIM/shared_trace/*.jsonl.
 
 stateDiagram-v2
 
@@ -13,6 +15,7 @@ stateDiagram-v2
     NormalOps : write access available subject to co_authorization
     NormalOps : EvalOps confidence flows normally
     NormalOps : telemetry routes through Agent Harness
+    NormalOps : every action appended to shared_trace JSONL
 
     NormalOps --> CrisisActivationPending : operator activation (NOC supervisor or key holder)
 
@@ -20,6 +23,7 @@ stateDiagram-v2
     CrisisActivationPending : CrisisModeActivation event emitted
     CrisisActivationPending : waiting up to 5s for agent fleet acknowledgement
     CrisisActivationPending : (acknowledgement_latency_max_seconds in guardrails.yaml)
+    CrisisActivationPending : pending event written to shared_trace
 
     CrisisActivationPending --> CrisisModeActive : all expected agents ack within 5s
     CrisisActivationPending --> EscalatedPaging : ack timeout, non-responsive agents listed
@@ -27,6 +31,7 @@ stateDiagram-v2
     EscalatedPaging : Escalated Paging
     EscalatedPaging : operator may force-kill stuck containers
     EscalatedPaging : or operator may proceed regardless
+    EscalatedPaging : escalation event written to shared_trace
 
     EscalatedPaging --> CrisisModeActive : operator overrides
 
@@ -37,12 +42,14 @@ stateDiagram-v2
     CrisisModeActive : write_access_smo_tmf921 revoked
     CrisisModeActive : evalops_confidence_floor 0.0
     CrisisModeActive : telemetry_routing manual_queues
+    CrisisModeActive : crisis event written to shared_trace
 
     CrisisModeActive --> CrisisDeactivationPending : operator deactivation (multi-key recommended)
 
     CrisisDeactivationPending : Crisis Deactivation Pending
     CrisisDeactivationPending : diagnostic re-baseline in progress
     CrisisDeactivationPending : agents reload taxonomy and EvalOps state
+    CrisisDeactivationPending : deactivation event written to shared_trace
 
     CrisisDeactivationPending --> RecoveryDrill : re-baseline complete
 
@@ -50,5 +57,6 @@ stateDiagram-v2
     RecoveryDrill : agents continue with elevated approval requirements
     RecoveryDrill : EvalOps confidence climbing back toward normal
     RecoveryDrill : telemetry rejoins Agent Harness routing
+    RecoveryDrill : drill events written to shared_trace
 
     RecoveryDrill --> NormalOps : observation window clean

@@ -1,9 +1,11 @@
-%% sequence_anomaly_lifecycle.mmd
-%% A day in the life of a PTP anomaly. Shows the temporal flow from CloudEvent detection
-%% through twin-validated remediation to the operator commit and the apply call.
-%% The operator step (steps 13-14) is the bottleneck and the gating point. That is the
-%% architectural argument the talk's audience needs to see.
-%% Companion to talk/architecture.mmd (macro) and talk/trust_loop.md.
+%% sequence_anomaly_lifecycle.mmd v2
+%% v2 changes vs v1:
+%%   added Trace participant showing the shared_trace JSONL append per stage
+%%   added dual-route fan-out for node_firmware (parallel O2 IMS + TMF921 emission, scenario E)
+%%   added scenario D divergence annotation (software_ok vs hardware_anomaly verdict split)
+%% A day in the life of a PTP anomaly. Operator step (the commit) is the bottleneck and the
+%% gating point. That is the architectural argument the talk's audience needs to see.
+%% Companion to architecture.mmd (macro) and trust_loop.md.
 
 sequenceDiagram
     participant Edge as Edge (linuxptp + cloud-event-proxy)
@@ -14,22 +16,39 @@ sequenceDiagram
     participant Guard as Guardrail Engine
     participant Op as NOC Operator
     participant OCloud as O-Cloud Manager (O2 IMS)
+    participant SMO as Partner SMO (TMF921)
+    participant Trace as Trace JSONL (shared_trace/*.jsonl)
 
     Edge->>Edge: ptp4l master offset spike detected
-    Edge->>Gateway: CloudEvent FaultPayload
+    Edge->>Gateway: CloudEvent FaultPayload (with verdict)
+    Gateway->>Trace: append fault_payload
+    Note over Edge,Gateway: Scenario D divergence: linuxptp reports SYNCHRONIZED (software_ok),<br/>NIC reports tx_hwtstamp_timeouts rising (hardware_anomaly)
     Gateway->>Agents: dispatch to relevant agents
+    Agents->>Trace: append per-agent findings
     Agents->>Router: RCA artifact (cross-domain evidence)
-    Router->>Router: consult taxonomy.yaml (deterministic)
+    Router->>Trace: append RCA
+    Router->>Router: consult taxonomy.yaml (deterministic first)
+    alt taxonomy resolves to ambiguous_path
+        Router->>Router: invoke LLM (ORAN_LLM_MODE gate, ambiguous only)
+    end
     Router->>Twin: proposed action for Sandbox test flight
     Twin-->>Router: apply-allowed signal (or reject)
     Router->>Twin: inverse action for Recoverability validation
     Twin-->>Router: rollback-confirmed signal
     Router->>Guard: RemediationProposal with twin verdicts
+    Router->>Trace: append proposal
     Guard->>Guard: evaluate blast radius, allowlist, dry_run_default
     Guard->>Op: AuditEvent (TMF688) plus ReversibilityProfile
+    Guard->>Trace: append audit event
     Note over Op: Operator reads, edits per co_authorization, commits
     Op->>Guard: humanApprovalStatus approved
-    Guard->>OCloud: apply_remediation (gated tool call)
-    OCloud->>Edge: MachineConfig or KMM Module CR via MCO/KMM
+    Guard->>OCloud: apply_remediation (gated tool call, DOWN route)
+    alt action.type == apply_metal3_firmware (scenario E, dual-route)
+        Guard->>SMO: TMF921 companion intent (UP route, parallel)
+        SMO-->>Guard: intent_id ack
+        Guard->>Trace: append companion_intent emission
+    end
+    OCloud->>Edge: MachineConfig or KMM Module CR or HostFirmwareComponents (via spoke operators)
     Edge-->>Gateway: state-change CloudEvent (convergence)
+    Gateway->>Trace: append convergence
     Note over Op: Bottleneck: the human is the gatekeeper in the timeline

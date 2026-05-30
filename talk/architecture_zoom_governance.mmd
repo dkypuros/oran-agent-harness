@@ -1,8 +1,10 @@
-%% architecture_zoom_governance.mmd
-%% Companion zoom diagram to talk/architecture.mmd (the macro view).
+%% architecture_zoom_governance.mmd v2
+%% v2 changes vs v1:
+%%   added companion intent emission for scenario E (dual-route case, fires alongside O2 IMS)
+%%   added oran-discover OMC bundle as read-only observability surface beside governance
+%%   added trace JSONL persistence note on AuditEvent emission
 %% Top half of the closed-loop system: TM Forum governance plus the human boundary.
-%% Covers TMF688 audit, Reversibility Profile, co-authorization, and the Killswitch (crisis_mode).
-%% Read alongside: talk/trust_loop.md, talk/killswitch.md, talk/oda_mapping.md.
+%% Read alongside: trust_loop.md, killswitch.md, oda_mapping.md.
 
 flowchart TB
 
@@ -32,13 +34,24 @@ flowchart TB
             AuditEvent["AuditEvent<br/>(harness/schemas/AuditEvent.json)<br/>TMF688-shaped envelope"]:::artifact
             ReversibilityProfile["ReversibilityProfile<br/>(harness/schemas/ReversibilityProfile.json)<br/>per-action undo contract (7 fields)"]:::artifact
             AuditSink["audit_sink<br/>(stdout+file in v0;<br/>Kafka/AMQ/TMF688 broker in prod)"]:::artifact
+            TraceSink["Trace JSONL<br/>5G_O-RAN_SIM/shared_trace/*.jsonl<br/>(durable evidence per run)"]:::trace
             AuditEvent --> ReversibilityProfile
             AuditEvent --> AuditSink
+            AuditEvent -. "append" .-> TraceSink
         end
 
         subgraph IntentEmission["Intent emission (up-route to SMO)"]
             IntentEvent["TMF921 Intent<br/>(emit_smo_intent action_type)"]:::artifact
+            CompanionIntent["TMF921 Companion Intent<br/>(dual-route case, fires when<br/>action.type == apply_metal3_firmware,<br/>scenario E)"]:::artifact
         end
+    end
+
+    %% Read-only observability surface, parallel to governance
+    subgraph DiscoverBundle["oran-discover OMC bundle (read-only)"]
+        direction LR
+        DiscPlan["/oran-discover:plan"]:::discover
+        DiscGuard["/oran-discover:guardrail"]:::discover
+        DiscPlan -.- DiscGuard
     end
 
     %% Flows from the cognitive middle into governance (incoming edges from the macro view)
@@ -52,10 +65,21 @@ flowchart TB
     AuditEvent --> IntentEvent
     IntentEvent --> SMO
 
+    %% Dual-route fan-out: companion intent emits in parallel
+    Proposal -. "dual-route on node_firmware<br/>(scenario E)" .-> CompanionIntent
+    CompanionIntent --> SMO
+
     %% Killswitch overrides everything
     Operator -. "activates" .-> CrisisMode
     CrisisMode == "freezes all write paths" ==> CoAuth
     CrisisMode == "revokes write access" ==> IntentEvent
+    CrisisMode == "revokes companion intent" ==> CompanionIntent
+
+    %% oran-discover reads (no writes)
+    DiscPlan -. "GET /history" .-> AuditEvent
+    DiscPlan -. "GET /state" .-> TraceSink
+    DiscGuard -. "read guardrails.yaml" .-> EditPermissions
+    DiscGuard -. "read crisis_mode" .-> CrisisMode
 
     %% Styling
     classDef human fill:#dbeafe,stroke:#1e40af,color:#000,stroke-width:3px
@@ -64,3 +88,5 @@ flowchart TB
     classDef guard fill:#fbcfe8,stroke:#9d174d,color:#000,stroke-width:2px
     classDef config fill:#f3e8ff,stroke:#6b21a8,color:#000
     classDef artifact fill:#fae8ff,stroke:#86198f,color:#000
+    classDef trace fill:#ecfdf5,stroke:#047857,color:#000,stroke-width:2px
+    classDef discover fill:#f3e8ff,stroke:#6b21a8,color:#000,stroke-width:2px

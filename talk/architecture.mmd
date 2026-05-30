@@ -1,17 +1,20 @@
-%% architecture.mmd
-%% Macro / billboard view of the O-RAN Agent Harness closed-loop pattern.
-%% Seven boxes, two routing branches. The mental map an audience reads in 30 seconds.
+%% architecture.mmd v2 (macro / billboard view, the 30-second mental map)
+%% v2 changes vs v1:
+%%   added durable Trace JSONL persistence node (shared_trace/*.jsonl)
+%%   added explicit dual-route annotation between UP and DOWN (scenario E pattern)
+%%   added oran-discover read-only observation surface (the new OMC bundle)
+%%   added Mac-local lab annotation on the harness subgraph
 %% Companion diagrams (open these for detail):
-%%   architecture_zoom_governance.mmd   TM Forum top: audit, reversibility, killswitch, co-authorization
-%%   architecture_zoom_cognitive.mmd    Gateway, MCP servers, domain agents, Digital Twin substrate
-%%   architecture_zoom_ocloud.mmd       Hub O-Cloud, ACM, spoke operators, worker node, NIC
-%%   architecture_full.mmd              Comprehensive 30+ component reference (former architecture v3)
+%%   architecture_zoom_governance.mmd   TM Forum top: audit, reversibility, killswitch, co-auth
+%%   architecture_zoom_cognitive.mmd    Gateway, MCP servers, domain agents, unified LLM client, twin
+%%   architecture_zoom_ocloud.mmd       Hub O-Cloud, ACM, spoke operators, scenario E firmware path
+%%   architecture_full.mmd              Comprehensive 30+ component reference (v4)
 
 flowchart LR
 
     Obs["Observation Loop<br/>linuxptp drift<br/>NIC PHC events<br/>cloud-event-proxy<br/>publishes O-RAN CloudEvents"]:::observation
 
-    subgraph Middle["Agent Harness, Intelligence Augmentation"]
+    subgraph Middle["Agent Harness (Mac-local lab at macbook_lab/, also deployable to hub OpenShift)"]
         direction TB
         Harness["Agent Harness<br/>Gateway, Domain Agents,<br/>Router, Guardrails,<br/>AuditEvent emission"]:::harness
         Operator["NOC Operator<br/>plus Peer Reviewers"]:::human
@@ -25,9 +28,19 @@ flowchart LR
     UpRoute["UP route<br/>TMF921 intent<br/>to partner SMO<br/>service-layer actions"]:::routing
     DownRoute["DOWN route<br/>O2 IMS<br/>to O-Cloud Manager<br/>infra-layer actions"]:::routing
 
+    TraceLayer["Trace JSONL<br/>5G_O-RAN_SIM/shared_trace/<br/>per-scenario append-only<br/>(durable evidence)"]:::trace
+
+    Discover["oran-discover OMC bundle<br/>(read-only surveys: ptp, metal3,<br/>redfish, smo, taxonomy, guardrail)"]:::discover
+
     Obs ==> Harness
     Harness ==> UpRoute
     Harness ==> DownRoute
+    UpRoute -. "dual-route on node_firmware<br/>(scenario E fires both<br/>regardless of cell count)" .-> DownRoute
+    Harness -. "append per stage" .-> TraceLayer
+    UpRoute -. "envelope" .-> TraceLayer
+    DownRoute -. "phases" .-> TraceLayer
+    Discover -. "GET only<br/>(no mutation)" .-> Harness
+    Discover -. "GET only" .-> TraceLayer
 
     classDef observation fill:#dbeafe,stroke:#1e40af,color:#000,stroke-width:3px
     classDef harness fill:#fef3c7,stroke:#b45309,color:#000,stroke-width:3px
@@ -35,3 +48,5 @@ flowchart LR
     classDef killswitch fill:#fee2e2,stroke:#991b1b,color:#000,stroke-width:4px
     classDef twin fill:#fff7ed,stroke:#9a3412,color:#000,stroke-width:4px
     classDef routing fill:#fde8e8,stroke:#c53030,color:#000,stroke-width:3px
+    classDef trace fill:#ecfdf5,stroke:#047857,color:#000,stroke-width:2px
+    classDef discover fill:#f3e8ff,stroke:#6b21a8,color:#000,stroke-width:2px

@@ -1,27 +1,40 @@
-%% sequence_agentic_recovery.mmd
+%% sequence_agentic_recovery.mmd v2
+%% v2 changes vs v1:
+%%   added Trace participant showing shared_trace JSONL append per stage
+%%   enumerated the 7 ReversibilityProfile fields read at decision time
+%%   added dual-route inverse for scenario E (O2 IMS rollback AND TMF921 cancellation)
 %% The undo. Operator decides 30 minutes after the apply that the fix produced unintended
 %% side effects and wants to walk it back.
-%% Shows the surgical per-action nature: small blast radius, no full failover, twin-validated
-%% inverse action. This is Agentic Recoverability, not Disaster Recovery.
-%% Companion to talk/trust_loop.md (Activity 3) and harness/schemas/ReversibilityProfile.json.
+%% Surgical, per-action. Twin-validated inverse. This is Agentic Recoverability, not DR.
+%% Companion to trust_loop.md (Activity 3) and harness/schemas/ReversibilityProfile.json.
 
 sequenceDiagram
     participant Op as NOC Operator
     participant Guard as Guardrail Engine
     participant Twin as Digital Twin
     participant OCloud as O-Cloud Manager (O2 IMS)
+    participant SMO as Partner SMO (TMF921)
     participant Edge as Edge (linuxptp + cloud-event-proxy)
     participant Gateway as Agentic Gateway
+    participant Trace as Trace JSONL (shared_trace/*.jsonl)
 
     Op->>Op: decides rollback needed
     Op->>Guard: rollback request citing AuditEvent eventId
     Guard->>Guard: load event.remediation.reversibility_profile
-    Note over Guard: 7 fields read at decision time, no vendor doc lookup needed
+    Note over Guard: 7 fields read at decision time, no vendor doc lookup:<br/>rollback_intent, blast_radius_if_reverse, rebuild_timeline,<br/>replication_history, validation_history, risk_profile_burn_down,<br/>confidence_in_reversibility
+    Guard->>Trace: append rollback_requested
     Guard->>Twin: inverse action validation request
     Twin->>Twin: run inverse against current cluster state snapshot
     Twin-->>Guard: rollback-safe signal
-    Guard->>OCloud: apply inverse via O2 IMS
-    OCloud->>Edge: inverse MachineConfig or KMM Module CR
+    Guard->>Trace: append twin_inverse_verdict
+    Guard->>OCloud: apply inverse via O2 IMS (DOWN route)
+    OCloud->>Edge: inverse MachineConfig or KMM Module CR or HostFirmwareComponents
+    alt original action was apply_metal3_firmware (scenario E)
+        Guard->>SMO: TMF921 companion-intent cancellation (UP route)
+        SMO-->>Guard: cancellation_id ack
+        Guard->>Trace: append companion_intent_cancellation
+    end
     Edge-->>Gateway: CloudEvent confirming pre-remediation state restored
+    Gateway->>Trace: append rollback_converged
     Gateway->>Op: AuditEvent eventType RemediationRolledBack
     Note over Op,Gateway: Surgical, per-action, no full-failover step. Not DR.
