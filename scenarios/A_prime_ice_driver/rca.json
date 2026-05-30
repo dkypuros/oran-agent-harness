@@ -1,0 +1,69 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RCA.json. Evidence-chain pattern referenced from prior demo substrate (bibliography ref 35).",
+    "spec_section": "Diagnostic substrate output, per architecture_zoom_cognitive.mmd RCA node",
+    "spec_version": "v0",
+    "bibliography_ref": [35],
+    "scenario": "A_prime_ice_driver",
+    "produced_by": "harness/runtime/walker.py stubbed_agents stage (in real deployment, by Platform/RAN/Hardware Domain Agents)"
+  },
+  "fault_id": "flt-2026-05-14-002",
+  "timestamp": "2026-05-14T11:15:10Z",
+  "evidence": [
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_ptp4l_status",
+      "finding": "monotonic master offset drift over 15 minutes, no recovery; PHC frequency drift exceeds 100 ppb/hour; state transitioning LOCKED -> UNCALIBRATED",
+      "raw_data": {
+        "interface": "ens2f0",
+        "samples": [
+          {"t": "11:00:00Z", "rms_ns": 320, "max_ns": 450, "freq_ppb": -2100, "state": "LOCKED"},
+          {"t": "11:05:00Z", "rms_ns": 680, "max_ns": 920, "freq_ppb": -3800, "state": "LOCKED"},
+          {"t": "11:10:00Z", "rms_ns": 1100, "max_ns": 1450, "freq_ppb": -5600, "state": "LOCKED"},
+          {"t": "11:15:00Z", "rms_ns": 1640, "max_ns": 2100, "freq_ppb": -7400, "state": "UNCALIBRATED"}
+        ],
+        "phc_freq_drift_ppb_per_hour": 145,
+        "drift_signature": "monotonic_no_recovery"
+      }
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_driver_info",
+      "finding": "ice driver 1.11.17 matches known PHC drift regression (Intel KB 730421); fixed upstream in ice 1.13.7",
+      "raw_data": {
+        "interface": "ens2f0",
+        "driver": "ice",
+        "driver_version": "1.11.17",
+        "firmware_version": "4.40 0x8001b743 1.3429.0",
+        "kernel_version": "5.14.0-427.50.1.el9_4.x86_64",
+        "known_issues": [
+          {
+            "id": "Intel-KB-730421",
+            "summary": "PHC drift on E810 with kernel >5.14 when SR-IOV VFs allocated",
+            "fixed_in": "ice 1.13.7+"
+          }
+        ]
+      }
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_nic_stats",
+      "finding": "rx_hwtstamp_filter_drops incrementing without LLDP correlation; pattern consistent with driver-side timestamp queue mismanagement, not host service interference",
+      "raw_data": {
+        "interface": "ens2f0",
+        "rx_hwtstamp_filter_drops_per_min": 18,
+        "tx_hwtstamp_timeouts_per_min": 2,
+        "fw_lldp_agent_active": false,
+        "sriov_vfs_allocated": 4
+      }
+    }
+  ],
+  "candidate_classifications": [
+    {
+      "taxonomy_match": "host_driver",
+      "target_layer": "infra",
+      "confidence": "high",
+      "rationale": "ice driver 1.11.17 matches known PHC drift regression (Intel KB 730421); monotonic frequency drift with no host-service correlation. Driver swap to 1.13.7+ via KMM is the deterministic fix."
+    }
+  ]
+}

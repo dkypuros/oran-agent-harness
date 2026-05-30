@@ -72,12 +72,18 @@ oran-agent-harness/
 |   |-- mcp-tool-schemas/ 4 FastMCP tool surfaces
 |   `-- references/      5 upstream contract pointers, commit-SHA pinnable
 |-- scenarios/           2 PTP host-platform walkthroughs
-|   |-- A_fw_lldp_agent/      fw-lldp-agent service interferes with PTP
-|   `-- A_prime_ice_driver/   ice driver 1.11.x causes PHC drift
+|   |-- README.md             walkthrough narrative, what is stubbed vs real
+|   |-- A_fw_lldp_agent/      fw-lldp-agent service interferes with PTP (5 fixtures)
+|   `-- A_prime_ice_driver/   ice driver 1.11.x causes PHC drift (5 fixtures)
+|-- harness/runtime/     deterministic Python runtime (stubs + real Router + real Guardrail)
+|   |-- router.py             real deterministic Router (taxonomy lookup)
+|   |-- guardrail.py          real deterministic Guardrail engine (audit emission)
+|   `-- walker.py             orchestrator with CLI entry point
 |-- omc-skills/          reference operationalization (OMC)
 |   `-- o-ran/                4 skills + README + conformance index
-`-- scripts/             executable verify gate
-    `-- verify.py             9 deterministic checks, exits non-zero on any failure
+`-- scripts/             executable verify gate and demo runner
+    |-- verify.py             10 deterministic checks, exits non-zero on any failure
+    `-- demo.sh               walks both scenarios end to end with --verbose
 ```
 
 ## Citation discipline
@@ -95,13 +101,72 @@ pip install pyyaml jsonschema
 python3 scripts/verify.py
 ```
 
-It runs 9 deterministic checks (citation headers, JSON parse, YAML parse, conformance.md bidirectional
-completeness, em dash audit, leakage guard, README structure, file counts, and schema validation of
-scenario data against the declared harness schemas) and exits non-zero on any failure. The schema
-validation check is optional, skipped with a warning if `jsonschema` is not installed. See the script
+It runs 10 deterministic checks (citation headers, JSON parse, YAML parse, conformance.md
+bidirectional completeness, em dash audit, leakage guard, README structure, file counts, schema
+validation of scenario data against the declared harness schemas, and end-to-end walker output
+matching committed audit_event.json on material fields) and exits non-zero on any failure. Check 9
+(schema validation) is optional and skipped with a warning if `jsonschema` is not installed.
+Check 10 (walker end to end) requires PyYAML and runs the walker as a subprocess. See the script
 header for the full list.
 
-## Running the walkthroughs (OMC reference operationalization)
+### Replicating the test locally
+
+The complete reproducible test sequence from a fresh clone:
+
+```bash
+git clone https://github.com/dkypuros/oran-agent-harness.git
+cd oran-agent-harness
+pip install pyyaml jsonschema       # PyYAML for parse + runtime, jsonschema for check 9
+
+# Walk both scenarios end to end (real Router + Guardrail, stubbed Gateway/MCP/Agents/Twin)
+./scripts/demo.sh
+
+# Full verify gate (10 checks)
+python3 scripts/verify.py
+```
+
+Expected output of `python3 scripts/verify.py`:
+
+```
+SUMMARY: 10/10 checks passed
+OVERALL: PASS
+```
+
+Expected output of `./scripts/demo.sh` (truncated): each scenario prints four pipeline stages
+(FaultPayload, RCA, RemediationProposal, AuditEvent) and the final AuditEvent shows
+`targetLayer: infra`, `dryRun: true`, `requiresHumanApproval: true`, and a populated
+`reversibility_profile` with the expected `confidence_in_reversibility` value (`high` for Scenario
+A, `medium` for Scenario A-prime).
+
+See `scenarios/README.md` for the walkthrough narrative and the table of what is stubbed vs real.
+
+## Running the walkthroughs
+
+There are two ways to walk a scenario end to end.
+
+### Deterministic Python runtime (recommended for demos)
+
+Real Router and Guardrail engine. Stubbed Gateway, MCP servers, Domain Agents, and Digital Twin.
+Output is fully reproducible across runs. Verify gate check 10 enforces match against the committed
+audit_event.json on material fields.
+
+```
+./scripts/demo.sh
+```
+
+Or a single scenario:
+
+```
+python3 -m harness.runtime.walker scenarios/A_fw_lldp_agent/fault_payload.json --verbose
+```
+
+See `scenarios/README.md` for the walkthrough narrative, what is stubbed vs real, and how to swap a
+stub for a real component when moving to a bigger environment.
+
+### OMC reference operationalization (Claude Code skills)
+
+Prose-driven invocation via the OMC skill bundle. LLM provider in the loop, behavioral
+reproducibility bounded by provider determinism settings.
 
 ```
 # Scenario A, fw-lldp-agent host service interfering with PTP

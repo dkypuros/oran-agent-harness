@@ -1,0 +1,61 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RCA.json. Evidence-chain pattern referenced from prior demo substrate (bibliography ref 35).",
+    "spec_section": "Diagnostic substrate output, per architecture_zoom_cognitive.mmd RCA node",
+    "spec_version": "v0",
+    "bibliography_ref": [35],
+    "scenario": "A_fw_lldp_agent",
+    "produced_by": "harness/runtime/walker.py stubbed_agents stage (in real deployment, by Platform/RAN/Hardware Domain Agents)"
+  },
+  "fault_id": "flt-2026-05-14-001",
+  "timestamp": "2026-05-14T10:42:15Z",
+  "evidence": [
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_ptp4l_status",
+      "finding": "ptp4l master offset spiking >5000ns intermittently, state flipping LOCKED <-> FREE_RUNNING",
+      "raw_data": {
+        "interface": "ens2f0",
+        "samples": [
+          {"t": "10:42:00Z", "rms_ns": 14, "max_ns": 25, "freq_ppb": -5765, "state": "LOCKED"},
+          {"t": "10:42:05Z", "rms_ns": 4440, "max_ns": 7880, "freq_ppb": -13325, "state": "LOCKED"},
+          {"t": "10:42:10Z", "rms_ns": 8920, "max_ns": 12350, "freq_ppb": -18001, "state": "FREE_RUNNING"},
+          {"t": "10:42:13Z", "rms_ns": 11200, "max_ns": 14800, "freq_ppb": -19500, "state": "FREE_RUNNING"}
+        ]
+      }
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.list_active_services",
+      "finding": "fw-lldp-agent.service active on PTP-bound slave interface; known to emit LLDP frames that contend for hardware timestamping resources",
+      "raw_data": {
+        "service": "fw-lldp-agent.service",
+        "state": "active",
+        "interface": "ens2f0",
+        "ptp_role": "slave",
+        "service_enabled": true
+      }
+    },
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_nic_stats",
+      "finding": "tx_hwtstamp_timeouts incrementing in correlation with LLDP TX bursts; PHC contention pattern",
+      "raw_data": {
+        "interface": "ens2f0",
+        "driver": "ice",
+        "driver_version": "1.13.7",
+        "tx_hwtstamp_timeouts_per_min": 42,
+        "rx_hwtstamp_filter_drops_per_min": 0,
+        "fw_lldp_agent_active": true
+      }
+    }
+  ],
+  "candidate_classifications": [
+    {
+      "taxonomy_match": "ptp_host_stack",
+      "target_layer": "infra",
+      "confidence": "high",
+      "rationale": "fw-lldp-agent.service active on PTP-bound slave interface, correlated with tx_hwtstamp_timeouts and master offset spikes. Classic host-service interference with PTP hardware timestamping."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RemediationProposal.json (O-RAN.WG6.O2IMS-Interface plus TMF921 Intent shape)",
+    "spec_section": "O2 IMS ProvisioningRequest intent shape; TMF921 Intent envelope",
+    "spec_version": "WG6 O2IMS current, TMF921 current",
+    "bibliography_ref": [3, 19],
+    "scenario": "A_prime_ice_driver",
+    "produced_by": "harness/runtime/router.py route() function (deterministic taxonomy lookup against contribution-1-routing-rule.yaml)"
+  },
+  "proposalId": "prop-2026-05-14-002",
+  "version": "v1alpha1",
+  "targetLayer": "infra",
+  "classificationConfidence": "high",
+  "classificationMethod": "deterministic",
+  "taxonomyMatch": "host_driver",
+  "contributingSignals": [
+    "platform.ptp_host_stack.phc_drift_monotonic",
+    "platform.ptp_host_stack.state_uncalibrated",
+    "platform.host_driver.version_outdated",
+    "platform.host_driver.known_issue_match"
+  ],
+  "actionType": "apply_kmm_module",
+  "actionTarget": "worker-ran-02.dallas.example.com",
+  "actionPayloadRef": "ice-driver-update",
+  "ocloudInternalPath": "kernel-module-management",
+  "dryRun": true,
+  "requiresHumanApproval": true,
+  "humanApprovalStatus": "pending"
+}

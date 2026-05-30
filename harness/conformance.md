@@ -48,6 +48,11 @@ header, the verify gate fails.
 | scenarios/A_prime_ice_driver/fault_payload.json          | validates against harness/schemas/FaultPayload.json             | Synthetic platform-agent evidence bundle               | v0                   | 31               |
 | scenarios/A_prime_ice_driver/remediation.yaml            | kmm.sigs.x-k8s.io/v1beta1 Module                                | Real KMM Module instance                               | kmmv1beta1 current   | 10, 42           |
 | scenarios/A_prime_ice_driver/audit_event.json            | TMF688 Event Management API and ReversibilityProfile (Phase 4)  | Event envelope plus reversibility_profile field        | TMF688 current       | 18               |
+| scenarios/A_fw_lldp_agent/rca.json                       | validates against harness/schemas/RCA.json                      | Diagnostic substrate output (stubbed_agents fixture)   | v0                   | 35               |
+| scenarios/A_fw_lldp_agent/remediation_proposal.json      | validates against harness/schemas/RemediationProposal.json      | Router output before guardrail evaluation              | v0                   | 3, 19            |
+| scenarios/A_prime_ice_driver/rca.json                    | validates against harness/schemas/RCA.json                      | Diagnostic substrate output (stubbed_agents fixture)   | v0                   | 35               |
+| scenarios/A_prime_ice_driver/remediation_proposal.json   | validates against harness/schemas/RemediationProposal.json      | Router output before guardrail evaluation              | v0                   | 3, 19            |
+| scenarios/README.md                                      | walkthrough narrative (not a contract artifact)                 | Documents pipeline stages and stub vs real boundaries  | v0                   | n/a              |
 
 ## How the verify gate uses this index
 

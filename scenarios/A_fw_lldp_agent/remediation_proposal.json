@@ -1,0 +1,29 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RemediationProposal.json (O-RAN.WG6.O2IMS-Interface plus TMF921 Intent shape)",
+    "spec_section": "O2 IMS ProvisioningRequest intent shape; TMF921 Intent envelope",
+    "spec_version": "WG6 O2IMS current, TMF921 current",
+    "bibliography_ref": [3, 19],
+    "scenario": "A_fw_lldp_agent",
+    "produced_by": "harness/runtime/router.py route() function (deterministic taxonomy lookup against contribution-1-routing-rule.yaml)"
+  },
+  "proposalId": "prop-2026-05-14-001",
+  "version": "v1alpha1",
+  "targetLayer": "infra",
+  "classificationConfidence": "high",
+  "classificationMethod": "deterministic",
+  "taxonomyMatch": "ptp_host_stack",
+  "contributingSignals": [
+    "platform.ptp_host_stack.master_offset_anomaly",
+    "platform.ptp_host_stack.state_unstable",
+    "platform.ptp_host_stack.fw_lldp_agent_active",
+    "platform.host_nic.tx_hwtstamp_timeouts"
+  ],
+  "actionType": "apply_machine_config",
+  "actionTarget": "worker-ran-01.dallas.example.com",
+  "actionPayloadRef": "99-worker-ran-disable-fw-lldp-agent",
+  "ocloudInternalPath": "machine-config-operator",
+  "dryRun": true,
+  "requiresHumanApproval": true,
+  "humanApprovalStatus": "pending"
+}

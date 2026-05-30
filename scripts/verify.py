@@ -2,10 +2,11 @@
 """
 Phase 6 verify gate for the O-RAN Agent Harness public repo.
 
-Runs 9 deterministic checks against the repository contents and exits 0 if all
-pass, non-zero if any fail. Check 9 (JSON Schema validation) is optional and
-auto-skipped if `jsonschema` is not installed. Designed for any reviewer to
-run after cloning:
+Runs 10 deterministic checks against the repository contents and exits 0 if
+all pass, non-zero if any fail. Check 9 (JSON Schema validation) is optional
+and auto-skipped if `jsonschema` is not installed. Check 10 (runtime walker
+end-to-end) requires PyYAML and runs the walker as a subprocess. Designed for
+any reviewer to run after cloning:
 
     python3 scripts/verify.py
 
@@ -32,7 +33,7 @@ Excluded from the public tree scans: .git, .local, .omc, python_demo.
 import json
 import os
 import re
-import subprocess
+import subprocess  # noqa: F401  used both in check 6 (no_leakage) and check 10 (walker_e2e)
 import sys
 from pathlib import Path
 
@@ -184,22 +185,28 @@ def main():
     g1 = "Here is my presentation" in top25
     g2 = "Here is the example work" in top25
     g3 = "Here is where I actually test" in top25
-    ok = 80 <= line_count <= 150 and g1 and g2 and g3
+    ok = 80 <= line_count <= 250 and g1 and g2 and g3
     record(
         "readme_structure",
         ok,
         f"lines={line_count}, three goals present={g1 and g2 and g3}",
     )
 
-    # 8. File counts
+    # 8. File counts (exclude __pycache__ and *.pyc which appear after running the walker)
     print("\n--- file counts ---")
-    harness_count = sum(1 for p in (REPO_ROOT / "harness").rglob("*") if p.is_file())
+    harness_count = sum(
+        1
+        for p in (REPO_ROOT / "harness").rglob("*")
+        if p.is_file()
+        and "__pycache__" not in p.parts
+        and p.suffix != ".pyc"
+    )
     omc_count = sum(1 for p in (REPO_ROOT / "omc-skills/o-ran").glob("*.md"))
-    ok = harness_count == 21 and omc_count == 6
+    ok = harness_count == 25 and omc_count == 6
     record(
         "file_counts",
         ok,
-        f"harness={harness_count}/21, omc-skills md={omc_count}/6",
+        f"harness={harness_count}/25, omc-skills md={omc_count}/6",
     )
 
     # 9. Schema validation (optional, requires jsonschema)
@@ -244,6 +251,62 @@ def main():
                 except jsonschema.ValidationError as e:
                     fails.append(f"{path} reversibility_profile: {e.message}")
         record("schema_validation", not fails, f"{len(fails)} failures" + (": " + "; ".join(fails) if fails else ""))
+
+    # 10. Runtime walker end-to-end (requires PyYAML, already a dep)
+    print("\n--- runtime walker end-to-end (scenarios vs committed audit_event.json) ---")
+    walker_fails = []
+    material_fields = [
+        "targetLayer",
+        "taxonomyMatch",
+        "actionType",
+        "ocloudInternalPath",
+        "actionPayloadRef",
+        "dryRun",
+        "requiresHumanApproval",
+    ]
+    for scenario in ["A_fw_lldp_agent", "A_prime_ice_driver"]:
+        fault_path = REPO_ROOT / f"scenarios/{scenario}/fault_payload.json"
+        expected_path = REPO_ROOT / f"scenarios/{scenario}/audit_event.json"
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "harness.runtime.walker", str(fault_path)],
+                cwd=str(REPO_ROOT),
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=30,
+            )
+            actual = json.loads(result.stdout)
+        except subprocess.CalledProcessError as e:
+            walker_fails.append(f"{scenario}: walker exited {e.returncode}: {e.stderr[:120]}")
+            continue
+        except Exception as e:
+            walker_fails.append(f"{scenario}: walker error: {e}")
+            continue
+
+        expected = json.loads(expected_path.read_text())
+        for field in material_fields:
+            a = actual["event"]["remediation"].get(field)
+            e = expected["event"]["remediation"].get(field)
+            if a != e:
+                walker_fails.append(f"{scenario}: {field} actual={a!r} expected={e!r}")
+        a_conf = actual["event"]["remediation"].get("reversibility_profile", {}).get(
+            "confidence_in_reversibility"
+        )
+        e_conf = expected["event"]["remediation"].get("reversibility_profile", {}).get(
+            "confidence_in_reversibility"
+        )
+        if a_conf != e_conf:
+            walker_fails.append(
+                f"{scenario}: reversibility_profile.confidence_in_reversibility "
+                f"actual={a_conf!r} expected={e_conf!r}"
+            )
+    record(
+        "walker_e2e",
+        not walker_fails,
+        f"{len(walker_fails)} failures"
+        + (": " + "; ".join(walker_fails) if walker_fails else ""),
+    )
 
     # Summary
     print()
