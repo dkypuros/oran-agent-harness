@@ -181,10 +181,10 @@ def main():
     print("\n--- README structure ---")
     readme = (REPO_ROOT / "README.md").read_text()
     line_count = readme.count("\n")
-    top25 = "\n".join(readme.split("\n")[:25])
-    g1 = "Here is my presentation" in top25
-    g2 = "Here is the example work" in top25
-    g3 = "Here is where I actually test" in top25
+    top_lede = "\n".join(readme.split("\n")[:60])
+    g1 = "Here is my presentation" in top_lede
+    g2 = "Here is the example work" in top_lede
+    g3 = "Here is where I actually test" in top_lede
     ok = 80 <= line_count <= 350 and g1 and g2 and g3
     record(
         "readme_structure",

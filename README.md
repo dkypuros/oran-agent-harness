@@ -3,6 +3,32 @@
 Citation-grounded declarative artifact set for the talk *From Multivendor Diagnosis to Closed-Loop
 Remediation: An Agent Harness for Cloud RAN Day-2*, O-RAN nGRG Workshop, Seattle, 4th [THU] JUN 2026.
 
+## What is novel
+
+The right-side execution path grounds infrastructure remediation in two standardized contracts at
+once: the O-RAN O2 IMS interface ([ref 2](docs/references.md#ref-2),
+[ref 3](docs/references.md#ref-3)) above, and the CRD-shaped delivery contracts inside the O-Cloud
+(Metal3 BareMetalHost / HostFirmwareComponents at [ref 8](docs/references.md#ref-8); Machine Config
+Operator at [ref 9](docs/references.md#ref-9)) below. The 2+3+8+9 conjunction is what lets a single
+RemediationProposal travel from the cognitive layer, through a standardized O-RAN interface, into
+a concrete Kubernetes-native contract that already runs in production O-Cloud deployments. Most
+prior agentic-RAN work either stops at the SMO boundary without a delivery story, or proposes a
+custom controller plane that side-steps O-RAN's own resource layering. Layered on top, the
+Remediation Router classifies first by deterministic taxonomy lookup against the O-RAN WG6
+O-Cloud resource model and invokes LLM reasoning only on the residual `ambiguous` class. Full
+walkthrough at `talk/architecture_narrative.md`.
+
+## Quick start
+
+```bash
+cd macbook_lab && ./run.sh
+# then open http://localhost:8097 in a browser
+```
+
+Requires Docker Desktop on a Mac. No other dependencies. Optionally set
+`ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `macbook_lab/.env`; absent that, a
+local fake-vllm mock serves canned responses with no internet required.
+
 Three goals for this repository, in the author's words:
 
 1. **Here is my presentation to the O-RAN community.** The submission abstract, the architecture
