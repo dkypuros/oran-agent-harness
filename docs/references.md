@@ -231,3 +231,9 @@ f. References 44 through 47 cover standards named in the architecture diagram an
 
 47. TM Forum. TMF902 AI Model Management API. https://www.tmforum.org/oda/open-apis/table/tmf902.
     Accessed 14th [WED] MAY 2026.
+
+48. O-RAN Alliance. O-RAN Decoupled SMO Architecture. Working Group 1 Technical Report
+    (O-RAN.WG1.TR.Decoupled-SMO-Architecture-R004-v03.00). O-RAN Alliance e.V.
+    https://www.o-ran.org/specifications. Accessed 30th [FRI] MAY 2026. Source for SMOS
+    (SMO Service) terminology and the candidate positioning of this harness as a Closed-Loop
+    Remediation SMOS.

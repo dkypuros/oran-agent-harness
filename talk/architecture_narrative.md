@@ -109,6 +109,30 @@ crisis_mode revokes write access to O2 IMS and the SMO, pins EvalOps confidence 
 telemetry to manual human queues. The ReversibilityProfile rewinds one applied action; the
 Killswitch freezes all of them. The two compose; they answer different questions.
 
+## 5. Where this lives in the SMO architecture
+
+The harness operates within the scope of the SMO. Specifically, it corresponds to a candidate
+Closed-Loop Remediation SMOS (SMO Service) per O-RAN.WG1.TR.Decoupled-SMO-Architecture
+(R004-v03.00). The infra route terminates at the O2 IMS ProvisioningRequest service per
+O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11 Section 3.4. In a production deployment, the harness's
+ProvisioningRequests would be submitted through FOCOM (Federated O-Cloud Orchestration and
+Management), the SMO function that consumes O2 IMS for infrastructure management per
+O-RAN.WG6.O2-GAnP-v01.02 Section 2.2 (Figure 2.2-2: IMS managed by FOCOM, DMS consumed by NFO).
+FOCOM is not bypassed by this harness; the harness acts as a candidate orchestrator that FOCOM
+(or the SMO equivalent) composes into its workflow.
+
+Three layers operate at distinct abstractions. The O-RAN management-plane interfaces (O1, A1,
+R1, E2, O2) standardize how the SMO interacts with managed elements, the Near-RT RIC, rApps, and
+the O-Cloud. MCP (Anthropic Model Context Protocol) is a separate, lower-layer protocol the
+harness uses to orchestrate its internal LLM agents. MCP does not replace, bypass, or compete
+with the O-RAN interfaces; it composes at a different layer. An rApp realization of this harness
+pattern would use MCP internally and expose its capabilities via R1 to the rest of the SMO.
+
+A1 policies target Near-RT RIC behavior (traffic steering, QoS optimization, slice SLAs). This
+harness targets infrastructure remediation (host configuration, kernel drivers, firmware) via
+the O2 IMS interface, which is a different layer of the architecture. The two compose; they do
+not compete.
+
 ## How to read this repo's diagrams
 
 The repo ships one macro diagram plus three zoom diagrams. Read them in this order based on what
