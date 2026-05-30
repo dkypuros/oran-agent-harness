@@ -39,6 +39,15 @@ guardrail_contract:
       audit_schema: ../schemas/AuditEvent.json
       audit_format: TMF688 Event Management API
 
+    global_crisis_override:
+      description: "Killswitch / Agentic Circuit Breaker. Global override that freezes all agent write actions during macro events (hurricanes, tornadoes, lightning storms, regional power loss, security incidents). AT&T-validated operational requirement. See talk/killswitch.md for the architectural rationale."
+      enforced_by: guardrails.yaml.crisis_mode
+      activation_schema: ../schemas/CrisisModeActivation.json
+      activation_doc: ../../talk/killswitch.md
+      contrast_with: per_action_guardrails
+      contrast_rationale: "The other four elements gate ONE action at a time. global_crisis_override freezes ALL actions until explicitly deactivated. ReversibilityProfile undoes one applied action; crisis_mode freezes all actions."
+      acknowledgement_latency_max_seconds: 5
+
   # The guardrail contract is LLM-FREE by design. Deterministic policy enforcement is the
   # primitive operators trust. Any LLM reasoning happens upstream (in the Router for
   # ambiguous_path classification, in the domain agents for evidence chain construction).

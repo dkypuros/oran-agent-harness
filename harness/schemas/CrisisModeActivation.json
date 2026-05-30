@@ -1,0 +1,90 @@
+{
+  "_conforms_to": {
+    "spec": "harness-unique crisis-mode activation event. AT&T-validated operational contract. See talk/killswitch.md for the architectural rationale.",
+    "spec_section": "Killswitch / Agentic Circuit Breaker activation envelope",
+    "spec_version": "v0",
+    "bibliography_ref": null,
+    "schema_role": "Validates the activation event emitted whenever a NOC supervisor or key holder triggers crisis_mode in harness/guardrails.yaml. Distinct from AuditEvent (TMF688) which carries per-action remediation audits; this carries the global freeze signal."
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dkypuros/oran-agent-harness/blob/main/harness/schemas/CrisisModeActivation.json",
+  "title": "CrisisModeActivation",
+  "description": "Global crisis-mode activation event. Emitted when an operator triggers the Killswitch to freeze all agent actions during macro events (hurricanes, tornadoes, lightning storms, regional power loss, security incidents). The harness MUST stand all agents down within acknowledgement_latency_max_seconds (5s default in guardrails.yaml). Distinct from ReversibilityProfile which carries the rollback contract for one already-applied action.",
+  "type": "object",
+  "required": [
+    "activationId",
+    "activatedAt",
+    "activatedBy",
+    "triggerCategory",
+    "expectedDurationMinutes",
+    "affectedScope"
+  ],
+  "properties": {
+    "activationId": {
+      "type": "string",
+      "pattern": "^crisis-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
+      "description": "Globally unique activation id."
+    },
+    "activatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of activation."
+    },
+    "activatedBy": {
+      "type": "object",
+      "required": ["actorId", "actorRole"],
+      "description": "Identity of the operator who activated crisis mode.",
+      "properties": {
+        "actorId": {"type": "string"},
+        "actorRole": {
+          "type": "string",
+          "enum": ["noc_supervisor", "designated_key_holder", "incident_commander", "automated_trigger"]
+        },
+        "secondaryKeyHolderId": {
+          "type": "string",
+          "description": "Optional. Present when multi-key activation is used."
+        }
+      }
+    },
+    "triggerCategory": {
+      "type": "string",
+      "enum": ["weather_macro", "power_grid", "security_incident", "manual_drill", "other"],
+      "description": "What class of event triggered the activation. Drives downstream telemetry routing decisions."
+    },
+    "triggerDetail": {
+      "type": "string",
+      "description": "Free-text detail. Example: 'Hurricane Helene landfall projected 2026-09-26 18:00 UTC, Southeast US'."
+    },
+    "expectedDurationMinutes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Operator's best guess at how long crisis mode will remain active. Informs agent backoff strategies."
+    },
+    "affectedScope": {
+      "type": "string",
+      "enum": ["site", "regional", "national", "global"],
+      "description": "Spatial scope of the crisis. Agents may use this to scope their stand-down."
+    },
+    "acknowledgementsReceived": {
+      "type": "array",
+      "description": "Identities of agents that have acknowledged the freeze and stood down. Populated as acknowledgements arrive within the latency window.",
+      "items": {
+        "type": "object",
+        "required": ["agentId", "acknowledgedAt"],
+        "properties": {
+          "agentId": {"type": "string"},
+          "acknowledgedAt": {"type": "string", "format": "date-time"},
+          "agentRole": {
+            "type": "string",
+            "enum": ["platform_agent", "ran_agent", "hardware_agent", "router", "guardrail_engine", "gateway"]
+          }
+        }
+      }
+    },
+    "expectedAgentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total agents expected to acknowledge. acknowledgementsReceived.length == expectedAgentCount is the success condition within the latency window."
+    }
+  }
+}

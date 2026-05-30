@@ -24,6 +24,7 @@ header, the verify gate fails.
 | harness/schemas/AuditEvent.json                 | TMF688 Event Management API                                       | Event envelope and notification body                   | TMF688 current       | 18               |
 | harness/schemas/RCA.json                        | harness-unique Root Cause Analysis evidence chain                 | Prior demo substrate, Ericsson blog (ref 35)           | v0                   | 35               |
 | harness/schemas/ReversibilityProfile.json       | harness-unique trust-loop contribution                            | v0 reversibility contract, see talk/trust_loop.md      | v0                   | n/a              |
+| harness/schemas/CrisisModeActivation.json       | harness-unique Killswitch contract, AT&T-validated                | v0 crisis-mode activation envelope, see talk/killswitch.md | v0               | n/a              |
 | harness/routing-rules/contribution-1-routing-rule.yaml  | O-RAN.WG6 resource model and TMF921 Intent envelope       | Up-vs-down routing per resource layer                  | v0                   | 1, 2, 3, 19      |
 | harness/routing-rules/contribution-2-guardrail-contract.yaml | harness-unique, audit shape per TMF688               | Four named elements, declarative form                  | v0                   | 18               |
 | harness/routing-rules/contribution-3-llm-neutrality.yaml | harness-unique substrate constraint, LiteLLM-style       | Provider abstraction assertion                         | v0                   | 17               |

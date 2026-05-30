@@ -72,3 +72,35 @@ co_authorization:
   commit_phase:
     actor: operator
     output: "AuditEvent with humanApprovalStatus: approved-by-{operator-id}-at-{timestamp}"
+
+# Crisis mode (Killswitch / Agentic Circuit Breaker)
+# Global, human-controlled override for macro events (hurricanes, tornadoes, lightning storms,
+# regional power loss, security incidents) where the physical world is in an extreme state and
+# the harness's normal pattern matching would actively fight that reality.
+#
+# AT&T-validated operational requirement. In a traditional appliance world, the override is a
+# literal physical action (pull the power cord, pull the fiber). In a software-defined Cloud RAN,
+# the appliance is distributed across thousands of pods and hundreds of nodes; there is no cord.
+# crisis_mode is the cord.
+#
+# This is DISTINCT from ReversibilityProfile (harness/schemas/ReversibilityProfile.json):
+#   ReversibilityProfile UNDOES one applied action.
+#   crisis_mode FREEZES all actions until explicitly deactivated.
+crisis_mode:
+  description: "Global override for macro events. AT&T-validated operational requirement."
+  activation:
+    actors: "NOC supervisor or designated key holders"
+    mechanism: "explicit operator action via UI or signed API call"
+    audit: "every activation emits a CrisisModeActivation event (harness/schemas/CrisisModeActivation.json)"
+    acknowledgement_latency_max_seconds: 5
+  effects:
+    dry_run_default: forced_true
+    require_human_approval: forced_all
+    write_access_o2ims: revoked
+    write_access_smo_tmf921: revoked
+    evalops_confidence_floor: 0.0
+    telemetry_routing: manual_queues
+  deactivation:
+    actors: "same key holders, multi-key recommended"
+    mechanism: "explicit operator action with audit trail"
+    post_deactivation: "full diagnostic re-baseline before agents continue"

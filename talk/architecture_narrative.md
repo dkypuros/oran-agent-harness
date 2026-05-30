@@ -90,6 +90,14 @@ timeline, replication history, validation history, risk profile burn-down, and c
 reversibility. Seven fields, same place every time, same shape every time. That is the contract
 between the harness and the human in the loop.
 
+One more contract sits above the per-action seam: the Killswitch (formal name crisis_mode in
+guardrails.yaml, full discussion in `talk/killswitch.md`). It is the global override for macro
+events (hurricanes, tornadoes, lightning storms, security incidents) where the harness's normal
+pattern matching would actively fight a degraded physical world. When activated by a NOC supervisor,
+crisis_mode revokes write access to O2 IMS and the SMO, pins EvalOps confidence at zero, and routes
+telemetry to manual human queues. The ReversibilityProfile rewinds one applied action; the
+Killswitch freezes all of them. The two compose; they answer different questions.
+
 ## Where to look for detail
 
 - Architecture diagram source: `talk/architecture.mmd` (open as text or render with mermaid-cli)
