@@ -149,6 +149,36 @@ configuration, kernel drivers, firmware) via the O2 IMS interface
 ([ref 3](../docs/references.md#ref-3)), which is a different layer of the architecture. The
 two compose; they do not compete.
 
+## 6. The 5G platform substrate
+
+This repository ships its own 5G O-RAN simulator at `5G_O-RAN_SIM/` (re-licensed Apache 2.0,
+copied wholesale from the author's BF3-5G-Demo project). The simulator is the platform
+substrate (SMO, CU/DU, O-Cloud, Open Fronthaul O-RU, Near-RT RIC, Non-RT RIC, OAM, Security)
+that the agentic harness operates on top of. Together they form the full closed-loop demo
+stack:
+
+- The simulator at `5G_O-RAN_SIM/` provides 13 O-RAN service implementations across WG1, WG2,
+  WG3, WG4, WG6, WG9, WG10, and WG11; an aggregation gateway on port 8088; a React dashboard;
+  and a 14/14 O-RAN compliance test suite that validates 47 specs against the running services.
+- The harness pattern at `harness/` provides the closed-loop intelligence: Agentic Gateway,
+  MCP servers, Domain Agents, Router (with ambiguous_path now wired to live LLM-assist), the
+  Guardrail engine, and TMF688 audit emission.
+- The LLM inference layer at `5G_O-RAN_SIM/llm/` provides a unified `completion()` client and
+  a fake OpenShift AI vLLM mock server on port 8090. Anthropic Claude and OpenAI GPT are
+  configurable in `5G_O-RAN_SIM/.env` (template at `.env.example`). The default is the local
+  vLLM mock so the demo runs without external network calls.
+
+The integration seam is at `harness/runtime/router.py` `_resolve_ambiguous()`: when the
+`ORAN_LLM_MODE=live` environment variable is set, the router calls the inference client with
+a disambiguation prompt built from the RCA's candidate classifications. The seam is exercised
+end-to-end (the LLM hint appears in the router's NotImplementedError message); the router
+does not auto-parse the response into a deterministic classification in v0. Default behavior
+(env var unset) preserves the historical `NotImplementedError` so the existing verify gate at
+10/10 PASS and the unit test `test_route_ambiguous_raises` remain unaffected. This is the
+live realization of Contribution 3 (LLM-neutral substrate). Trace logs accumulate at
+`5G_O-RAN_SIM/llm/mock_traces.jsonl` (gitignored) for replay analysis as the p2p sync
+troubleshooting work unfolds.
+
 ## How to read this repo's diagrams
 
 The repo ships one macro diagram plus three zoom diagrams. Read them in this order based on what

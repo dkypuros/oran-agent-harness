@@ -119,6 +119,29 @@ def test_route_empty_classifications_raises() -> None:
     raise AssertionError("expected ValueError, got none")
 
 
+def test_route_ambiguous_with_llm_mode_live() -> None:
+    """ORAN_LLM_MODE=live: router exercises the 5G_O-RAN_SIM/llm seam and re-raises with hint.
+
+    Skipped if ORAN_LLM_MODE is not set (default verify gate behavior must stay unchanged).
+    When set, the test asserts the NotImplementedError message carries the LLM disambiguation
+    hint, proving the live-mode seam is wired through to the inference client.
+    """
+    import os as _os
+
+    if _os.environ.get("ORAN_LLM_MODE") != "live":
+        print("SKIP: test_route_ambiguous_with_llm_mode_live (ORAN_LLM_MODE not set to live)")
+        return
+    rca = _ambiguous_rca()
+    try:
+        router.route(rca)
+    except NotImplementedError as exc:
+        msg = str(exc)
+        assert "LLM-assist returned" in msg, msg
+        assert "disambiguation hint" in msg, msg
+        return
+    raise AssertionError("expected NotImplementedError, got none")
+
+
 def test_evaluate_crisis_mode_active() -> None:
     """Monkey-patch the crisis_mode seam to True and confirm evaluate raises RuntimeError."""
     original = guardrail._CRISIS_MODE_ACTIVE
@@ -143,6 +166,7 @@ _TESTS = [
     test_route_ambiguous_raises,
     test_route_unknown_layer_raises,
     test_route_empty_classifications_raises,
+    test_route_ambiguous_with_llm_mode_live,
     test_evaluate_crisis_mode_active,
 ]
 

@@ -22,6 +22,8 @@ Agents would attach them to the RCA's candidate_classifications.
 from __future__ import annotations
 
 import json
+import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +31,7 @@ import yaml
 
 _RUNTIME_DIR = Path(__file__).resolve().parent
 _HARNESS_DIR = _RUNTIME_DIR.parent
+_REPO_ROOT = _HARNESS_DIR.parent
 
 with (_HARNESS_DIR / "routing-rules" / "contribution-1-routing-rule.yaml").open() as _fh:
     _ROUTING_RULE = yaml.safe_load(_fh)
@@ -85,10 +88,54 @@ def route(rca: dict[str, Any]) -> dict[str, Any]:
         proposal["actionType"] = "emit_smo_intent"
         proposal["ocloudInternalPath"] = "smo-tmf921-endpoint"
     elif layer == "ambiguous":
+        hint = _resolve_ambiguous(rca)
         raise NotImplementedError(
-            "ambiguous_path requires LLM-assist tier, not implemented in stub runtime"
+            f"ambiguous_path LLM-assist returned a disambiguation hint: {hint!r}. "
+            f"Router does not parse LLM responses into deterministic classifications in v0; "
+            f"the seam is exercised but the resulting RemediationProposal is not auto-emitted."
         )
     else:
         raise ValueError(f"unknown target_layer {layer}")
 
     return proposal
+
+
+def _resolve_ambiguous(rca: dict[str, Any]) -> str:
+    """LLM-assist tier for ambiguous_path. Env-gated.
+
+    Default (ORAN_LLM_MODE unset): raises NotImplementedError preserving the historical
+    behavior so the existing verify gate at 10/10 PASS and the unit test
+    test_route_ambiguous_raises are unaffected.
+
+    Live (ORAN_LLM_MODE=live): imports the 5G_O-RAN_SIM/llm inference client and calls
+    completion() with a disambiguation prompt built from the RCA's candidate classifications.
+    Returns the LLM's textual response. The router's ambiguous branch then re-raises
+    NotImplementedError with the hint included; the seam is exercised but the resulting
+    classification is not auto-applied. Future work could parse the response into a
+    deterministic classification.
+
+    Bibliography refs: 13 (Anthropic MCP context), 17 (LiteLLM-style abstraction)
+    """
+    if os.environ.get("ORAN_LLM_MODE") != "live":
+        raise NotImplementedError(
+            "ambiguous_path requires LLM-assist tier, not implemented in stub runtime "
+            "(set ORAN_LLM_MODE=live and configure 5G_O-RAN_SIM/.env to enable)"
+        )
+    sim_path = _REPO_ROOT / "5G_O-RAN_SIM"
+    if str(sim_path) not in sys.path:
+        sys.path.insert(0, str(sim_path))
+    try:
+        from llm.inference_client import completion
+    except ImportError as exc:
+        raise NotImplementedError(
+            f"ambiguous_path live mode failed to import 5G_O-RAN_SIM/llm/inference_client: {exc}"
+        ) from exc
+    fault_id = rca.get("fault_id", "<unknown>")
+    candidates = rca.get("candidate_classifications", [])
+    prompt = (
+        f"Disambiguate the following ambiguous fault classification for fault {fault_id}. "
+        f"Candidates: {candidates}. "
+        f"Return the most likely concrete classification (e.g. host_driver, ran_parameter) "
+        f"and explain in one sentence."
+    )
+    return completion(prompt, tier="medium")
