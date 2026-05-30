@@ -24,7 +24,7 @@ LangGraph, OpenAI Agents SDK, Microsoft Semantic Kernel, or any agent framework 
 Schema and YAML.
 
 The reference O2 IMS implementation cited throughout is Red Hat's open-source O-Cloud Manager
-(openshift-kni/oran-o2ims, bibliography ref 6 in `references.md`).
+(openshift-kni/oran-o2ims, bibliography ref 6 in `docs/references.md`).
 
 ## How the system works (one paragraph)
 
@@ -44,8 +44,19 @@ populated reversibility profile. Full walkthrough at `talk/architecture_narrativ
 oran-agent-harness/
 |-- README.md            this file
 |-- LICENSE              Apache-2.0
-|-- references.md        public bibliography, 47 numbered AMA refs, URLs only
+|-- CONTRIBUTING.md      four extensible surfaces, hard rules, citation discipline
+|-- pyproject.toml       packaging metadata, pip install -e . enables module imports
+|-- Makefile             canonical entry points: make install / verify / demo
+|-- .editorconfig        UTF-8, LF, indent rules per file type
 |-- .gitignore           defense-in-depth against .local/, python_demo/, .pdf, .env
+|-- .github/
+|   |-- workflows/
+|   |   `-- verify.yml             CI runs the 10-check verify gate on push and PR
+|   |-- ISSUE_TEMPLATE/
+|   |   `-- new-scenario.md        structured fields for a new walkthrough scenario
+|   `-- PULL_REQUEST_TEMPLATE.md   verify-gate checklist for every PR
+|-- docs/
+|   `-- references.md    public bibliography, 47 numbered AMA refs, URLs only
 |-- talk/                presentation artifacts
 |   |-- abstract.md             canonical nGRG submission
 |   |-- architecture.mmd        macro / billboard, 7 boxes, the mental map (the entry point)
@@ -198,5 +209,5 @@ Apache-2.0. See `LICENSE`.
 ## Acknowledgements
 
 The diagnostic substrate this work builds on (MCP-coordinated multivendor domain agents) is the published
-output of a joint Ericsson, Red Hat, and Intel effort. See bibliography ref 35 in `references.md`. The
+output of a joint Ericsson, Red Hat, and Intel effort. See bibliography ref 35 in `docs/references.md`. The
 closed-loop remediation extension presented here is solo work by the author for the nGRG workshop.

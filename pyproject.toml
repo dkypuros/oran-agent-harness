@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oran-agent-harness"
+version = "0.1.0"
+description = "Citation-grounded declarative artifact set and stubbed runtime for the O-RAN nGRG talk From Multivendor Diagnosis to Closed-Loop Remediation"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+authors = [
+    { name = "David Kypuros" },
+]
+keywords = ["o-ran", "ngrg", "agent-harness", "mcp", "tmforum", "closed-loop"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Telecommunications Industry",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+]
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "jsonschema>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/dkypuros/oran-agent-harness"
+Repository = "https://github.com/dkypuros/oran-agent-harness"
+Issues = "https://github.com/dkypuros/oran-agent-harness/issues"
+
+[tool.setuptools.packages.find]
+include = ["harness*"]
+exclude = ["scripts*", "scenarios*", "tests*", "talk*", "docs*", "omc-skills*"]
+
+[tool.setuptools.package-data]
+"harness.runtime" = ["*.json", "*.yaml"]

@@ -3,7 +3,7 @@
 Central index mapping every authored stub artifact in this repository to the upstream specification it
 conforms to and the bibliography reference that documents it. This file is the contract the project's
 verify gate (`/oh-my-claudecode:verify`) runs against. Bibliography ref numbers index into
-`references.md`.
+`docs/references.md`.
 
 ## Rule
 
