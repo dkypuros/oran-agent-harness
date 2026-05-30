@@ -44,12 +44,14 @@ Every template ends with the repo URL. The repo carries the talk forward.
 
 **Length target**: 280 characters, link card to the repo.
 
+## Thread (4-tweet expansion if the first lands)
+
+**Length target**: roughly 1120 characters total across 4 tweets (280 each).
+
 > Closed-loop day-2 remediation for multivendor Cloud RAN, just talked at #ORAN nGRG.
 > Deterministic taxonomy first, LLM only on the ambiguous residual, dual-route to TMF921 +
 > O2 IMS. Apache 2.0 research bench:
 > github.com/dkypuros/oran-agent-harness
-
-## Thread (4-tweet expansion if the first lands)
 
 1. > Closed-loop day-2 remediation for multivendor Cloud RAN, just talked at #ORAN nGRG.
    > Deterministic taxonomy first, LLM only on the ambiguous residual, dual-route to TMF921
@@ -67,8 +69,8 @@ Every template ends with the repo URL. The repo carries the talk forward.
 
 ## Red Hat internal Slack (colleague-safe, work CoS audience)
 
-**Channels**: `#telco-architecture`, `#oran`, `#ai-day2`, `#hybrid-cloud-engineering` as
-appropriate.
+**Length target**: roughly 200-300 words. **Channels**: `#telco-architecture`, `#oran`,
+`#ai-day2`, `#hybrid-cloud-engineering` as appropriate.
 
 > Wrapped my nGRG talk in Seattle on the agent harness for Cloud RAN Day-2. The bench is
 > public at github.com/dkypuros/oran-agent-harness under Apache 2.0. Three things that might
@@ -86,7 +88,8 @@ appropriate.
 
 ## Red Hat internal email (sanitized internal exec note)
 
-**Subject**: nGRG talk shipped, agent harness research bench public on GitHub
+**Length target**: roughly 200 words. **Subject**: nGRG talk shipped, agent harness research
+bench public on GitHub
 
 > Team,
 >

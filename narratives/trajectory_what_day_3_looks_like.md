@@ -13,7 +13,7 @@ operator co-authoring every action. That is the scope of the current contributio
 scope a research workshop should fund as the proof of concept.
 
 The interesting question is what Day-3 looks like. Single-site Day-2 is necessary but not
-sufficient for the full vision. This narrative names the four workstreams that sit downstream of
+sufficient for the full vision. This narrative names the five workstreams that sit downstream of
 the current bench and explains why each one is research, not engineering. A reviewer who is
 deciding whether to fund continued work on this thesis should read this file as the explicit
 roadmap.
