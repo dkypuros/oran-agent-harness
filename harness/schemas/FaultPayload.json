@@ -1,9 +1,9 @@
 {
   "_conforms_to": {
-    "spec": "harness-unique fault context schema. Evidence model conforms to O-RAN.WG6 Cloud Notifications.",
-    "spec_section": "Cloud Notifications, payload contract",
-    "spec_version": "WG6 Cloud Notifications, current",
-    "bibliography_ref": 31,
+    "spec": "harness-unique fault context schema. Payload shape approximates O2 IMS Infrastructure Monitoring alarm notifications and O-RAN.WG6 Cloud Notifications.",
+    "spec_section": "O2ims_InfrastructureMonitoring AlarmEventRecord data type (O2IMS-INTERFACE R005-v11 Section 3.3.6.2.2) and AlarmChangeNotification (Section 3.3.5.1.2). Also informed by O-Cloud Alarms framework (Section 4) and WG6 Cloud Notifications payload contract.",
+    "spec_version": "WG6 O2IMS-INTERFACE R005-v11, WG6 Cloud Notifications current",
+    "bibliography_ref": [3, 31],
     "schema_role": "Validates scenarios/*/fault_payload.json"
   },
   "$schema": "http://json-schema.org/draft-07/schema#",
