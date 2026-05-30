@@ -1,7 +1,7 @@
 {
   "_conforms_to": {
-    "spec": "Anthropic Model Context Protocol tool-schema specification",
-    "spec_section": "tools object, per server",
+    "spec": "Anthropic Model Context Protocol tool-schema specification, internal harness scaffolding",
+    "spec_section": "MCP tools object per server. The data CONSUMED by these tools (linuxptp daemon state, MachineConfig pool state, NIC PHC counters, kernel driver versions) is O-Cloud-internal platform telemetry, NOT an O-RAN-standardized interface. O-RAN O1 (WG10.TS.O1-Interface) governs SMO-to-managed-element OAM (O-CU, O-DU, O-RU); the O-Cloud platform layer sits below the managed-element boundary. The standardized SMO-facing flow is the O2 IMS Infrastructure Monitoring AlarmEventRecord that the guardrail engine emits downstream.",
     "spec_version": "MCP current",
     "bibliography_ref": [13, 14, 15],
     "schema_role": "Declares the tool surface for mcp-platform, the FastMCP server exposing ptp4l, driver, and host configuration tools to the Platform Domain Agent."

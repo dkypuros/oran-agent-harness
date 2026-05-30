@@ -37,6 +37,15 @@ mcp-platform (linuxptp, host services, driver versions, NIC stats), mcp-ran (cel
 RAN parameters), and mcp-hardware (NIC PHC introspection, BMC Redfish, CPU performance counters). A
 fourth, mcp-ocloud, surfaces the O-Cloud Manager Inventory and Alarms.
 
+A telemetry-boundary note. The data these MCP servers consume (linuxptp daemon state, MachineConfig
+pool status, KMM Module load state, kernel driver versions, NIC PHC counters) is O-Cloud-internal
+platform telemetry. It is NOT governed by O-RAN O1, which standardizes SMO-to-managed-element OAM
+where managed elements are O-CU, O-DU, and O-RU. The O-Cloud platform layer sits below the
+managed-element boundary; how it surfaces its own state to local consumers is implementation
+specific. The standardized SMO-facing flow downstream of the harness IS spec-governed: the
+guardrail engine emits a TMF688 AuditEvent and the O-Cloud Manager exposes alarms via the O2 IMS
+AlarmEventRecord (O2IMS-INTERFACE R005-v11 Section 3.3.6.2.2). MCP servers and O1 do not overlap.
+
 Three domain agents (Platform, RAN, Hardware) consult those servers and a shared Knowledge Base (RAG,
 mapped to TMF GB922 SID for telecom context). Each agent produces structured findings that converge
 into a Root Cause Analysis artifact (`harness/schemas/RCA.json`). The Remediation Router consults
