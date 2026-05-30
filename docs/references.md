@@ -263,3 +263,11 @@ f. References 44 through 47 cover standards named in the architecture diagram an
     harness/routing-rules/contribution-3-llm-neutrality.yaml layering_disclaimer block. R1 is the
     SMO-internal service-exposure interface for rApps; MCP is internal agent scaffolding within
     the harness.
+
+<a id="ref-52"></a>52. O-RAN Alliance. O-RAN E2 Interface family: General Aspects and Principles, Application
+    Protocol, and Service Models. Working Group 3 Technical Specifications (E2GAP, E2AP,
+    E2SM-KPM, E2SM-RC, E2SM-LLC, plus the Near-RT RIC Architecture and RIC API specs). O-RAN
+    Alliance e.V. https://www.o-ran.org/specifications. Accessed 30th [FRI] MAY 2026. Backs the
+    E2 interface mention in the O-RAN management-plane interface list at
+    talk/architecture_narrative.md section 5 three-layers paragraph. E2 governs Near-RT RIC
+    interactions with E2 nodes (O-CU, O-DU); this harness does not consume E2 directly.

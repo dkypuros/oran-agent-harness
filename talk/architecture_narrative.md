@@ -134,7 +134,8 @@ equivalent) composes into its workflow.
 
 Three layers operate at distinct abstractions. The O-RAN management-plane interfaces
 (O1 [ref 49](../docs/references.md#ref-49), A1 [ref 50](../docs/references.md#ref-50),
-R1 [ref 51](../docs/references.md#ref-51), E2, O2 [ref 3](../docs/references.md#ref-3))
+R1 [ref 51](../docs/references.md#ref-51), E2 [ref 52](../docs/references.md#ref-52),
+O2 [ref 3](../docs/references.md#ref-3))
 standardize how the SMO interacts with managed elements, the Near-RT RIC, rApps, and the
 O-Cloud. MCP (Anthropic Model Context Protocol, [ref 13](../docs/references.md#ref-13)) is a
 separate, lower-layer protocol the harness uses to orchestrate its internal LLM agents. MCP does
