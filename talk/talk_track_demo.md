@@ -137,6 +137,16 @@ are amplifiers that improve the look but do not change what the script says.
    appears in the GitHub repo for self-serve replay.
 5. **Drop or keep the bibliography callout in Beat 2?** Removing it saves 8 seconds. Keeping it
    reinforces the citation-discipline story but may read as pedantic.
+6. **TMF921 service-layer Q&A disclaimer (speaker notes, not in script).** The architecture
+   narrative section 3 describes a service-layer route that emits a TMF921 intent to the
+   partner SMO. Neither walkthrough scenario exercises it (both are infra-layer faults), and
+   no open big-demo issue (#11 through #22) implements it either. If asked "show the
+   service-layer route" or "where is TMF921 in the demo?", the prepared answer is: "The
+   taxonomy entry for ran_parameter (service layer) is defined in harness/taxonomy.yaml. Both
+   scenarios in this demo set are infra-layer faults, so the TMF921 path is not exercised
+   today. The contract is honored at the routing-rule layer (see contribution-1-routing-rule.yaml
+   service_to_smo_path block); the live demo path is infra-only." This pre-empts the most
+   likely audience question without a prepared answer.
 
 ## Constraints honored
 
