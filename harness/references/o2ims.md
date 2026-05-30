@@ -12,11 +12,11 @@ Bibliography ref: 3, 6, 39
 
 ## Pin
 
-Commit SHA: `<commit-sha-pinned-at-publication>`
+Commit SHA: `913484da469255ebd9446d48ec65c8217bccf872`
 
 The pinned snapshot is the O-Cloud Manager release used as the reference O2 IMS implementation for the talk's
-walkthroughs. The placeholder above is intentional; pinning is a follow-up step before 3rd [WED] JUN 2026
-publication. Until pinned, the live URL above remains authoritative.
+walkthroughs, resolved against main HEAD on 2026-05-30. The upstream is authoritative if the pinned commit
+diverges from a later upstream release.
 
 ## How the harness consumes this contract
 

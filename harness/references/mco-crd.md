@@ -15,10 +15,10 @@ Bibliography ref: 9, 12, 41
 
 ## Pin
 
-Commit SHA: `<commit-sha-pinned-at-publication>`
+Commit SHA: `d72b715f8f9e0fad5d27a45420ea074ea2628207`
 
-The pinned snapshot is the MachineConfig CRD version that scenario `A_fw_lldp_agent` conforms to. The
-placeholder above is intentional; pinning is a follow-up step before 3rd [WED] JUN 2026 publication.
+The pinned snapshot is the MachineConfig CRD version that scenario `A_fw_lldp_agent` conforms to,
+resolved against main HEAD on 2026-05-30.
 
 ## How the harness consumes this contract
 

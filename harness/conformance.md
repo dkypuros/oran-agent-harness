@@ -32,11 +32,11 @@ header, the verify gate fails.
 | harness/mcp-tool-schemas/mcp-ran.json           | Anthropic MCP tool-schema spec, PM context per 3GPP TS 28.552     | tools object; 3GPP 5G performance measurements         | MCP current, 28.552  | 13, 32           |
 | harness/mcp-tool-schemas/mcp-hardware.json      | Anthropic MCP tool-schema spec, PHC and Redfish references        | tools object                                           | MCP current          | 13, 34           |
 | harness/mcp-tool-schemas/mcp-ocloud.json        | Anthropic MCP tool-schema spec, O-Cloud surface per O2 IMS        | tools object; O2 IMS Inventory, Alarms, Provisioning   | MCP current, WG6     | 3, 6, 13         |
-| harness/references/o2ims.md                     | O-RAN.WG6.O2IMS-Interface (pointer)                               | O2 IMS reference implementation                        | upstream SHA TBD     | 3, 6, 39         |
-| harness/references/cloudevents.md               | O-RAN.WG6 Cloud Notifications, CNCF CloudEvents 1.0 (pointer)     | Event publisher, schema versions                       | upstream SHA TBD     | 29, 30, 31, 40   |
-| harness/references/mco-crd.md                   | machineconfiguration.openshift.io/v1 MachineConfig (pointer)      | MachineConfig CRD                                      | upstream SHA TBD     | 9, 12, 41        |
-| harness/references/kmm-crd.md                   | kmm.sigs.x-k8s.io/v1beta1 Module (pointer)                        | Module CRD                                             | upstream SHA TBD     | 10, 42           |
-| harness/references/mcp-spec.md                  | Anthropic Model Context Protocol Specification (pointer)          | MCP tool-schema spec                                   | upstream SHA TBD     | 13, 14, 15, 43   |
+| harness/references/o2ims.md                     | O-RAN.WG6.O2IMS-Interface (pointer)                               | O2 IMS reference implementation                        | 913484d              | 3, 6, 39         |
+| harness/references/cloudevents.md               | O-RAN.WG6 Cloud Notifications, CNCF CloudEvents 1.0 (pointer)     | Event publisher, schema versions                       | 3774ede              | 29, 30, 31, 40   |
+| harness/references/mco-crd.md                   | machineconfiguration.openshift.io/v1 MachineConfig (pointer)      | MachineConfig CRD                                      | d72b715              | 9, 12, 41        |
+| harness/references/kmm-crd.md                   | kmm.sigs.x-k8s.io/v1beta1 Module (pointer)                        | Module CRD                                             | b8e0265              | 10, 42           |
+| harness/references/mcp-spec.md                  | Anthropic Model Context Protocol Specification (pointer)          | MCP tool-schema spec                                   | d069881              | 13, 14, 15, 43   |
 | harness/runtime/scenario_stubs.json             | harness-unique consolidated stub table (single source of truth)   | Per-scenario stub values consumed by router + guardrail + walker | v0           | 3, 18, 19, 31, 35 |
 
 ## Scenario artifacts

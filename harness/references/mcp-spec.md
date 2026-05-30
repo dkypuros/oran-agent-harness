@@ -13,10 +13,10 @@ Bibliography ref: 13, 14, 15, 43
 
 ## Pin
 
-Commit SHA: `<commit-sha-pinned-at-publication>`
+Commit SHA: `d069881d3e1dab5ae76b4bf20806d131d1aa84e5`
 
-The pinned snapshot is the MCP tool-schema spec version the harness/mcp-tool-schemas/ files conform to. The
-placeholder above is intentional; pinning is a follow-up step before 3rd [WED] JUN 2026 publication.
+The pinned snapshot is the MCP tool-schema spec version the harness/mcp-tool-schemas/ files conform to,
+resolved against main HEAD on 2026-05-30.
 
 ## How the harness consumes this contract
 

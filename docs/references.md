@@ -165,25 +165,25 @@ harness/references/*.md files point to. Pinning commit SHAs is a follow-up step 
 publication; placeholder notation below is intentional.
 
 39. OpenShift KNI. oran-o2ims pinned snapshot. GitHub.
-    https://github.com/openshift-kni/oran-o2ims/tree/<commit-sha-pinned-at-publication>. Pin target:
+    https://github.com/openshift-kni/oran-o2ims/tree/913484da469255ebd9446d48ec65c8217bccf872. Pin target:
     O-Cloud Manager release used as the reference O2 IMS implementation.
 
 40. Red Hat Cloud Native Events. cloud-event-proxy pinned snapshot. GitHub.
-    https://github.com/redhat-cne/cloud-event-proxy/tree/<commit-sha-pinned-at-publication>. Pin target:
+    https://github.com/redhat-cne/cloud-event-proxy/tree/3774ede771948d98290af1f3fdd1f5c006d5f2fa. Pin target:
     the CloudEvents schema versions the harness consumes.
 
 41. OpenShift project. machine-config-operator MachineConfig CRD pinned snapshot. GitHub.
-    https://github.com/openshift/machine-config-operator/tree/<commit-sha-pinned-at-publication>/
+    https://github.com/openshift/machine-config-operator/tree/d72b715f8f9e0fad5d27a45420ea074ea2628207/
     manifests/machineconfiguration.crd.yaml. Pin target: the MachineConfig schema that scenarios
     A_fw_lldp_agent and A_prime_ice_driver conform to.
 
 42. Kubernetes SIGs. kernel-module-management Module v1beta1 CRD pinned snapshot. GitHub.
-    https://github.com/kubernetes-sigs/kernel-module-management/tree/<commit-sha-pinned-at-publication>/
+    https://github.com/kubernetes-sigs/kernel-module-management/tree/b8e0265fe059dbb47a074a287f0d6b7d6d8c13ed/
     config/crd/bases/kmm.sigs.x-k8s.io_modules.yaml. Pin target: the Module shape that scenario
     A_prime_ice_driver conforms to.
 
 43. Anthropic Model Context Protocol. MCP tool-schema specification pinned snapshot. GitHub.
-    https://github.com/modelcontextprotocol/specification/tree/<commit-sha-pinned-at-publication>. Pin
+    https://github.com/modelcontextprotocol/specification/tree/d069881d3e1dab5ae76b4bf20806d131d1aa84e5. Pin
     target: the JSON Schema shape that harness/mcp-tool-schemas/ conforms to.
 
 ---

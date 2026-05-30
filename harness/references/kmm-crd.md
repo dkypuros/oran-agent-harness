@@ -15,10 +15,10 @@ Bibliography ref: 10, 42
 
 ## Pin
 
-Commit SHA: `<commit-sha-pinned-at-publication>`
+Commit SHA: `b8e0265fe059dbb47a074a287f0d6b7d6d8c13ed`
 
-The pinned snapshot is the KMM Module v1beta1 release that scenario `A_prime_ice_driver` conforms to. The
-placeholder above is intentional; pinning is a follow-up step before 3rd [WED] JUN 2026 publication.
+The pinned snapshot is the KMM Module v1beta1 release that scenario `A_prime_ice_driver` conforms to,
+resolved against main HEAD on 2026-05-30.
 
 ## How the harness consumes this contract
 

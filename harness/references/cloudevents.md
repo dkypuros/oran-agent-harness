@@ -12,10 +12,10 @@ Bibliography ref: 29, 30, 31, 40
 
 ## Pin
 
-Commit SHA: `<commit-sha-pinned-at-publication>`
+Commit SHA: `3774ede771948d98290af1f3fdd1f5c006d5f2fa`
 
-The pinned snapshot is the cloud-event-proxy release whose schema versions the harness consumes. The
-placeholder above is intentional; pinning is a follow-up step before 3rd [WED] JUN 2026 publication.
+The pinned snapshot is the cloud-event-proxy release whose schema versions the harness consumes,
+resolved against main HEAD on 2026-05-30.
 
 ## How the harness consumes this contract
 
