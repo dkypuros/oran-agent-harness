@@ -11,17 +11,23 @@ Three goals for this repository, in the author's words:
    guardrails, schemas, routing rules, MCP tool surfaces, upstream pointers) live under `harness/`.
    Every authored file carries a citation header tying it to an O-RAN, ETSI, IEEE, 3GPP, or TM Forum
    section. The central index is `harness/conformance.md`.
-3. **Here is where I actually test the use case.** Two walkthrough scenarios under `scenarios/` exercise
-   the harness against host-platform PTP faults. The reference operationalization that runs them lives
-   under `omc-skills/o-ran/`.
+3. **Here is where I actually test the use case.** Four walkthrough scenarios under `scenarios/`
+   exercise the harness against host-platform PTP faults (A, A-prime, D, E). A research bench at
+   `5G_O-RAN_SIM/bench/` runs them all end to end with platform stubs firing and trace files
+   accumulating. A static HTML trace viewer at `5G_O-RAN_SIM/dashboard/trace_view/` shows the
+   per-scenario timelines side by side. The OMC skill bundle under `omc-skills/o-ran/` is the
+   reference operationalization for prose-driven runs.
 
 ## What this repository is
 
-A stub-only declarative artifact set. No FastMCP servers, no LangGraph agents, no Python
-implementation. The architectural pattern is operationalization-agnostic. We provide an OMC skill bundle
-as one reference operationalization, with the explicit framing that the contracts are portable to
-LangGraph, OpenAI Agents SDK, Microsoft Semantic Kernel, or any agent framework that can read JSON
-Schema and YAML.
+A citation-grounded declarative artifact set (harness pattern) with a runnable platform substrate
+(`5G_O-RAN_SIM/`) underneath. The harness pattern itself stays declarative (taxonomy, guardrails,
+schemas, routing rules, MCP tool surfaces); the platform substrate provides 13 O-RAN service
+implementations across WG1 to WG11, stub publishers for PTP alarms / Metal3 firmware / Redfish BMC
+/ TMF921 SMO companion intents, and a unified LLM inference client routable across Anthropic, OpenAI,
+and a local OpenShift AI vLLM mock. The architectural pattern is operationalization-agnostic; the
+contracts are portable to LangGraph, OpenAI Agents SDK, Microsoft Semantic Kernel, or any agent
+framework that can read JSON Schema and YAML.
 
 The reference O2 IMS implementation cited throughout is Red Hat's open-source O-Cloud Manager
 (openshift-kni/oran-o2ims, bibliography ref 6 in `docs/references.md`).
@@ -56,7 +62,7 @@ oran-agent-harness/
 |   |   `-- new-scenario.md        structured fields for a new walkthrough scenario
 |   `-- PULL_REQUEST_TEMPLATE.md   verify-gate checklist for every PR
 |-- docs/
-|   `-- references.md    public bibliography, 47 numbered AMA refs, URLs only
+|   `-- references.md    public bibliography, 52 numbered AMA refs, URLs only, HTML id anchors
 |-- talk/                presentation artifacts
 |   |-- abstract.md             canonical nGRG submission
 |   |-- architecture.mmd        macro / billboard, 7 boxes, the mental map (the entry point)
@@ -82,10 +88,12 @@ oran-agent-harness/
 |   |-- routing-rules/   3 YAMLs, one per talk contribution
 |   |-- mcp-tool-schemas/ 4 FastMCP tool surfaces
 |   `-- references/      5 upstream contract pointers, commit-SHA pinnable
-|-- scenarios/           2 PTP host-platform walkthroughs
+|-- scenarios/           4 PTP host-platform walkthroughs
 |   |-- README.md             walkthrough narrative, what is stubbed vs real
 |   |-- A_fw_lldp_agent/      fw-lldp-agent service interferes with PTP (5 fixtures)
-|   `-- A_prime_ice_driver/   ice driver 1.11.x causes PHC drift (5 fixtures)
+|   |-- A_prime_ice_driver/   ice driver 1.11.x causes PHC drift (5 fixtures)
+|   |-- D_phc_drift_hw_only/  software-LOCKED vs hardware-NOT-OK divergence (5 fixtures)
+|   `-- E_nic_firmware_update/ NIC firmware update via Metal3 + TMF921 companion intent (5 fixtures)
 |-- harness/runtime/     deterministic Python runtime (stubs + real Router + real Guardrail)
 |   |-- router.py             real deterministic Router (taxonomy lookup)
 |   |-- guardrail.py          real deterministic Guardrail engine (audit emission)
@@ -95,11 +103,33 @@ oran-agent-harness/
 |-- scripts/             executable verify gate and demo runner
 |   |-- verify.py             10 deterministic checks, exits non-zero on any failure
 |   `-- demo.sh               walks both scenarios end to end with --verbose
-`-- 5G_O-RAN_SIM/        platform substrate (BF3-5G-Demo, Apache 2.0 re-licensed)
+|-- tests/               runtime unit tests for the harness Router and Guardrail
+|   |-- __init__.py
+|   `-- test_runtime.py       6 tests covering service / ambiguous / unknown layer / empty / crisis_mode / LLM-mode branches
+`-- 5G_O-RAN_SIM/        platform substrate (BF3-5G-Demo, Apache 2.0 re-licensed by the author)
     |-- open-digital-platform-2_0/   13 O-RAN service implementations across WG1-WG11
     |-- demo_front-end/              React dashboard
     |-- docs/                        O-RAN architecture and compliance docs
-    `-- llm/                         (added by #48) LLM inference client and fake vLLM mock
+    |-- oam/                         platform stubs the harness consumes
+    |   |-- ptp_operator_stub.py        emits CloudEvents matching O-RAN WG6 Cloud Notification API
+    |   |-- metal3_bmo_stub.py          firmware push phases (Preparing/Pushing/Rebooting/Verifying/Updated)
+    |   `-- redfish_bmc_stub.py         DMTF Redfish SimpleUpdate task lifecycle
+    |-- smo/
+    |   `-- tmf921_intent_emitter.py    TMF921 SMO companion intent envelope builder
+    |-- llm/                         LLM inference layer (Issue #48)
+    |   |-- inference_client.py         unified completion() across Anthropic / OpenAI / vLLM
+    |   |-- fake_vllm_server.py         fake OpenShift AI vLLM mock on port 8090
+    |   `-- .env.example                template, copy to .env to configure providers
+    |-- shared_trace/                file-based JSONL trace layer for cross-stage replay
+    |   |-- writer.py                   append_trace(scenario_id, stage, payload)
+    |   |-- viewer.py                   CLI timeline reader
+    |   `-- E_nic_firmware_update.example.jsonl   committed dual-route example trace
+    |-- bench/                       research bench runner
+    |   |-- runner.py                   orchestrates all 4 scenarios end to end
+    |   `-- summary.py                  comparative markdown table
+    `-- dashboard/trace_view/        static HTML trace viewer (vanilla JS, no build step)
+        |-- index.html                  4-up compare + per-scenario zoom
+        `-- serve.py                    python http.server on port 8095
 ```
 
 ## Citation discipline
@@ -152,7 +182,10 @@ Expected output of `./scripts/demo.sh` (truncated): each scenario prints four pi
 (FaultPayload, RCA, RemediationProposal, AuditEvent) and the final AuditEvent shows
 `targetLayer: infra`, `dryRun: true`, `requiresHumanApproval: true`, and a populated
 `reversibility_profile` with the expected `confidence_in_reversibility` value (`high` for Scenario
-A, `medium` for Scenario A-prime).
+A, `medium` for A-prime, `medium` for D, `medium` for E). Scenario E additionally carries a
+`companion_intent` (TMF921 envelope) in the remediation block reflecting the dual-route case.
+
+The verify gate's walker_e2e check enforces matching output for all 4 committed scenarios.
 
 See `scenarios/README.md` for the walkthrough narrative and the table of what is stubbed vs real.
 
@@ -170,14 +203,59 @@ audit_event.json on material fields.
 ./scripts/demo.sh
 ```
 
-Or a single scenario:
+Or a single scenario (A, A_prime, D, or E):
 
 ```
 python3 -m harness.runtime.walker scenarios/A_fw_lldp_agent/fault_payload.json --verbose
+python3 -m harness.runtime.walker scenarios/E_nic_firmware_update/fault_payload.json --verbose
 ```
 
 See `scenarios/README.md` for the walkthrough narrative, what is stubbed vs real, and how to swap a
 stub for a real component when moving to a bigger environment.
+
+### Research bench and trace viewer
+
+The research bench at `5G_O-RAN_SIM/bench/` runs all 4 scenarios end to end, firing the platform
+stubs (PTP operator publisher, Metal3 BMO, Redfish BMC, TMF921 SMO emitter for Scenario E) and
+capturing per-stage records to JSONL files at `5G_O-RAN_SIM/shared_trace/`.
+
+```bash
+# Run the bench (produces shared_trace/*.jsonl + bench/last_run_summary.md)
+python 5G_O-RAN_SIM/bench/runner.py all
+
+# Or a single scenario
+python 5G_O-RAN_SIM/bench/runner.py E_nic_firmware_update
+```
+
+The static HTML trace viewer renders the resulting JSONL files as color-coded timelines with a
+4-up comparison view:
+
+```bash
+python 5G_O-RAN_SIM/dashboard/trace_view/serve.py
+# open http://localhost:8095/dashboard/trace_view/index.html
+```
+
+### LLM substrate (Contribution 3 realized live)
+
+The harness Router's `ambiguous_path` is wired through a unified LLM inference client at
+`5G_O-RAN_SIM/llm/inference_client.py`. By default the seam is dormant (`ORAN_LLM_MODE` unset, the
+existing `NotImplementedError` raises so the verify gate stays clean). When `ORAN_LLM_MODE=live`,
+the router routes through Anthropic, OpenAI, or a local fake vLLM mock per the configured
+`LLM_PROVIDER` env var:
+
+```bash
+# Boot the local fake OpenShift AI vLLM mock (port 8090)
+python 5G_O-RAN_SIM/llm/fake_vllm_server.py
+
+# Copy the template and configure provider keys
+cd 5G_O-RAN_SIM && cp .env.example .env
+
+# Drive the harness with the LLM seam live
+ORAN_LLM_MODE=live python3 -m harness.runtime.walker scenarios/A_fw_lldp_agent/fault_payload.json
+```
+
+Stub-safety: if the configured provider key is the `stub-replace-with-real-key` placeholder, the
+client returns a deterministic canned disambiguation without making any network call.
 
 ### OMC reference operationalization (Claude Code skills)
 
@@ -205,7 +283,7 @@ populated ReversibilityProfile.
 |------------------------------------------|--------------------------------------------------------------|----------------------------------------------|
 | Remediation routing rule                 | harness/routing-rules/contribution-1-routing-rule.yaml      | omc-skills/o-ran/remediate.md                |
 | Guardrail contract layer                 | harness/routing-rules/contribution-2-guardrail-contract.yaml plus harness/guardrails.yaml | omc-skills/o-ran/sandbox-validation.md       |
-| LLM-neutral substrate                    | harness/routing-rules/contribution-3-llm-neutrality.yaml    | Automatic via OMC provider abstraction       |
+| LLM-neutral substrate                    | harness/routing-rules/contribution-3-llm-neutrality.yaml    | 5G_O-RAN_SIM/llm/inference_client.py routing across Anthropic / OpenAI / vLLM (with fake_vllm_server.py mock) |
 
 ## License
 
