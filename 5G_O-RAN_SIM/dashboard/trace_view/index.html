@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>5G_O-RAN_SIM trace timeline</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           margin: 0; padding: 18px 22px; background: #fafbfc; color: #1d1d1f; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .subtitle { color: #6e6e73; font-size: 13px; margin-bottom: 14px; }
+    .controls { margin-bottom: 16px; }
+    .controls button { padding: 6px 12px; margin-right: 8px; border: 1px solid #d2d2d7;
+                       background: white; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .controls button.active { background: #007aff; color: white; border-color: #007aff; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .grid.one { grid-template-columns: 1fr; max-width: 800px; margin: 0 auto; }
+    .col { background: white; border: 1px solid #e5e5ea; border-radius: 8px;
+           padding: 12px; min-height: 200px; }
+    .col h2 { font-size: 14px; margin: 0 0 10px; color: #1d1d1f; }
+    .col .empty { color: #8e8e93; font-style: italic; font-size: 12px; }
+    .row { border-left: 3px solid #d2d2d7; padding: 6px 10px; margin: 4px 0;
+           font-size: 11px; line-height: 1.4; background: #f5f5f7; border-radius: 4px;
+           word-break: break-word; }
+    .row .ts { color: #6e6e73; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+               font-size: 10px; }
+    .row .stage { display: inline-block; padding: 1px 6px; border-radius: 3px;
+                  color: white; font-size: 10px; font-weight: 600; margin: 2px 0; }
+    .row .summary { color: #1d1d1f; margin-top: 2px; font-family: ui-monospace,
+                    SFMono-Regular, Menlo, monospace; font-size: 10px; }
+    /* stage color coding */
+    .stage-ptp_operator { background: #007aff; }
+    .stage-gateway { background: #34c759; }
+    .stage-mcp_platform, .stage-mcp_ran, .stage-mcp_hardware, .stage-mcp_ocloud { background: #5ac8fa; }
+    .stage-domain_agent_platform, .stage-domain_agent_ran, .stage-domain_agent_hardware { background: #af52de; }
+    .stage-router { background: #ff9500; }
+    .stage-smo_intent { background: #ff3b30; }
+    .stage-guardrail { background: #ffcc00; color: #1d1d1f; }
+    .stage-metal3_bmo { background: #a2845e; }
+    .stage-redfish_bmc { background: #8e8e93; }
+    .stage-audit { background: #1d1d1f; }
+    .stage-unknown { background: #d2d2d7; color: #1d1d1f; }
+    .legend { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; margin: 8px 0 16px; }
+    .legend .stage { font-size: 10px; padding: 2px 8px; }
+    .footer { color: #6e6e73; font-size: 11px; margin-top: 22px; }
+  </style>
+</head>
+<body>
+  <h1>5G_O-RAN_SIM trace timeline</h1>
+  <div class="subtitle">
+    Reads <code>../shared_trace/{scenario}.jsonl</code> files. Run the bench first
+    (<code>python 5G_O-RAN_SIM/bench/runner.py all</code>), then refresh this page.
+  </div>
+  <div class="controls">
+    <button id="btn-compare" class="active">4-up compare</button>
+    <button id="btn-A">A only</button>
+    <button id="btn-Ap">A-prime only</button>
+    <button id="btn-D">D only</button>
+    <button id="btn-E">E only</button>
+    <button id="btn-reload">Reload traces</button>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div class="grid" id="grid"></div>
+  <div class="footer">
+    Stages: ptp_operator -> gateway -> mcp_* -> domain_agent_* -> router -> smo_intent -> guardrail -> metal3_bmo / redfish_bmc -> audit.
+    Color-coded by stage. Each row shows ts, stage, and a JSON-ish summary of the record.
+  </div>
+
+  <script>
+    const SCENARIOS = [
+      "A_fw_lldp_agent",
+      "A_prime_ice_driver",
+      "D_phc_drift_hw_only",
+      "E_nic_firmware_update",
+    ];
+    const STAGE_KEYS = [
+      "ptp_operator", "gateway", "mcp_platform", "mcp_ran", "mcp_hardware", "mcp_ocloud",
+      "domain_agent_platform", "domain_agent_ran", "domain_agent_hardware",
+      "router", "smo_intent", "guardrail", "metal3_bmo", "redfish_bmc", "audit",
+    ];
+
+    async function fetchTrace(scenarioId) {
+      const url = `../shared_trace/${scenarioId}.jsonl`;
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) return [];
+        const text = await res.text();
+        return text.split("\n").filter(Boolean).map(line => {
+          try { return JSON.parse(line); } catch { return null; }
+        }).filter(Boolean);
+      } catch { return []; }
+    }
+
+    function stageClass(stage) {
+      if (!stage) return "stage-unknown";
+      return STAGE_KEYS.includes(stage) ? `stage-${stage}` : "stage-unknown";
+    }
+
+    function renderRow(rec) {
+      const ts = (rec.ts || "").replace("T", " ").slice(0, 19);
+      const stage = rec.stage || "unknown";
+      const cls = stageClass(stage);
+      const summaryFields = Object.fromEntries(
+        Object.entries(rec).filter(([k]) => !["ts", "scenario_id", "stage"].includes(k))
+      );
+      const summary = JSON.stringify(summaryFields);
+      return `<div class="row">
+        <span class="ts">${ts}</span>
+        <span class="stage ${cls}">${stage}</span>
+        <div class="summary">${escapeHtml(summary)}</div>
+      </div>`;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    async function renderColumn(scenarioId) {
+      const recs = await fetchTrace(scenarioId);
+      const rows = recs.length
+        ? recs.map(renderRow).join("")
+        : `<div class="empty">no trace file at shared_trace/${scenarioId}.jsonl yet; run the bench.</div>`;
+      return `<div class="col">
+        <h2>${scenarioId}</h2>
+        ${rows}
+      </div>`;
+    }
+
+    async function render(scenarioFilter) {
+      const grid = document.getElementById("grid");
+      const targets = scenarioFilter ? [scenarioFilter] : SCENARIOS;
+      grid.className = targets.length === 1 ? "grid one" : "grid";
+      const cols = await Promise.all(targets.map(renderColumn));
+      grid.innerHTML = cols.join("");
+    }
+
+    function renderLegend() {
+      const legend = document.getElementById("legend");
+      legend.innerHTML = STAGE_KEYS.map(s =>
+        `<span class="stage ${stageClass(s)}">${s}</span>`
+      ).join("");
+    }
+
+    function setActive(id) {
+      document.querySelectorAll(".controls button").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    document.getElementById("btn-compare").onclick = () => { setActive("btn-compare"); render(); };
+    document.getElementById("btn-A").onclick = () => { setActive("btn-A"); render("A_fw_lldp_agent"); };
+    document.getElementById("btn-Ap").onclick = () => { setActive("btn-Ap"); render("A_prime_ice_driver"); };
+    document.getElementById("btn-D").onclick = () => { setActive("btn-D"); render("D_phc_drift_hw_only"); };
+    document.getElementById("btn-E").onclick = () => { setActive("btn-E"); render("E_nic_firmware_update"); };
+    document.getElementById("btn-reload").onclick = () => {
+      const active = document.querySelector(".controls button.active").id;
+      const map = { "btn-compare": null, "btn-A": "A_fw_lldp_agent", "btn-Ap": "A_prime_ice_driver",
+                    "btn-D": "D_phc_drift_hw_only", "btn-E": "E_nic_firmware_update" };
+      render(map[active]);
+    };
+
+    renderLegend();
+    render();
+  </script>
+</body>
+</html>
