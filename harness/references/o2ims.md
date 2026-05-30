@@ -20,8 +20,9 @@ diverges from a later upstream release.
 
 ## Canonical URI structure
 
-Per O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11, Section 3.4.3 and Section 3.4.4.2.2 (p. 118),
-Table 3.4.3-1, the canonical ProvisioningRequest REST resource URI is:
+Per O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11 (docs/references.md bibliography ref 3), Section 3.4.3
+and Section 3.4.4.2.2 (p. 118), Table 3.4.3-1, the canonical ProvisioningRequest REST resource
+URI is:
 
   {apiRoot}/O2ims_infrastructureProvisioning/{apiMajorVersion}/provisioningRequests
 

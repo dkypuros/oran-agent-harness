@@ -11,14 +11,14 @@ llm_neutrality_assertion:
 
   # Layering note: MCP (Anthropic Model Context Protocol, bibliography ref 13) is internal
   # agent scaffolding the harness uses to orchestrate domain agents and tool calls. MCP is
-  # NOT an O-RAN management plane interface; O-RAN defines O1, A1, R1, E2, and O2 as the
-  # standardized management plane. An rApp realization of this harness pattern would use
-  # MCP internally and expose its capabilities to the rest of the SMO via R1.
+  # NOT an O-RAN management plane interface; O-RAN defines O1 (ref 49), A1 (ref 50), R1 (ref 51),
+  # E2, and O2 (ref 3) as the standardized management plane. An rApp realization of this harness
+  # pattern would use MCP internally and expose its capabilities to the rest of the SMO via R1.
   layering_disclaimer:
-    mcp_role: "internal agent scaffolding, tool-calling protocol consumed inside the harness"
-    not_an_oran_interface: "MCP does not replace, bypass, or compete with O1, A1, R1, E2, or O2"
-    rapp_path: "an rApp realization would expose capability via R1 to the SMO; MCP stays internal"
-    relation_to_a1: "A1 targets Near-RT RIC behavior; this harness targets infrastructure remediation via O2 IMS, a different layer of the architecture"
+    mcp_role: "internal agent scaffolding, tool-calling protocol consumed inside the harness (MCP, bibliography ref 13)"
+    not_an_oran_interface: "MCP does not replace, bypass, or compete with O1 (ref 49), A1 (ref 50), R1 (ref 51), E2, or O2 (ref 3)"
+    rapp_path: "an rApp realization would expose capability via R1 (ref 51) to the SMO; MCP stays internal"
+    relation_to_a1: "A1 (ref 50) targets Near-RT RIC behavior; this harness targets infrastructure remediation via O2 IMS (ref 3), a different layer of the architecture"
 
   # The contract: no harness component embeds a specific provider. All LLM calls go through
   # an abstraction layer.
