@@ -237,3 +237,29 @@ f. References 44 through 47 cover standards named in the architecture diagram an
     https://www.o-ran.org/specifications. Accessed 30th [FRI] MAY 2026. Source for SMOS
     (SMO Service) terminology and the candidate positioning of this harness as a Closed-Loop
     Remediation SMOS.
+
+49. O-RAN Alliance. O-RAN O1 Interface Specification. Working Group 10 Technical Specification
+    (O-RAN.WG10.TS.O1-Interface.0-R005-v18.00). O-RAN Alliance e.V.
+    https://www.o-ran.org/specifications. Accessed 30th [FRI] MAY 2026. Backs the
+    SMO-to-managed-element OAM boundary distinction described in
+    talk/architecture_narrative.md section 2 telemetry-boundary note and in
+    harness/mcp-tool-schemas/mcp-platform.json. O1 governs SMO interactions with O-CU, O-DU, and
+    O-RU managed elements; the O-Cloud platform layer the harness observes sits below this
+    boundary.
+
+50. O-RAN Alliance. O-RAN A1 interface: General Aspects and Principles and Application Protocol.
+    Working Group 2 Technical Specifications (O-RAN.WG2.TS.A1GAP-R005-v05.03 and
+    O-RAN.WG2.TS.A1AP-R005-v06.00). O-RAN Alliance e.V. https://www.o-ran.org/specifications.
+    Accessed 30th [FRI] MAY 2026. Backs the A1-vs-O2-IMS layering distinction in talk track
+    Beat 3 and harness/routing-rules/contribution-3-llm-neutrality.yaml. A1 policies target
+    Near-RT RIC behavior (traffic steering, QoS, slice SLAs); this harness targets infrastructure
+    remediation via O2 IMS, a different layer.
+
+51. O-RAN Alliance. O-RAN R1 interface: General Aspects and Principles and Application Protocols
+    for R1 Services. Working Group 2 Technical Specifications (O-RAN.WG2.TS.R1GAP-R005-v13.00
+    and O-RAN.WG2.TS.R1AP-R005-v10.00). O-RAN Alliance e.V.
+    https://www.o-ran.org/specifications. Accessed 30th [FRI] MAY 2026. Backs the MCP-vs-R1
+    layering distinction in talk track Beat 3, talk/architecture_narrative.md section 5, and
+    harness/routing-rules/contribution-3-llm-neutrality.yaml layering_disclaimer block. R1 is the
+    SMO-internal service-exposure interface for rApps; MCP is internal agent scaffolding within
+    the harness.
