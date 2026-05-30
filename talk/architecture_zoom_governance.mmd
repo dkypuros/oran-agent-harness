@@ -6,7 +6,7 @@
 
 flowchart TB
 
-    subgraph Outside["Outside the harness boundary"]
+    subgraph Boundary["Boundary actors (outside the harness)"]
         direction LR
         Operator["NOC Operator<br/>(reads AuditEvent at decision time,<br/>holds the Killswitch key)"]:::human
         Peers["Peer reviewers<br/>(optional, per co_authorization edit_phase)"]:::human
@@ -16,19 +16,19 @@ flowchart TB
     subgraph Governance["TM Forum governance layer (top half of the harness)"]
         direction TB
 
-        subgraph KillLayer["Killswitch (global override, crisis_mode)"]
+        subgraph Killswitch_section["Killswitch (global override, crisis_mode)"]
             CrisisMode["crisis_mode block<br/>(harness/guardrails.yaml)"]:::killswitch
             CrisisActivation["CrisisModeActivation<br/>(harness/schemas/CrisisModeActivation.json)<br/>5s acknowledgement contract"]:::artifact
             CrisisMode --> CrisisActivation
         end
 
-        subgraph CoAuthLayer["Co-authorization (per-action boundary)"]
+        subgraph CoAuthorization["Co-authorization (per-action boundary)"]
             CoAuth["co_authorization block<br/>(harness/guardrails.yaml)<br/>draft / edit / commit phases"]:::guard
             EditPermissions["permitted_modifications<br/>(blast_radius, target nodes,<br/>dry_run, additional_safeguards)"]:::config
             CoAuth --> EditPermissions
         end
 
-        subgraph AuditLayer["Audit trail (TMF688)"]
+        subgraph AuditTrail["Audit trail (TMF688)"]
             AuditEvent["AuditEvent<br/>(harness/schemas/AuditEvent.json)<br/>TMF688-shaped envelope"]:::artifact
             ReversibilityProfile["ReversibilityProfile<br/>(harness/schemas/ReversibilityProfile.json)<br/>per-action undo contract (7 fields)"]:::artifact
             AuditSink["audit_sink<br/>(stdout+file in v0;<br/>Kafka/AMQ/TMF688 broker in prod)"]:::artifact
@@ -36,7 +36,7 @@ flowchart TB
             AuditEvent --> AuditSink
         end
 
-        subgraph IntentLayer["Intent emission (up-route to SMO)"]
+        subgraph IntentEmission["Intent emission (up-route to SMO)"]
             IntentEvent["TMF921 Intent<br/>(emit_smo_intent action_type)"]:::artifact
         end
     end

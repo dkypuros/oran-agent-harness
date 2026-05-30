@@ -12,10 +12,10 @@ flowchart TB
 
     Inbound["O-RAN CloudEvents inbound<br/>from cloud-event-proxy on the worker<br/>(WG6 Cloud Notifications)"]:::external
 
-    subgraph CognitiveLayer["Cognitive layer (sits on the Digital Twin substrate below)"]
+    subgraph Cognitive["Cognitive components (sit on the Digital Twin substrate below)"]
         direction TB
 
-        subgraph GatewayLayer["Agentic Gateway over MCP"]
+        subgraph AgenticGateway["Agentic Gateway over MCP"]
             Gateway["Agentic Gateway<br/>mTLS + OAuth2 + IP allowlist<br/>vendor-private tool exposure"]:::gateway
             McpPlat["mcp-platform<br/>ptp4l, services,<br/>driver, NIC stats"]:::mcp
             McpRan["mcp-ran<br/>cell sync, PM counters,<br/>RAN params"]:::mcp
@@ -27,7 +27,7 @@ flowchart TB
             Gateway --> McpOcloud
         end
 
-        subgraph AgentLayer["Domain Agents (LangGraph nodes)"]
+        subgraph DomainAgents["Domain Agents (LangGraph nodes)"]
             PlatA["Platform Agent"]:::agent
             RanA["RAN Domain Agent"]:::agent
             HwA["Hardware Domain Agent"]:::agent
@@ -35,7 +35,7 @@ flowchart TB
 
         KB["Knowledge Base (RAG)<br/>NOC playbooks plus SID context<br/>(maps to TMF GB922)"]:::kb
 
-        subgraph RouterLayer["Remediation Router"]
+        subgraph RemediationRouterSection["Remediation Router"]
             RCA["Root Cause Analysis<br/>harness/schemas/RCA.json"]:::artifact
             Taxonomy["taxonomy.yaml<br/>O-RAN WG6 resource model<br/>~20 entries"]:::config
             Router["Remediation Router<br/>deterministic lookup first<br/>LLM-assist on ambiguous edges"]:::router
