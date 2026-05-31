@@ -15,8 +15,8 @@
   "properties": {
     "fault_id": {
       "type": "string",
-      "pattern": "^flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
-      "description": "References the originating FaultPayload.fault_id."
+      "pattern": "^flt-[A-Za-z0-9-]+$",
+      "description": "References the originating FaultPayload.fault_id. Pattern aligns with FaultPayload.fault_id and AuditEvent.event.correlatedEventId so all three schemas accept both date-based ids (flt-YYYY-MM-DD-NNN) and short codes (flt-D-001, flt-E-reject-001)."
     },
     "timestamp": {
       "type": "string",

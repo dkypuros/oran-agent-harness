@@ -51,7 +51,7 @@ The remainder of the paper is organized as follows. Section \ref{sec:anchoring} 
   l4/.style={layer, fill=blue!12},
   arr/.style={->, thick, gray}
 ]
-\node[l4] (l4) at (0, 3.6) {\textbf{Layer 4: End-to-end fixture replay}\\ \scriptsize verify gate check 10 (walker\_e2e), 5 scenarios, 8 material fields};
+\node[l4] (l4) at (0, 3.6) {\textbf{Layer 4: End-to-end fixture replay}\\ \scriptsize verify gate check 10 (walker\_e2e), 5 scenarios, 8 fields};
 \node[l3] (l3) at (0, 2.2) {\textbf{Layer 3: Bidirectional conformance index}\\ \scriptsize verify gate check 4 (conformance\_complete)};
 \node[l2] (l2) at (0, 0.8) {\textbf{Layer 2: JSON Schema draft-07 contracts}\\ \scriptsize verify gate check 9 (schema\_validation)};
 \node[l1] (l1) at (0, -0.6) {\textbf{Layer 1: Citation headers on every authored stub}\\ \scriptsize verify gate check 1 (citation\_headers)};
@@ -62,7 +62,7 @@ The remainder of the paper is organized as follows. Section \ref{sec:anchoring} 
 
 \node[font=\scriptsize, rotate=90, gray] at (-4.2, 1.5) {claim anchoring chain (bottom-up)};
 \end{tikzpicture}
-\caption{Four-layer claim anchoring system. Each layer is mechanically enforced by a specific check of the verify gate. Layer 1 turns documentation into a contract; Layer 4 turns architectural claims into mechanically falsifiable assertions against committed expected outputs.}
+\caption{Four-layer claim anchoring system (read bottom-up). Each layer is mechanically enforced by a specific check of the verify gate. Layer 1 turns documentation into a contract; Layer 4 turns architectural claims into mechanically falsifiable assertions against committed expected outputs.}
 \label{fig:fourlayer}
 \end{figure}
 
@@ -82,7 +82,7 @@ A single file \texttt{harness/conformance.md} is a two-column table mapping ever
 
 \subsection{Layer 4: End-to-end fixture replay}
 
-The gate's tenth check runs the deterministic walker as a subprocess against all five committed scenario fault payloads. For each scenario, the actual audit event output is compared against the committed expected audit event on seven material fields: \texttt{targetLayer}, \texttt{taxonomyMatch}, \texttt{actionType}, \texttt{ocloudInternalPath}, \texttt{actionPayloadRef}, \texttt{dryRun}, \texttt{requiresHumanApproval}, plus the \texttt{reversibility\_profile.confidence\_in\_reversibility} field. Any divergence on any material field fails the gate. The mechanism turns architectural claims about routing decisions, action types, and the seven-field reversibility contract into mechanically falsifiable assertions.
+The gate's tenth check runs the deterministic walker as a subprocess against all five committed scenario fault payloads. For each scenario, the actual audit event output is compared against the committed expected audit event on eight material comparisons: seven named fields (\texttt{targetLayer}, \texttt{taxonomyMatch}, \texttt{actionType}, \texttt{ocloudInternalPath}, \texttt{actionPayloadRef}, \texttt{dryRun}, \texttt{requiresHumanApproval}) plus the \texttt{reversibility\_profile.confidence\_in\_reversibility} sub-field comparison. Any divergence on any comparison fails the gate. The mechanism turns architectural claims about routing decisions, action types, and the seven-field reversibility contract into mechanically falsifiable assertions.
 
 \section{The Verify Gate}
 \label{sec:gate}

@@ -15,8 +15,8 @@
   "properties": {
     "fault_id": {
       "type": "string",
-      "pattern": "^flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
-      "description": "Globally unique fault correlation id."
+      "pattern": "^flt-[A-Za-z0-9-]+$",
+      "description": "Globally unique fault correlation id. Pattern aligns with AuditEvent.event.correlatedEventId so cross-schema referential integrity holds across the deterministic walker pipeline; accepts both date-based ids (flt-YYYY-MM-DD-NNN) and short codes (flt-D-001, flt-E-reject-001) used by the committed walkthrough scenarios."
     },
     "timestamp": {
       "type": "string",

@@ -230,22 +230,25 @@ def main():
         fp_schema = json.loads((REPO_ROOT / "harness/schemas/FaultPayload.json").read_text())
         rev_schema = json.loads((REPO_ROOT / "harness/schemas/ReversibilityProfile.json").read_text())
         fails = []
-        # Validate fault payloads against FaultPayload schema
-        for path in [
-            "scenarios/A_fw_lldp_agent/fault_payload.json",
-            "scenarios/A_prime_ice_driver/fault_payload.json",
-        ]:
+        scenario_ids = [
+            "A_fw_lldp_agent",
+            "A_prime_ice_driver",
+            "D_phc_drift_hw_only",
+            "E_nic_firmware_update",
+            "E_with_smo_reject",
+        ]
+        # Validate fault payloads against FaultPayload schema (all 5 scenarios)
+        for sid in scenario_ids:
+            path = f"scenarios/{sid}/fault_payload.json"
             data = json.loads((REPO_ROOT / path).read_text())
             data_no_meta = {k: v for k, v in data.items() if k != "_conforms_to"}
             try:
                 jsonschema.validate(data_no_meta, fp_schema)
             except jsonschema.ValidationError as e:
                 fails.append(f"{path}: {e.message}")
-        # Validate audit_event.event.remediation against RemediationProposal schema
-        for path in [
-            "scenarios/A_fw_lldp_agent/audit_event.json",
-            "scenarios/A_prime_ice_driver/audit_event.json",
-        ]:
+        # Validate audit_event.event.remediation against RemediationProposal schema (all 5)
+        for sid in scenario_ids:
+            path = f"scenarios/{sid}/audit_event.json"
             data = json.loads((REPO_ROOT / path).read_text())
             remediation = data["event"]["remediation"]
             # ReversibilityProfile is a harness-unique extension on RemediationProposal
