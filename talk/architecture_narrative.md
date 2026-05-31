@@ -18,7 +18,9 @@ sandbox that runs before any live action.
 ## What is novel here, in one paragraph
 
 The right-side execution path is the contribution. It grounds infrastructure remediation in two
-standardized contracts simultaneously. Above, the O-RAN O2 IMS interface
+standardized contracts simultaneously, both anchored in the
+[O-RAN Architecture (ref 1)](../docs/references.md#ref-1) resource layering. Above, the O-RAN O2
+IMS interface
 ([O-RAN.WG6 O2 General Aspects and Principles, ref 2](../docs/references.md#ref-2);
 [O-RAN.WG6 O2 IMS Interface Specification, ref 3](../docs/references.md#ref-3)) gives the
 SMO-to-O-Cloud API a specification surface. Below, the actual delivery happens through CRD-shaped
@@ -27,10 +29,13 @@ contracts that already run in production O-Cloud deployments:
 firmware, and the [Machine Config Operator (ref 9)](../docs/references.md#ref-9) for host
 configuration. Most published agentic-RAN work either stops at the SMO boundary without a delivery
 story, or proposes a custom controller plane that side-steps O-RAN's own resource layering. The
-2+3+8+9 conjunction is what lets a single RemediationProposal travel from the cognitive layer
-through a standardized O-RAN interface into a concrete Kubernetes-native contract. Layered on top
-of that conjunction, the Remediation Router classifies first by deterministic taxonomy lookup
-against the O-RAN WG6 O-Cloud resource model and invokes LLM reasoning only on the residual
+prior diagnostic substrate published in
+[Kiani Mehr S, Korati Prasanna N, Kypuros D, et al. (ref 35)](../docs/references.md#ref-35)
+provides the multivendor fault-localization layer this work extends with a closed-loop remediation
+path. The 2+3+8+9 conjunction is what lets a single RemediationProposal travel from the cognitive
+layer through a standardized O-RAN interface into a concrete Kubernetes-native contract. Layered
+on top of that conjunction, the Remediation Router classifies first by deterministic taxonomy
+lookup against the O-RAN WG6 O-Cloud resource model and invokes LLM reasoning only on the residual
 `ambiguous` class. The rest of this document walks the four pieces (left loop, cognitive middle,
 routing decision, sandbox plus operator seam) in that order.
 
