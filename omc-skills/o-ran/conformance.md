@@ -27,7 +27,9 @@ Material fields (the fields that must match exactly, not just shape): `targetLay
 `reversibility_profile.confidence_in_reversibility`,
 `sandbox_verdict.apply_allowed` (v0 two-key gate, set by walker's `sandbox_simulation()`),
 `companion_intent.dispatch_result.accepted` (v0 SMO outcome, set by router's
-`_maybe_attach_dispatch_result()` from `harness/runtime/scenario_stubs.json`).
+`_maybe_attach_dispatch_result()` from `harness/runtime/scenario_stubs.json`),
+`o2ims_dispatch.accepted` (v0 O-RAN O2 IMS hop outcome, set by router's `_call_o2ims_deploy()`
+via `5G_O-RAN_SIM/oam/o2ims_stub.deploy_request()`; absent on service-layer routes).
 
 Non-material fields (may differ across LLM provider, model, or run): timestamps, contributingSignals
 ordering, free-text descriptions, validation_history.last_twin_run_at.

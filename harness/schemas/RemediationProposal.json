@@ -133,6 +133,10 @@
       "type": "object",
       "description": "Harness-unique extension attached by router.py _maybe_build_companion_intent() for dual-route node_firmware actions. Carries a TMF921 envelope plus an optional dispatch_result subfield recording the partner SMO's response."
     },
+    "o2ims_dispatch": {
+      "type": "object",
+      "description": "Harness-unique extension attached by router.py _call_o2ims_deploy() when targetLayer=infra. Carries the O-Cloud Manager's DeploymentRequest response per O-RAN.WG6 O2 IMS Interface Specification (refs 2, 3, 6). Fields: accepted, deploymentManagerId, deploymentRequestId, ocloud_internal_path, reconciler_target, ocm_version, ocm_response, optional request_received_at. Absent on service-layer routes (those cross TMF921 instead)."
+    },
     "reversibility_profile": {
       "type": "object",
       "description": "Optional in v0. When present, conforms to harness/schemas/ReversibilityProfile.json."

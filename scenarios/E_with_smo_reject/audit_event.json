@@ -34,6 +34,26 @@
       "humanApprovalStatus": "pending",
       "actionType": "apply_metal3_firmware",
       "ocloudInternalPath": "metal3-baremetal-operator",
+      "o2ims_dispatch": {
+        "_conforms_to": {
+          "spec": "O-RAN.WG6 O2 IMS Interface Specification, DeploymentRequest envelope",
+          "spec_section": "Infrastructure Management Services request and response envelope",
+          "spec_version": "O-RAN.WG6.O2IMS-Interface current",
+          "bibliography_ref": [
+            2,
+            3,
+            6
+          ]
+        },
+        "accepted": true,
+        "deploymentManagerId": "ocm-dallas-cluster-01",
+        "deploymentRequestId": "o2ims-req-flt-E-reject-001-001",
+        "ocloud_internal_path": "metal3-baremetal-operator",
+        "reconciler_target": "Metal3 BareMetalOperator (HostFirmwareComponents reconciler)",
+        "ocm_version": "openshift-kni/oran-o2ims v0-stub",
+        "ocm_response": "DeploymentRequest accepted by O-Cloud Manager ocm-dallas-cluster-01; will dispatch apply_metal3_firmware for worker-ran-03.dallas.example.com into Metal3 BareMetalOperator (HostFirmwareComponents reconciler).",
+        "request_received_at": "2026-05-30T18:42:45Z"
+      },
       "companion_intent": {
         "_conforms_to": {
           "spec": "TMF921 Intent Management API envelope, companion intent",

@@ -207,6 +207,46 @@ def test_dispatch_result_rejected_on_smo_reject_scenario() -> None:
     assert companion["dispatch_result"]["rejection_reason"] == "neighboring_cells_at_capacity"
 
 
+def test_o2ims_dispatch_attached_on_down_route() -> None:
+    """Down-route (layer=infra) crosses the O-RAN O2 IMS hop via 5G_O-RAN_SIM/oam/o2ims_stub.
+
+    Proves the architecture diagram's O2 IMS edge is a real code path, not a synthesized
+    string. router.route() must call into the o2ims_stub module and attach the response
+    envelope as proposal["o2ims_dispatch"]. The envelope must carry the O2 IMS
+    DeploymentRequest contract shape (deploymentManagerId, deploymentRequestId,
+    ocloud_internal_path, reconciler_target) and cite the foundation refs (2, 3, 6).
+    Service-layer routes do NOT cross O2 IMS, so service routes must NOT attach
+    o2ims_dispatch. Bibliography refs: 2 (O2 GA&P), 3 (O2 IMS Interface), 6 (oran-o2ims).
+    """
+    infra_rca = {
+        "fault_id": "flt-2026-05-14-001",
+        "timestamp": "2026-05-14T10:42:15Z",
+        "evidence": [],
+        "candidate_classifications": [
+            {
+                "taxonomy_match": "ptp_host_stack",
+                "target_layer": "infra",
+                "confidence": "high",
+                "rationale": "synthetic infra-layer test fixture (ptp_host_stack -> MCO)",
+            }
+        ],
+    }
+    proposal = router.route(infra_rca)
+    assert "o2ims_dispatch" in proposal, "infra route missing o2ims_dispatch"
+    dispatch = proposal["o2ims_dispatch"]
+    assert dispatch["accepted"] is True, dispatch
+    assert dispatch["deploymentManagerId"] == "ocm-dallas-cluster-01", dispatch
+    assert dispatch["deploymentRequestId"].startswith("o2ims-req-flt-"), dispatch
+    assert dispatch["ocloud_internal_path"] == "machine-config-operator", dispatch
+    assert "Machine Config Operator" in dispatch["reconciler_target"], dispatch
+    assert set(dispatch["_conforms_to"]["bibliography_ref"]) == {2, 3, 6}
+
+    service_proposal = router.route(_service_rca())
+    assert "o2ims_dispatch" not in service_proposal, (
+        "service route must not cross O2 IMS; got o2ims_dispatch on TMF921 route"
+    )
+
+
 _TESTS = [
     test_route_service_layer,
     test_route_ambiguous_raises,
@@ -216,6 +256,7 @@ _TESTS = [
     test_evaluate_crisis_mode_active,
     test_evaluate_sandbox_block_when_apply_disallowed,
     test_dispatch_result_rejected_on_smo_reject_scenario,
+    test_o2ims_dispatch_attached_on_down_route,
 ]
 
 

@@ -71,7 +71,14 @@ place every time and in the same shape every time.
    - `eventType: RemediationProposed`
    - `event.correlatedEventId` from the originating FaultPayload
    - `event.domain: oran-ocloud`
-   - `event.remediation` carries the full RemediationProposal plus the ReversibilityProfile
+   - `event.remediation` carries the full RemediationProposal plus the ReversibilityProfile.
+     For infra-layer (DOWN-route) proposals it also carries `o2ims_dispatch`, the O-Cloud
+     Manager's DeploymentRequest response attached by `router.py::_call_o2ims_deploy()` via
+     `5G_O-RAN_SIM/oam/o2ims_stub.deploy_request()`. The block carries `accepted`,
+     `deploymentManagerId`, `deploymentRequestId`, `reconciler_target`, `ocm_version`, and
+     `ocm_response` per O-RAN.WG6 O2 IMS Interface Specification ([refs 2, 3](../../docs/references.md#ref-2)).
+     The operator sees this row before co-authorization so the O2 IMS hop is visible in the
+     audit, not just synthesized as a path string.
 
 5. **Emit**: Per `audit_sink: stdout+file` in guardrails.yaml v0, the AuditEvent is printed to stdout and
    appended to `audit.jsonl`. Production deployments swap the sink for Kafka, AMQ Streams, or a

@@ -84,6 +84,7 @@ def route(rca: dict[str, Any]) -> dict[str, Any]:
             )
         proposal["actionType"] = path_entry["action_type"]
         proposal["ocloudInternalPath"] = path_entry["ocloud_internal"]
+        proposal["o2ims_dispatch"] = _call_o2ims_deploy(fault_id, proposal, scenario)
     elif layer == "service":
         proposal["actionType"] = "emit_smo_intent"
         proposal["ocloudInternalPath"] = "smo-tmf921-endpoint"
@@ -143,6 +144,35 @@ def _resolve_ambiguous(rca: dict[str, Any]) -> str:
         f"and explain in one sentence."
     )
     return completion(prompt, tier="medium")
+
+
+def _call_o2ims_deploy(
+    fault_id: str,
+    proposal: dict[str, Any],
+    scenario: dict[str, Any],
+) -> dict[str, Any]:
+    """Cross the O-RAN O2 IMS hop on the DOWN route.
+
+    Calls into 5G_O-RAN_SIM/oam/o2ims_stub.deploy_request() so the path the architecture diagram
+    labels "harness writes through O2 IMS to Metal3 / MCO / KMM" is a real code path, not a
+    synthesized string. The returned envelope is the O-Cloud Manager's DeploymentRequest response
+    per O-RAN.WG6 O2 IMS Interface Specification; the operator sees it on the AuditEvent as
+    `event.remediation.o2ims_dispatch`. Per-scenario `o2ims_dispatch_outcome` in
+    scenario_stubs.json overrides the synthesized defaults (e.g. to inject a reject path).
+    Bibliography refs: 2 (O2 GA&P), 3 (O2 IMS Interface), 6 (oran-o2ims reference impl).
+    """
+    sim_path = _REPO_ROOT / "5G_O-RAN_SIM"
+    if str(sim_path) not in sys.path:
+        sys.path.insert(0, str(sim_path))
+    from oam.o2ims_stub import deploy_request  # noqa: E402 (path-conditional import)
+
+    return deploy_request(
+        scenario_id=fault_id,
+        action_type=proposal.get("actionType", ""),
+        action_target=proposal.get("actionTarget", ""),
+        ocloud_internal_path=proposal.get("ocloudInternalPath", ""),
+        deterministic_outcome=scenario.get("o2ims_dispatch_outcome"),
+    )
 
 
 def _maybe_attach_dispatch_result(

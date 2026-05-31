@@ -3,8 +3,8 @@
     "spec_family": "harness-unique consolidated stub table",
     "section": "single source of truth for per-scenario runtime stubs (Router + Guardrail + Walker)",
     "version": "v0",
-    "bibliography_ref": [3, 18, 19, 31, 35],
-    "notes": "In real deployment, the fields here are sourced from: Domain Agents (proposalId, actionTarget, actionPayloadRef, contributingSignals, rca_timestamp, rca_rationale); the harness clock (event_time); the proposal evaluator + O-Cloud Inventory (blast_radius); EvalOps (reversibility_profile); the Digital Twin simulator (sandbox_verdict); the partner SMO TMF921 endpoint (smo_dispatch_outcome). Stubbed here for the four committed walkthrough scenarios plus one negative path (E_with_smo_reject) so the deterministic runtime produces output that matches the committed audit_event.json fixtures on material fields."
+    "bibliography_ref": [2, 3, 18, 19, 31, 35],
+    "notes": "In real deployment, the fields here are sourced from: Domain Agents (proposalId, actionTarget, actionPayloadRef, contributingSignals, rca_timestamp, rca_rationale); the harness clock (event_time); the proposal evaluator + O-Cloud Inventory (blast_radius); EvalOps (reversibility_profile); the Digital Twin simulator (sandbox_verdict); the partner SMO TMF921 endpoint (smo_dispatch_outcome); the O-Cloud Manager O2 IMS endpoint (o2ims_dispatch_outcome, deterministic override for the 5G_O-RAN_SIM/oam/o2ims_stub call in router.py). Stubbed here for the four committed walkthrough scenarios plus one negative path (E_with_smo_reject) so the deterministic runtime produces output that matches the committed audit_event.json fixtures on material fields."
   },
   "scenarios": {
     "flt-2026-05-14-001": {
@@ -34,6 +34,9 @@
         "apply_allowed": true,
         "simulator_run_at": "2026-05-14T10:42:16Z",
         "rationale": "Replay of apply_machine_config (mask fw-lldp-agent.service) against in-memory state snapshot converged; PTP master offset returned to baseline within settle interval; no driver-level side effects observed."
+      },
+      "o2ims_dispatch_outcome": {
+        "request_received_at": "2026-05-14T10:42:17Z"
       },
       "reversibility_profile": {
         "rollback_intent": {
@@ -102,6 +105,9 @@
         "accepted_at": "2026-05-30T11:25:43Z",
         "smo_response": "MaintenanceWindowNotification accepted by partner SMO. Handover for 47 UEs across worker-ran-02 cells scheduled to neighboring cells before window start. SLA gate set."
       },
+      "o2ims_dispatch_outcome": {
+        "request_received_at": "2026-05-30T11:25:42Z"
+      },
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_metal3_firmware",
@@ -169,6 +175,9 @@
         "rejected_at": "2026-05-30T18:42:46Z",
         "smo_response": "Cannot handover 47 UEs from worker-ran-03 cells; neighboring cells are at 92% capacity in the proposed window. Partner SMO recommends deferring the maintenance window by 4 hours or accepting SLA degradation during the apply."
       },
+      "o2ims_dispatch_outcome": {
+        "request_received_at": "2026-05-30T18:42:45Z"
+      },
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_metal3_firmware",
@@ -231,6 +240,9 @@
         "simulator_run_at": "2026-05-30T11:00:25Z",
         "rationale": "Replay of apply_kmm_module (ice 1.11.17 to 1.13.7) against in-memory state snapshot converged; PHC drift signature cleared on simulated post-load; no PTP daemon flap observed during simulated driver reload."
       },
+      "o2ims_dispatch_outcome": {
+        "request_received_at": "2026-05-30T11:00:27Z"
+      },
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_kmm_module",
@@ -292,6 +304,9 @@
         "apply_allowed": true,
         "simulator_run_at": "2026-05-14T11:15:11Z",
         "rationale": "Replay of apply_kmm_module (ice driver swap) against in-memory state snapshot converged; monotonic drift signature cleared; PTP daemon healthy post-load."
+      },
+      "o2ims_dispatch_outcome": {
+        "request_received_at": "2026-05-14T11:15:13Z"
       },
       "reversibility_profile": {
         "rollback_intent": {

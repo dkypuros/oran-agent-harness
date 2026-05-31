@@ -131,8 +131,14 @@ respect for the service-execution boundary.
 Config Operator), driver swaps via [KMM Module](../docs/references.md#ref-10) CRs (delivered by the Kernel Module Management
 Operator), node firmware via [Metal3](../docs/references.md#ref-7) HostFirmwareComponents, PerformanceProfile updates via the Node
 Tuning Operator, SR-IOV reconfiguration. Every one of these flows into the O-Cloud via the O-RAN O2
-IMS API. Red Hat's open-source O-Cloud Manager (`openshift-kni/oran-o2ims`) is the reference O2 IMS
-implementation cited in this work.
+IMS API. Red Hat's open-source O-Cloud Manager (`openshift-kni/oran-o2ims`, [ref 6](../docs/references.md#ref-6))
+is the reference O2 IMS implementation cited in this work. In v0 the down-route is a real code hop:
+`harness/runtime/router.py::_call_o2ims_deploy()` invokes
+`5G_O-RAN_SIM/oam/o2ims_stub.deploy_request()`, and the O-Cloud Manager's DeploymentRequest response
+lands on the AuditEvent as `event.remediation.o2ims_dispatch` (carrying `deploymentManagerId`,
+`deploymentRequestId`, `reconciler_target`, and the operator-facing `ocm_response`). The audit row
+shows the operator that the O2 IMS hop happened before the underlying Metal3 / MCO / KMM reconciler
+took over, not just that a path string was composed.
 
 The routing rule fires the LOW branch alone for most infra remediations, but a higher-blast
 case forces both branches in parallel. Scenario E (`scenarios/E_nic_firmware_update/`) shows
