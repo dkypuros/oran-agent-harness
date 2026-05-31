@@ -11,6 +11,9 @@
 \usepackage{enumitem}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc}
 \hypersetup{colorlinks=true,citecolor=blue,linkcolor=blue,urlcolor=blue}
 
 \title{Composing O-RAN, TM Forum, IEEE, DMTF, and Kubernetes-Native Contracts Without Inventing Parallel Standards: A Bridge-Based Architecture for Closed-Loop Cloud RAN Remediation}
@@ -54,7 +57,45 @@ The remainder of the paper is organized as follows. Section \ref{sec:stack} surv
 \section{The Composition Bridges}
 \label{sec:bridges}
 
-Each bridge below names the from-spec, the to-spec, the seam artifact in the harness, the file anchor where the bridge is implemented, and the bibliography references involved. A reviewer can confirm any single bridge by reading the named files.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  body/.style={draw, rounded corners, fill=gray!15, minimum width=2.6cm, minimum height=0.7cm, font=\small\bfseries, align=center},
+  spec/.style={draw=none, minimum width=2.6cm, minimum height=0.42cm, font=\scriptsize, align=center, text=black!65},
+  bridge/.style={draw, rounded corners, fill=blue!15, minimum width=2.0cm, minimum height=0.7cm, font=\scriptsize, align=center},
+  plane/.style={draw, rounded corners, fill=orange!15, minimum width=15.6cm, minimum height=0.7cm, font=\small\bfseries, align=center},
+  arr/.style={->, thick, gray!50}
+]
+\node[body] (oran) at (0, 3.0) {O-RAN Alliance};
+\node[body] (tmf)  at (3.9, 3.0) {TM Forum};
+\node[body] (ieee) at (7.8, 3.0) {IEEE / ITU-T};
+\node[body] (dmtf) at (11.7, 3.0) {DMTF};
+\node[body] (k8s)  at (15.0, 3.0) {CNCF / Kubernetes};
+
+\node[spec] at (0, 2.4) {WG1, WG6 O2, R1, O1};
+\node[spec] at (3.9, 2.4) {TMF688, TMF921, GB922};
+\node[spec] at (7.8, 2.4) {1588-2019, G.8275.1};
+\node[spec] at (11.7, 2.4) {Redfish DSP0266};
+\node[spec] at (15.0, 2.4) {CloudEvents, MCO, KMM, Metal3};
+
+\draw[thick, gray] (-1.2, 1.45) -- (16.2, 1.45);
+
+\node[bridge] at (-0.6, 1.45) {B1\\ PTP to Fault};
+\node[bridge] at (1.7, 1.45)  {B2\\ taxonomy};
+\node[bridge] at (4.0, 1.45)  {B3\\ 2+3+8+9};
+\node[bridge] at (6.4, 1.45)  {B4\\ TMF921 dual};
+\node[bridge] at (8.8, 1.45)  {B5\\ Redfish chain};
+\node[bridge] at (11.4, 1.45) {B6\\ TMF688 audit};
+\node[bridge] at (14.4, 1.45) {B7\\ MCP to R1 (v1)};
+
+\node[plane] at (7.5, 0.2) {Agent Harness Enforcement Plane (router, guardrail, conformance index, verify gate)};
+
+\end{tikzpicture}
+\caption{Seven contract bridges between five standards bodies and the harness enforcement plane. Each numbered bridge corresponds to a subsection of this section. Specific interface references appear under each standards body box. The enforcement plane below the rail is where each bridge becomes machine-verifiable via the citation header on the relevant authored YAML or JSON artifact.}
+\label{fig:bridges}
+\end{figure*}
+
+Each bridge below names the from-spec, the to-spec, the seam artifact in the harness, the file anchor where the bridge is implemented, and the bibliography references involved. Figure~\ref{fig:bridges} shows the seven bridges in one view. A reviewer can confirm any single bridge by reading the named files.
 
 \subsection{Bridge 1: IEEE 1588 / G.8275.1 to O-RAN WG6 Cloud Notifications}
 
@@ -86,6 +127,13 @@ The harness's Agentic Gateway exposes vendor-private tooling to agents via MCP \
 
 \section{The Conformance Auditing Mechanism}
 \label{sec:audit}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../talk/architecture_zoom_cognitive.png}
+\caption{Cognitive middle zoom. The Agentic Gateway terminates the CloudEvents stream and presents the MCP server mesh (mcp-platform, mcp-ran, mcp-hardware, mcp-ocloud) to the three domain agents (Platform, RAN, Hardware). The deterministic Router consults the taxonomy and the routing rule. EvalOps, Sandbox, and Agentic Recoverability run as activities on the Digital Twin substrate beneath. Citation-header enforcement and the conformance index sit alongside the Router as machine-verifiable contracts.}
+\label{fig:cognitive}
+\end{figure}
 
 The bridge claims are only useful if a reviewer can confirm them mechanically. The harness ships two enforcement mechanisms.
 

@@ -11,6 +11,8 @@
 \usepackage{enumitem}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc}
 \hypersetup{colorlinks=true,citecolor=blue,linkcolor=blue,urlcolor=blue}
 
 \title{A Fixture-Driven Research Harness for Falsifiable Claims in Agentic O-RAN Automation}
@@ -39,7 +41,32 @@ The remainder of the paper is organized as follows. Section \ref{sec:anchoring} 
 \section{The Claim Anchoring System}
 \label{sec:anchoring}
 
-Four layers of anchoring carry the load.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  layer/.style={draw, rounded corners, minimum width=7.6cm, minimum height=1.0cm, font=\small, align=center},
+  l1/.style={layer, fill=red!12},
+  l2/.style={layer, fill=yellow!18},
+  l3/.style={layer, fill=green!12},
+  l4/.style={layer, fill=blue!12},
+  arr/.style={->, thick, gray}
+]
+\node[l4] (l4) at (0, 3.6) {\textbf{Layer 4: End-to-end fixture replay}\\ \scriptsize verify gate check 10 (walker\_e2e), 5 scenarios, 8 material fields};
+\node[l3] (l3) at (0, 2.2) {\textbf{Layer 3: Bidirectional conformance index}\\ \scriptsize verify gate check 4 (conformance\_complete)};
+\node[l2] (l2) at (0, 0.8) {\textbf{Layer 2: JSON Schema draft-07 contracts}\\ \scriptsize verify gate check 9 (schema\_validation)};
+\node[l1] (l1) at (0, -0.6) {\textbf{Layer 1: Citation headers on every authored stub}\\ \scriptsize verify gate check 1 (citation\_headers)};
+
+\draw[arr] (l1.north) -- (l2.south);
+\draw[arr] (l2.north) -- (l3.south);
+\draw[arr] (l3.north) -- (l4.south);
+
+\node[font=\scriptsize, rotate=90, gray] at (-4.2, 1.5) {claim anchoring chain (bottom-up)};
+\end{tikzpicture}
+\caption{Four-layer claim anchoring system. Each layer is mechanically enforced by a specific check of the verify gate. Layer 1 turns documentation into a contract; Layer 4 turns architectural claims into mechanically falsifiable assertions against committed expected outputs.}
+\label{fig:fourlayer}
+\end{figure}
+
+Four layers of anchoring carry the load. Figure~\ref{fig:fourlayer} shows the layered hierarchy.
 
 \subsection{Layer 1: Citation headers on every stub}
 
@@ -60,7 +87,53 @@ The gate's tenth check runs the deterministic walker as a subprocess against all
 \section{The Verify Gate}
 \label{sec:gate}
 
-The gate is a single Python script at \texttt{scripts/verify.py}. It runs ten checks in sequence and exits 0 on 10 of 10 pass, non-zero with specific failure rows otherwise. Each check guards a specific failure mode.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  phase/.style={draw, rounded corners, thick, minimum width=4.8cm, minimum height=3.0cm, align=center},
+  check/.style={draw, rounded corners, fill=white, minimum width=4.0cm, minimum height=0.48cm, font=\scriptsize, align=center},
+  pass/.style={draw, rounded corners, fill=green!22, minimum width=3.0cm, minimum height=0.8cm, font=\small\bfseries, align=center},
+  block/.style={draw, rounded corners, fill=red!20, minimum width=8.0cm, minimum height=0.8cm, font=\small\bfseries, align=center},
+  arr/.style={->, thick}
+]
+\node[phase, fill=gray!10]   (pa) at (0, 0)   {};
+\node[phase, fill=blue!10]   (pb) at (5.5, 0) {};
+\node[phase, fill=orange!15] (pc) at (11, 0)  {};
+
+\node[font=\small\bfseries] at (0, 1.35)   {Phase A: Hygiene};
+\node[font=\small\bfseries] at (5.5, 1.35) {Phase B: Structure};
+\node[font=\small\bfseries] at (11, 1.35)  {Phase C: Conformance};
+
+\node[check] at (0, 0.7)  {C5 em\_dashes};
+\node[check] at (0, 0.15) {C6 no\_leakage};
+\node[check] at (0, -0.4) {C7 readme\_structure};
+\node[check] at (0, -0.95){C8 file\_counts};
+
+\node[check] at (5.5, 0.7)  {C1 citation\_headers};
+\node[check] at (5.5, 0.15) {C2 json\_parse};
+\node[check] at (5.5, -0.4) {C3 yaml\_parse};
+\node[check] at (5.5, -0.95){C4 conformance\_complete};
+
+\node[check] at (11, 0.4)  {C9 schema\_validation};
+\node[check] at (11, -0.2) {C10 walker\_e2e};
+
+\draw[arr] (pa.east) -- node[above, font=\scriptsize] {all pass} (pb.west);
+\draw[arr] (pb.east) -- node[above, font=\scriptsize] {all pass} (pc.west);
+
+\node[pass] (gp) at (15, 0) {GATE PASS};
+\draw[arr] (pc.east) -- (gp.west);
+
+\node[block] (bk) at (5.5, -2.5) {any check fail $\Rightarrow$ exit non-zero with specific failure row};
+\draw[arr] (pa.south) -- (bk.north -| pa.south);
+\draw[arr] (pb.south) -- (bk.north);
+\draw[arr] (pc.south) -- (bk.north -| pc.south);
+
+\end{tikzpicture}
+\caption{Ten-check verify gate as a three-phase pipeline. Phase A enforces hygiene (em-dash audit, leakage guard, README structure, file counts). Phase B enforces structural integrity (citation headers, JSON and YAML parse, conformance index). Phase C enforces spec conformance (JSON Schema validation, end-to-end walker replay). Any single check failure exits the gate non-zero with a specific failure row.}
+\label{fig:verifygate}
+\end{figure*}
+
+The gate is a single Python script at \texttt{scripts/verify.py}. It runs ten checks in sequence and exits 0 on 10 of 10 pass, non-zero with specific failure rows otherwise. Figure~\ref{fig:verifygate} shows the three-phase pipeline. Each check guards a specific failure mode.
 
 \textbf{Check 1, citation\_headers.} Guards against undocumented stubs. A new YAML or JSON file added without a \texttt{\_conforms\_to} block fails the check.
 

@@ -11,6 +11,7 @@
 \usepackage{enumitem}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \hypersetup{colorlinks=true,citecolor=blue,linkcolor=blue,urlcolor=blue}
 
 \title{A Closed-Loop Day-2 Remediation Architecture for O-RAN Cloud Infrastructure Using Standardized Interfaces}
@@ -52,7 +53,14 @@ The remainder of the paper is organized as follows. Section \ref{sec:background}
 \section{System Architecture}
 \label{sec:arch}
 
-The architecture has three logical pieces and an overhead control: the left loop (observation), the cognitive middle, the right loop (routing and delivery), and the Killswitch as a global override.
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{../talk/architecture.png}
+\caption{Seven-component macro architecture. The left side carries the observation loop (PTP Operator, cloud-event-proxy, O-RAN WG6 Cloud Notifications). The center carries the Agent Harness (Agentic Gateway plus four MCP servers plus three domain agents plus the deterministic Router). The right side forks: UP via TMF921 to the partner SMO, DOWN via O2 IMS to the O-Cloud. The Digital Twin substrate sits beneath the harness; the Killswitch is a global override above it.}
+\label{fig:arch_macro}
+\end{figure*}
+
+The architecture has three logical pieces and an overhead control: the left loop (observation), the cognitive middle, the right loop (routing and delivery), and the Killswitch as a global override. Figure~\ref{fig:arch_macro} shows the macro layout.
 
 \subsection{Left loop: observation}
 
@@ -80,7 +88,14 @@ The dual-route pattern fires both branches simultaneously when an infrastructure
 
 Before any apply, the proposal traverses a deterministic five-gate guardrail engine declared at \texttt{harness/guardrails.yaml} and executed at \texttt{harness/runtime/guardrail.py}. The gates fire in order: crisis\_mode global override, sandbox apply\_allowed (verdict produced by the Twin pass), action\_allowlist, blast\_radius caps (one node, one site, four cells in v0), and requiresHumanApproval. The Sandbox stage is operationally flexible: a same-topology mirrored cluster or a simulated linuxptp plus NIC driver stack satisfies the contract.
 
-Every audit event carries a populated \texttt{ReversibilityProfile} with seven fields: rollback intent, blast-radius-if-reverse, rebuild timeline, replication history, validation history, risk profile burn-down, and confidence in reversibility. The intent is that the operator has the rollback contract at decision time, not after-the-fact.
+Every audit event carries a populated \texttt{ReversibilityProfile} with seven fields: rollback intent, blast-radius-if-reverse, rebuild timeline, replication history, validation history, risk profile burn-down, and confidence in reversibility. The intent is that the operator has the rollback contract at decision time, not after-the-fact. Figure~\ref{fig:governance} shows the governance layer in detail.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../talk/architecture_zoom_governance.png}
+\caption{Governance layer zoom. The TMF688 audit event carries the proposal, the guardrail result, the sandbox verdict, the optional companion intent with its dispatch result, and the seven-field ReversibilityProfile. The co-authorization contract sits between draft and commit. The Killswitch (crisis\_mode) is the global override.}
+\label{fig:governance}
+\end{figure}
 
 \subsection{Killswitch as global override}
 
@@ -88,6 +103,13 @@ A \texttt{crisis\_mode} flag in \texttt{guardrails.yaml} is the global override.
 
 \section{Prototype and Walkthroughs}
 \label{sec:proto}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../talk/sequence_agentic_recovery.png}
+\caption{Sequence diagram for a single closed-loop remediation cycle. PTP CloudEvent arrives at the gateway, traverses the cognitive middle to a RemediationProposal, passes the sandbox apply-allowed gate and the five-gate guardrail, lands on the operator's co-authorization seat, and emits a TMF688 audit event with the reversibility profile attached.}
+\label{fig:sequence}
+\end{figure}
 
 The repository ships five end-to-end fixture scenarios under \texttt{scenarios/}: \texttt{A\_fw\_lldp\_agent} (a host service interfering with PTP, routed to MCO), \texttt{A\_prime\_ice\_driver} (an outdated NIC driver causing PHC drift, routed to KMM), \texttt{D\_phc\_drift\_hw\_only} (the hardware-only divergence demonstrating the diagnostic edge), \texttt{E\_nic\_firmware\_update} (the dual-route firmware case with accepted companion intent), and \texttt{E\_with\_smo\_reject} (the same firmware path with a rejected companion intent). Each scenario carries a \texttt{fault\_payload.json} input, a remediation YAML, and a committed \texttt{audit\_event.json} fixture that the verify gate replays against the actual walker output.
 
