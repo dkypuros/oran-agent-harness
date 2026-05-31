@@ -129,3 +129,65 @@ the standardized interop point.
 The repo has more than the deck. Point reviewers at the repo URL plus
 `talk/architecture_narrative.md` for the full walkthrough. Slide deck is out of scope for this
 repo per the locked plan decision (see `talk/slides.md`).
+
+## Q14. How does the dual-route handle transaction atomicity between the TMF921 up route and the O2 IMS down route? What if the partner SMO rejects the companion intent after the firmware push has already started?
+
+The dual-route is parallel emission, not a distributed two-phase commit. All three mechanisms
+that handle the failure modes are implemented in v0 of the bench and exercised by the test
+suite.
+
+1. **The Sandbox gates the down route on twin convergence, not on the up route's acceptance.**
+   Implemented in `harness/runtime/walker.py` `sandbox_simulation()` (the stage between Router
+   and Guardrail). Reads the per-scenario twin verdict from
+   `harness/runtime/scenario_stubs.json` `sandbox_verdict` block. The verdict carries
+   `simulator_version`, `twin_converged`, `baseline_match`, `deviation_observed`, and
+   `apply_allowed`. The Guardrail engine at `harness/runtime/guardrail.py` checks
+   `apply_allowed`; if False, it raises `ValueError("sandbox_verdict.apply_allowed is
+   False ... down-route blocked at twin gate")` before reaching the action_allowlist or
+   blast_radius checks. Proven by `tests/test_runtime.py::test_evaluate_sandbox_block_when_apply_disallowed`,
+   which monkey-patches a False verdict and asserts the apply is blocked.
+
+2. **The up route's outcome lands in the AuditEvent BEFORE operator co-authorization.** The
+   harness emits the TMF921 companion intent and captures the SMO's response in
+   `companion_intent.dispatch_result`. Implemented in `harness/runtime/router.py`
+   `_maybe_attach_dispatch_result()` and exercised end-to-end by
+   `scenarios/E_with_smo_reject/`, where the SMO rejects the maintenance window because
+   neighboring cells are at 92% capacity. The operator sees the rejection in the
+   AuditEvent before signing. Proven by
+   `tests/test_runtime.py::test_dispatch_result_rejected_on_smo_reject_scenario` (walks the
+   scenario end-to-end and asserts `companion_intent.dispatch_result.accepted == False`).
+   Per the `co_authorization` block in `harness/guardrails.yaml`, the operator can edit
+   `permitted_modifications` (defer the apply, adjust the window, change the target node)
+   or withhold approval entirely. The operator is the reconciliation point.
+
+3. **The Killswitch is the global abort for the mid-flight failure case.** Implemented in
+   `harness/runtime/guardrail.py` as the `_CRISIS_MODE_ACTIVE` seam that, when set, raises
+   `RuntimeError("crisis_mode active, all writes frozen")` before any further evaluation.
+   When activated by a NOC supervisor per `talk/killswitch.md`, all write paths revoke
+   (O2 IMS and SMO TMF921), EvalOps confidence pins at zero, in-flight actions are allowed
+   to complete or roll back per the ReversibilityProfile. Proven by
+   `tests/test_runtime.py::test_evaluate_crisis_mode_active`.
+
+A reviewer can verify all three by cloning the repo, running
+`python -m tests.test_runtime`, and inspecting the test output (8/8 PASS including the
+two new tests above). The walker_e2e check in `scripts/verify.py` exercises both the
+accepted and rejected dispatch_result paths across the five committed scenarios.
+
+What the architecture explicitly does NOT do: distributed two-phase commit across the SMO
+and the O-Cloud. That would require a global transaction coordinator and would couple the
+SMO's scheduling logic to the O-Cloud's firmware delivery state machine. Both vendors would
+lose authority over their own domain. The architecture preserves their separation by making
+the operator the reconciliation point and the Killswitch the global abort. Distributed
+transaction atomicity across the SMO-to-O-Cloud boundary is an open research direction for
+Day-3 (`narratives/trajectory_what_day_3_looks_like.md`, workstream 1, multi-site
+coordination).
+
+File anchors:
+  `harness/runtime/walker.py` `sandbox_simulation()` for the Sandbox stage
+  `harness/runtime/guardrail.py` for the Sandbox gate (`apply_allowed` check) and crisis_mode override
+  `harness/runtime/router.py` `_maybe_attach_dispatch_result()` for the SMO response capture
+  `harness/runtime/scenario_stubs.json` per-scenario `sandbox_verdict` and `smo_dispatch_outcome` blocks
+  `harness/guardrails.yaml` for co_authorization and crisis_mode policy
+  `scenarios/E_nic_firmware_update/` for the accepted dual-route path
+  `scenarios/E_with_smo_reject/` for the SMO-rejection dual-route path
+  `tests/test_runtime.py` 8/8 PASS, including two new tests covering the Sandbox gate and the SMO rejection capture

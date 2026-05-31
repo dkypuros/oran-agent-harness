@@ -62,6 +62,15 @@ def evaluate(proposal: dict[str, Any], fault_id: str) -> dict[str, Any]:
     if _CRISIS_MODE_ACTIVE:
         raise RuntimeError("crisis_mode active, all writes frozen")
 
+    sandbox = proposal.get("sandbox_verdict")
+    if sandbox is None:
+        raise ValueError("no sandbox_verdict on proposal; walker did not run the Sandbox stage")
+    if not sandbox.get("apply_allowed", False):
+        raise ValueError(
+            f"sandbox_verdict.apply_allowed is False ({sandbox.get('rationale', '')}); "
+            f"down-route blocked at twin gate"
+        )
+
     if proposal["actionType"] not in rules["action_allowlist"]:
         raise ValueError(f"actionType {proposal['actionType']} not in action_allowlist")
 

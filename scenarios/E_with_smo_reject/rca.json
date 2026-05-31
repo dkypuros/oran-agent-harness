@@ -1,0 +1,39 @@
+{
+  "_conforms_to": {
+    "spec": "validates against harness/schemas/RCA.json. Diagnostic substrate output for the firmware update scenario with downstream SMO rejection.",
+    "spec_section": "RCA schema",
+    "spec_version": "v0",
+    "bibliography_ref": [35],
+    "scenario": "E_with_smo_reject"
+  },
+  "fault_id": "flt-E-reject-001",
+  "timestamp": "2026-05-30T18:42:30Z",
+  "evidence": [
+    {
+      "source_agent": "platform",
+      "tool_name": "mcp-platform.get_phc2sys_drift",
+      "finding": "phc2sys drift persistent post-KMM-update.",
+      "raw_data": {"latest_ppb": 75, "post_kmm_update": true, "verdict": "firmware_anomaly"}
+    },
+    {
+      "source_agent": "hardware",
+      "tool_name": "mcp-hardware.get_nic_firmware",
+      "finding": "Intel E810 firmware 4.40 matches KB 8731; fixed in 4.50+.",
+      "raw_data": {"firmware_version": "4.40 0x8001b743 1.3429.0", "fixed_in": "4.50+"}
+    },
+    {
+      "source_agent": "hardware",
+      "tool_name": "mcp-hardware.get_bmc_redfish",
+      "finding": "BMC reachable, UpdateService Enabled, Metal3-managed.",
+      "raw_data": {"managed_by": "metal3-baremetal-operator"}
+    }
+  ],
+  "candidate_classifications": [
+    {
+      "taxonomy_match": "node_firmware",
+      "target_layer": "infra",
+      "confidence": "high",
+      "rationale": "Same root cause as flt-E-001 (NIC firmware 4.40 PHC bug per KB 8731). The diagnostic output is identical to the accepted path. The teaching contrast for this scenario lies downstream of routing: the companion TMF921 intent is REJECTED by the partner SMO because neighboring cells are at handover capacity. The operator sees both the apply-allowed Sandbox verdict and the SMO rejection in the AuditEvent and must reconcile manually."
+    }
+  ]
+}

@@ -145,6 +145,26 @@ def _resolve_ambiguous(rca: dict[str, Any]) -> str:
     return completion(prompt, tier="medium")
 
 
+def _maybe_attach_dispatch_result(
+    fault_id: str,
+    intent: dict[str, Any],
+) -> dict[str, Any]:
+    """Attach the partner SMO's dispatch_result to a companion intent.
+
+    The harness emits the TMF921 intent to the partner SMO's TMF921 endpoint and observes the
+    response. The response (acceptance, rejection, deferral) lands in the dispatch_result field
+    so the operator sees both routes' outcomes before co-authorization. Per scenario stubs:
+    flt-E-001 is accepted, flt-E-reject-001 is rejected because neighboring cells are at
+    capacity. Bibliography refs: 19 (TMF921 Intent Management API).
+    """
+    from harness.runtime.walker import _SCENARIO_STUBS as _STUBS  # noqa: E402 (avoid circular)
+    scenario_stub = _STUBS.get(fault_id, {})
+    outcome = scenario_stub.get("smo_dispatch_outcome")
+    if outcome is not None:
+        intent["dispatch_result"] = outcome
+    return intent
+
+
 def _maybe_build_companion_intent(
     rca: dict[str, Any],
     proposal: dict[str, Any],
@@ -170,7 +190,7 @@ def _maybe_build_companion_intent(
     blast = scenario.get("blast_radius") or {}
     if blast.get("nodes", 0) < 1:
         return None
-    return {
+    intent = {
         "_conforms_to": {
             "spec": "TMF921 Intent Management API envelope, companion intent",
             "spec_section": "Intent expression between Intent Owner and Intent Handler",
@@ -192,3 +212,4 @@ def _maybe_build_companion_intent(
             "alarms during the maintenance window."
         ),
     }
+    return _maybe_attach_dispatch_result(rca.get("fault_id", "unknown"), intent)

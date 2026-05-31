@@ -3,7 +3,9 @@
     "spec": "TMF688 Event Management API envelope plus harness-unique reversibility_profile",
     "spec_section": "Event envelope and notification body, plus reversibility_profile",
     "spec_version": "TMF688 current, ReversibilityProfile v0",
-    "bibliography_ref": [18],
+    "bibliography_ref": [
+      18
+    ],
     "scenario": "D_phc_drift_hw_only"
   },
   "eventId": "evt-flt-D-001-001",
@@ -25,11 +27,22 @@
         "platform.host_nic.tx_hwtstamp_timeouts_climbing",
         "hardware.driver.ice_1_11_17_known_regression"
       ],
-      "actionType": "apply_kmm_module",
       "actionTarget": "worker-ran-02.dallas.example.com",
       "actionPayloadRef": "ice-driver-update-1.13.7",
-      "ocloudInternalPath": "kernel-module-management",
       "dryRun": true,
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending",
+      "actionType": "apply_kmm_module",
+      "ocloudInternalPath": "kernel-module-management",
+      "sandbox_verdict": {
+        "simulator_version": "v0-deterministic-replay",
+        "twin_converged": true,
+        "baseline_match": "within_envelope",
+        "deviation_observed": "none",
+        "apply_allowed": true,
+        "simulator_run_at": "2026-05-30T11:00:25Z",
+        "rationale": "Replay of apply_kmm_module (ice 1.11.17 to 1.13.7) against in-memory state snapshot converged; PHC drift signature cleared on simulated post-load; no PTP daemon flap observed during simulated driver reload."
+      },
       "guardrailResult": {
         "outcome": "pass",
         "rulesEvaluated": [
@@ -43,8 +56,6 @@
           "cells": 4
         }
       },
-      "requiresHumanApproval": true,
-      "humanApprovalStatus": "pending",
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_kmm_module",
@@ -73,7 +84,7 @@
         },
         "risk_profile_burn_down": {
           "initial_risk_score": 0.42,
-          "current_risk_score": 0.20,
+          "current_risk_score": 0.2,
           "burn_down_rate_per_minute": 0.008
         },
         "confidence_in_reversibility": "medium"

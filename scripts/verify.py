@@ -269,6 +269,7 @@ def main():
         "A_prime_ice_driver",
         "D_phc_drift_hw_only",
         "E_nic_firmware_update",
+        "E_with_smo_reject",
     ]:
         fault_path = REPO_ROOT / f"scenarios/{scenario}/fault_payload.json"
         expected_path = REPO_ROOT / f"scenarios/{scenario}/audit_event.json"

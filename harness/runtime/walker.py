@@ -76,14 +76,23 @@ def stubbed_agents(fault_payload: dict[str, Any]) -> dict[str, Any]:
     return rca
 
 
-def stubbed_twin(proposal: dict[str, Any]) -> dict[str, Any]:
-    """Stubbed Digital Twin pass.
+def sandbox_simulation(proposal: dict[str, Any], fault_id: str) -> dict[str, Any]:
+    """Sandbox stage. Run the proposal against the Digital Twin substrate before live commit.
 
-    Real twin would deploy the proposal against a same-topology mirrored cluster and observe
-    convergence. Here we return canned twin_pass_rate 1.0 so the guardrail engine proceeds. The
-    twin verdict lives inside reversibility_profile.validation_history (populated by the guardrail
-    engine in the next stage).
+    Real twin would deploy the proposal against a same-topology mirrored cluster, run the action,
+    and observe convergence over a configurable settle interval. Here the verdict is sourced from
+    harness/runtime/scenario_stubs.json[fault_id].sandbox_verdict so the deterministic walker
+    produces output that matches the committed audit_event.json fixtures byte-for-byte.
+
+    The verdict carries: simulator_version, twin_converged, baseline_match, deviation_observed,
+    apply_allowed, simulator_run_at, rationale. The guardrail engine reads apply_allowed and
+    blocks the live commit if it is false. Trust-loop framing at talk/trust_loop.md Activity 2.
     """
+    scenario = _SCENARIO_STUBS.get(fault_id, {})
+    verdict = scenario.get("sandbox_verdict")
+    if verdict is None:
+        raise ValueError(f"no sandbox_verdict in scenario_stubs for fault_id {fault_id}")
+    proposal["sandbox_verdict"] = verdict
     return proposal
 
 
@@ -117,8 +126,10 @@ def walk(fault_payload_path: str, verbose: bool = False) -> dict[str, Any]:
         print("\n---- Stage 3: RemediationProposal (real Router) ----")
         print(json.dumps(proposal, indent=2))
 
-    # STUB: no-op identity pass-through. Real twin would mutate twin_pass_rate / last_twin_run_at.
-    proposal = stubbed_twin(proposal)
+    proposal = sandbox_simulation(proposal, fault_id=fp_no_meta["fault_id"])
+    if verbose:
+        print("\n---- Stage 3.5: Sandbox verdict (twin-replay gate) ----")
+        print(json.dumps(proposal["sandbox_verdict"], indent=2))
 
     audit_event = guardrail.evaluate(proposal, fault_id=fp_no_meta["fault_id"])
     if verbose:

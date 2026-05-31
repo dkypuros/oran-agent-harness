@@ -161,6 +161,52 @@ def test_evaluate_crisis_mode_active() -> None:
         guardrail._CRISIS_MODE_ACTIVE = original
 
 
+def test_evaluate_sandbox_block_when_apply_disallowed() -> None:
+    """Sandbox verdict with apply_allowed=False blocks the apply at the twin gate.
+
+    Proves the Sandbox stage in harness/runtime/walker.py is a real gate, not a stub.
+    The guardrail evaluator raises ValueError before reaching the action_allowlist or
+    blast_radius checks. This is the v0 implementation of trust_loop.md Activity 2
+    (Sandbox forward-direction test flight on the twin).
+    """
+    proposal = {
+        "actionType": "apply_machine_config",
+        "requiresHumanApproval": True,
+        "sandbox_verdict": {
+            "simulator_version": "v0-deterministic-replay",
+            "twin_converged": False,
+            "baseline_match": "envelope_breach",
+            "deviation_observed": "phc_drift_post_apply",
+            "apply_allowed": False,
+            "simulator_run_at": "2026-05-14T10:42:16Z",
+            "rationale": "twin replay produced PHC drift regression; apply blocked at gate",
+        },
+    }
+    try:
+        guardrail.evaluate(proposal, fault_id="flt-2026-05-14-001")
+    except ValueError as exc:
+        assert "apply_allowed is False" in str(exc), str(exc)
+        return
+    raise AssertionError("expected ValueError, got none")
+
+
+def test_dispatch_result_rejected_on_smo_reject_scenario() -> None:
+    """Walk scenarios/E_with_smo_reject/ end-to-end and verify the companion intent
+    carries dispatch_result.accepted=False.
+
+    Proves the dual-route is parallel emission with observable rejection capture. The
+    operator sees the SMO rejection in the AuditEvent before co-authorization. This is
+    the v0 implementation of the dispatch_result extension (trust_loop.md and Q14 in
+    talk/reviewer_faq.md).
+    """
+    from harness.runtime import walker
+    audit = walker.walk("scenarios/E_with_smo_reject/fault_payload.json", verbose=False)
+    companion = audit["event"]["remediation"]["companion_intent"]
+    assert "dispatch_result" in companion, "companion_intent missing dispatch_result"
+    assert companion["dispatch_result"]["accepted"] is False, companion["dispatch_result"]
+    assert companion["dispatch_result"]["rejection_reason"] == "neighboring_cells_at_capacity"
+
+
 _TESTS = [
     test_route_service_layer,
     test_route_ambiguous_raises,
@@ -168,6 +214,8 @@ _TESTS = [
     test_route_empty_classifications_raises,
     test_route_ambiguous_with_llm_mode_live,
     test_evaluate_crisis_mode_active,
+    test_evaluate_sandbox_block_when_apply_disallowed,
+    test_dispatch_result_rejected_on_smo_reject_scenario,
 ]
 
 

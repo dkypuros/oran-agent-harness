@@ -1,0 +1,26 @@
+{
+  "_conforms_to": {
+    "spec": "TMF921 Intent Management API envelope with dispatch_result. Standalone extract of the companion_intent nested field from this scenario's remediation_proposal.json, exposed as a fixture so the documentation can reference it directly. The dispatch_result records the SMO's rejection.",
+    "spec_section": "Intent expression between Intent Owner and Intent Handler plus dispatch_result extension",
+    "spec_version": "TMF921 current",
+    "bibliography_ref": [19],
+    "scenario": "E_with_smo_reject",
+    "source_of_truth": "scenarios/E_with_smo_reject/remediation_proposal.json field companion_intent"
+  },
+  "intent_id": "INT-flt-E-reject-001-companion",
+  "intent_type": "MaintenanceWindowNotification",
+  "affected_resources": [
+    "worker-ran-03.dallas.example.com"
+  ],
+  "service_impact_hint": "reduced_capacity",
+  "expected_outage_window_minutes": 8,
+  "issuer": "oran-agent-harness/router._maybe_build_companion_intent",
+  "dispatch_route": "smo-tmf921-endpoint",
+  "rationale": "Firmware update via Metal3 requires host reboot; the partner SMO is notified in parallel so it can pre-handover cells and gate downstream alarms during the maintenance window.",
+  "dispatch_result": {
+    "accepted": false,
+    "rejection_reason": "neighboring_cells_at_capacity",
+    "rejected_at": "2026-05-30T18:42:46Z",
+    "smo_response": "Cannot handover 47 UEs from worker-ran-03 cells; neighboring cells are at 92% capacity in the proposed window. Partner SMO recommends deferring the maintenance window by 4 hours or accepting SLA degradation during the apply."
+  }
+}

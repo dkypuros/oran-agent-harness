@@ -1,18 +1,12 @@
 {
   "_conforms_to": {
-    "spec": "validates against harness/schemas/RemediationProposal.json. Router output for the firmware update scenario, with companion_intent extension for the dual-route case.",
-    "spec_section": "RemediationProposal schema; approximates O-RAN.WG6.TS.O2IMS-INTERFACE-R005-v11 Section 3.4 ProvisioningRequest envelope. companion_intent is a harness-unique optional extension carrying a TMF921 envelope.",
+    "spec": "validates against harness/schemas/RemediationProposal.json. Router output for the SMO-rejection variant of the firmware update scenario.",
+    "spec_section": "RemediationProposal schema; companion_intent extension carries TMF921 envelope plus dispatch_result with accepted=false.",
     "spec_version": "v0",
-    "bibliography_ref": [
-      3,
-      7,
-      8,
-      19,
-      46
-    ],
-    "scenario": "E_nic_firmware_update"
+    "bibliography_ref": [3, 7, 8, 19, 46],
+    "scenario": "E_with_smo_reject"
   },
-  "proposalId": "prop-E-001",
+  "proposalId": "prop-E-reject-001",
   "version": "v1alpha1",
   "targetLayer": "infra",
   "classificationConfidence": "high",
@@ -23,7 +17,7 @@
     "hardware.nic.firmware_known_regression_kb_8731",
     "hardware.bmc.redfish_update_service_reachable"
   ],
-  "actionTarget": "worker-ran-02.dallas.example.com",
+  "actionTarget": "worker-ran-03.dallas.example.com",
   "actionPayloadRef": "intel-e810-firmware-update-4.50",
   "dryRun": true,
   "requiresHumanApproval": true,
@@ -35,14 +29,12 @@
       "spec": "TMF921 Intent Management API envelope, companion intent",
       "spec_section": "Intent expression between Intent Owner and Intent Handler",
       "spec_version": "TMF921 current",
-      "bibliography_ref": [
-        19
-      ]
+      "bibliography_ref": [19]
     },
-    "intent_id": "INT-flt-E-001-companion",
+    "intent_id": "INT-flt-E-reject-001-companion",
     "intent_type": "MaintenanceWindowNotification",
     "affected_resources": [
-      "worker-ran-02.dallas.example.com"
+      "worker-ran-03.dallas.example.com"
     ],
     "service_impact_hint": "reduced_capacity",
     "expected_outage_window_minutes": 8,
@@ -50,10 +42,10 @@
     "dispatch_route": "smo-tmf921-endpoint",
     "rationale": "Firmware update via Metal3 requires host reboot; the partner SMO is notified in parallel so it can pre-handover cells and gate downstream alarms during the maintenance window.",
     "dispatch_result": {
-      "accepted": true,
-      "smo_intent_id": "SMO-ACK-INT-flt-E-001-companion",
-      "accepted_at": "2026-05-30T11:25:43Z",
-      "smo_response": "MaintenanceWindowNotification accepted by partner SMO. Handover for 47 UEs across worker-ran-02 cells scheduled to neighboring cells before window start. SLA gate set."
+      "accepted": false,
+      "rejection_reason": "neighboring_cells_at_capacity",
+      "rejected_at": "2026-05-30T18:42:46Z",
+      "smo_response": "Cannot handover 47 UEs from worker-ran-03 cells; neighboring cells are at 92% capacity in the proposed window. Partner SMO recommends deferring the maintenance window by 4 hours or accepting SLA degradation during the apply."
     }
   }
 }

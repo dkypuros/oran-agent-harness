@@ -1,22 +1,22 @@
 {
   "_conforms_to": {
-    "spec": "TMF688 Event Management API envelope plus harness-unique reversibility_profile and companion_intent extension",
-    "spec_section": "Event envelope and notification body, plus reversibility_profile and companion_intent",
+    "spec": "TMF688 Event Management API envelope plus harness-unique sandbox_verdict, reversibility_profile, and companion_intent extensions with dispatch_result",
+    "spec_section": "Event envelope and notification body, plus sandbox_verdict, reversibility_profile, and companion_intent.dispatch_result",
     "spec_version": "TMF688 current, ReversibilityProfile v0",
     "bibliography_ref": [
       18,
       19
     ],
-    "scenario": "E_nic_firmware_update"
+    "scenario": "E_with_smo_reject"
   },
-  "eventId": "evt-flt-E-001-001",
-  "eventTime": "2026-05-30T11:25:45Z",
+  "eventId": "evt-flt-E-reject-001-001",
+  "eventTime": "2026-05-30T18:42:48Z",
   "eventType": "RemediationProposed",
   "event": {
-    "correlatedEventId": "flt-E-001",
+    "correlatedEventId": "flt-E-reject-001",
     "domain": "oran-ocloud",
     "remediation": {
-      "proposalId": "prop-E-001",
+      "proposalId": "prop-E-reject-001",
       "version": "v1alpha1",
       "targetLayer": "infra",
       "classificationConfidence": "high",
@@ -27,7 +27,7 @@
         "hardware.nic.firmware_known_regression_kb_8731",
         "hardware.bmc.redfish_update_service_reachable"
       ],
-      "actionTarget": "worker-ran-02.dallas.example.com",
+      "actionTarget": "worker-ran-03.dallas.example.com",
       "actionPayloadRef": "intel-e810-firmware-update-4.50",
       "dryRun": true,
       "requiresHumanApproval": true,
@@ -43,10 +43,10 @@
             19
           ]
         },
-        "intent_id": "INT-flt-E-001-companion",
+        "intent_id": "INT-flt-E-reject-001-companion",
         "intent_type": "MaintenanceWindowNotification",
         "affected_resources": [
-          "worker-ran-02.dallas.example.com"
+          "worker-ran-03.dallas.example.com"
         ],
         "service_impact_hint": "reduced_capacity",
         "expected_outage_window_minutes": 8,
@@ -54,10 +54,10 @@
         "dispatch_route": "smo-tmf921-endpoint",
         "rationale": "Firmware update via Metal3 requires host reboot; the partner SMO is notified in parallel so it can pre-handover cells and gate downstream alarms during the maintenance window.",
         "dispatch_result": {
-          "accepted": true,
-          "smo_intent_id": "SMO-ACK-INT-flt-E-001-companion",
-          "accepted_at": "2026-05-30T11:25:43Z",
-          "smo_response": "MaintenanceWindowNotification accepted by partner SMO. Handover for 47 UEs across worker-ran-02 cells scheduled to neighboring cells before window start. SLA gate set."
+          "accepted": false,
+          "rejection_reason": "neighboring_cells_at_capacity",
+          "rejected_at": "2026-05-30T18:42:46Z",
+          "smo_response": "Cannot handover 47 UEs from worker-ran-03 cells; neighboring cells are at 92% capacity in the proposed window. Partner SMO recommends deferring the maintenance window by 4 hours or accepting SLA degradation during the apply."
         }
       },
       "sandbox_verdict": {
@@ -66,8 +66,8 @@
         "baseline_match": "within_envelope",
         "deviation_observed": "expected_reboot_window",
         "apply_allowed": true,
-        "simulator_run_at": "2026-05-30T11:25:40Z",
-        "rationale": "Replay of apply_metal3_firmware (Intel E810 4.40 to 4.50+) against in-memory state snapshot converged; simulated reboot window of 8 minutes inside acceptable envelope; PHC stable post-reboot; no firmware regression detected during simulated SimpleUpdate task lifecycle."
+        "simulator_run_at": "2026-05-30T18:42:43Z",
+        "rationale": "Sandbox replay converged identically to flt-E-001. The infrastructure-side action is safe to apply per the twin. The decision blocker is on the service side: SMO has rejected the maintenance window, so the operator is the reconciliation point per the dual-route contract."
       },
       "guardrailResult": {
         "outcome": "pass",
@@ -85,7 +85,7 @@
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_metal3_firmware",
-          "intent_target": "worker-ran-02.dallas.example.com",
+          "intent_target": "worker-ran-03.dallas.example.com",
           "intent_payload_ref": "intel-e810-firmware-revert-4.40 (vendor allows downgrade with operator confirmation)"
         },
         "blast_radius_if_reverse": {
@@ -106,7 +106,7 @@
         "validation_history": {
           "twin_runs": 1,
           "twin_pass_rate": 1.0,
-          "last_twin_run_at": "2026-05-30T11:10:00Z"
+          "last_twin_run_at": "2026-05-30T18:30:00Z"
         },
         "risk_profile_burn_down": {
           "initial_risk_score": 0.55,

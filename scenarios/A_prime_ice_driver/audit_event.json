@@ -27,11 +27,22 @@
         "platform.host_driver.version_outdated",
         "platform.host_driver.known_issue_match"
       ],
-      "actionType": "apply_kmm_module",
       "actionTarget": "worker-ran-02.dallas.example.com",
       "actionPayloadRef": "ice-driver-update",
-      "ocloudInternalPath": "kernel-module-management",
       "dryRun": true,
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending",
+      "actionType": "apply_kmm_module",
+      "ocloudInternalPath": "kernel-module-management",
+      "sandbox_verdict": {
+        "simulator_version": "v0-deterministic-replay",
+        "twin_converged": true,
+        "baseline_match": "within_envelope",
+        "deviation_observed": "none",
+        "apply_allowed": true,
+        "simulator_run_at": "2026-05-14T11:15:11Z",
+        "rationale": "Replay of apply_kmm_module (ice driver swap) against in-memory state snapshot converged; monotonic drift signature cleared; PTP daemon healthy post-load."
+      },
       "guardrailResult": {
         "outcome": "pass",
         "rulesEvaluated": [
@@ -45,8 +56,6 @@
           "cells": 4
         }
       },
-      "requiresHumanApproval": true,
-      "humanApprovalStatus": "pending",
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_kmm_module",

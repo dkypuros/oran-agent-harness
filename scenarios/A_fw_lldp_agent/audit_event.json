@@ -27,11 +27,22 @@
         "platform.ptp_host_stack.fw_lldp_agent_active",
         "platform.host_nic.tx_hwtstamp_timeouts"
       ],
-      "actionType": "apply_machine_config",
       "actionTarget": "worker-ran-01.dallas.example.com",
       "actionPayloadRef": "99-worker-ran-disable-fw-lldp-agent",
-      "ocloudInternalPath": "machine-config-operator",
       "dryRun": true,
+      "requiresHumanApproval": true,
+      "humanApprovalStatus": "pending",
+      "actionType": "apply_machine_config",
+      "ocloudInternalPath": "machine-config-operator",
+      "sandbox_verdict": {
+        "simulator_version": "v0-deterministic-replay",
+        "twin_converged": true,
+        "baseline_match": "within_envelope",
+        "deviation_observed": "none",
+        "apply_allowed": true,
+        "simulator_run_at": "2026-05-14T10:42:16Z",
+        "rationale": "Replay of apply_machine_config (mask fw-lldp-agent.service) against in-memory state snapshot converged; PTP master offset returned to baseline within settle interval; no driver-level side effects observed."
+      },
       "guardrailResult": {
         "outcome": "pass",
         "rulesEvaluated": [
@@ -45,8 +56,6 @@
           "cells": 0
         }
       },
-      "requiresHumanApproval": true,
-      "humanApprovalStatus": "pending",
       "reversibility_profile": {
         "rollback_intent": {
           "intent_type": "apply_machine_config",

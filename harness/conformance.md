@@ -65,6 +65,12 @@ header, the verify gate fails.
 | scenarios/E_nic_firmware_update/companion_intent.json    | TMF921 Intent Management API envelope, companion intent         | Standalone extract of companion_intent for direct doc reference | TMF921 current | 19               |
 | scenarios/E_nic_firmware_update/remediation.yaml         | metal3.io/v1alpha1 HostFirmwareComponents                       | Metal3 BMO firmware update CR for Intel E810 NIC          | metal3v1alpha1 current | 7, 8           |
 | scenarios/E_nic_firmware_update/audit_event.json         | TMF688 Event Management API, ReversibilityProfile, companion_intent | Event envelope at blast (cells:4) plus SMO companion intent for firmware-class action | TMF688 current | 18, 19   |
+| scenarios/E_with_smo_reject/fault_payload.json           | validates against harness/schemas/FaultPayload.json             | Same firmware regression alarm as E on a different worker (worker-ran-03) | v0              | 26, 28, 29, 30, 31, 34, 44, 46 |
+| scenarios/E_with_smo_reject/rca.json                     | validates against harness/schemas/RCA.json                      | Diagnostic substrate output identical to E; teaching contrast is downstream | v0              | 35               |
+| scenarios/E_with_smo_reject/remediation_proposal.json    | validates against harness/schemas/RemediationProposal.json plus companion_intent with dispatch_result extension | Router output with TMF921 companion intent and dispatch_result accepted=false | v0              | 3, 7, 8, 19, 46 |
+| scenarios/E_with_smo_reject/companion_intent.json        | TMF921 Intent Management API envelope with dispatch_result      | Standalone extract showing the SMO rejection (capacity-bound)   | TMF921 current     | 19               |
+| scenarios/E_with_smo_reject/remediation.yaml             | metal3.io/v1alpha1 HostFirmwareComponents                       | Metal3 BMO firmware update CR for worker-ran-03 (same shape as E) | metal3v1alpha1 current | 7, 8           |
+| scenarios/E_with_smo_reject/audit_event.json             | TMF688 Event Management API with sandbox_verdict, ReversibilityProfile, and companion_intent.dispatch_result | Event envelope where Sandbox passes but SMO rejects the companion intent | TMF688 current | 18, 19   |
 
 ## How the verify gate uses this index
 
