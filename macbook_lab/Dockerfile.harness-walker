@@ -15,6 +15,7 @@ COPY harness /app/harness
 COPY scenarios /app/scenarios
 COPY 5G_O-RAN_SIM /app/5G_O-RAN_SIM
 COPY tests /app/tests
+COPY scripts /app/scripts
 COPY macbook_lab/http_wrappers /app/http_wrappers
 
 ENV PYTHONUNBUFFERED=1

@@ -120,6 +120,7 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-stub-replace-with-real-key}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-stub-replace-with-real-key}
       - LLM_PROVIDER=${LLM_PROVIDER:-vllm}
+      - ORAN_LLM_MODE=${ORAN_LLM_MODE:-heuristic}
       - VLLM_BASE_URL=http://fake-vllm:8090/v1
       - VLLM_API_KEY=demo-no-auth-required
     depends_on:
