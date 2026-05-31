@@ -162,11 +162,12 @@ Companion documents:
 <a id="ref-38"></a>38. Linux Foundation Networking. Open Source MANO (OSM). https://osm.etsi.org. Accessed 14th [WED]
     MAY 2026.
 
-## J. Upstream contracts referenced by harness/ stubs (commit-SHA-pinnable)
+## J. Upstream contracts referenced by harness/ stubs (commit-SHA-pinned)
 
 These references augment entries 5, 6, 9, 10, and 13. They are the specific snapshots that
-harness/references/*.md files point to. Pinning commit SHAs is a follow-up step before 3rd [WED] JUN 2026
-publication; placeholder notation below is intentional.
+harness/references/*.md files point to. Each entry below carries the real commit SHA from the
+upstream repository, validated against the GitHub API on 2026-05-31 (all five resolve HTTP 200,
+with ref-43 resolving via repository-rename redirect from the historical path).
 
 <a id="ref-39"></a>39. OpenShift KNI. oran-o2ims pinned snapshot. GitHub.
     https://github.com/openshift-kni/oran-o2ims/tree/913484da469255ebd9446d48ec65c8217bccf872. Pin target:
@@ -187,8 +188,11 @@ publication; placeholder notation below is intentional.
     A_prime_ice_driver conforms to.
 
 <a id="ref-43"></a>43. Anthropic Model Context Protocol. MCP tool-schema specification pinned snapshot. GitHub.
-    https://github.com/modelcontextprotocol/specification/tree/d069881d3e1dab5ae76b4bf20806d131d1aa84e5. Pin
-    target: the JSON Schema shape that harness/mcp-tool-schemas/ conforms to.
+    https://github.com/modelcontextprotocol/modelcontextprotocol/tree/d069881d3e1dab5ae76b4bf20806d131d1aa84e5.
+    The repository was renamed from `modelcontextprotocol/specification` to
+    `modelcontextprotocol/modelcontextprotocol`; GitHub preserves the redirect, so the pinned
+    SHA resolves through either path. Pin target: the JSON Schema shape that
+    harness/mcp-tool-schemas/ conforms to.
 
 ---
 
@@ -209,8 +213,11 @@ d. Reference 35 is included as the proof point that an MCP-coordinated multivend
    exists in published form. The talk's new contribution (the closed-loop remediation extension) builds
    architecturally on top of that substrate.
 
-e. References 39 through 43 use placeholder commit-SHA notation. These will be pinned to actual SHAs
-   before publication. Until then, the live URLs (refs 5, 6, 9, 10, 13, 29) remain authoritative.
+e. References 39 through 43 carry pinned commit SHAs validated against GitHub on 2026-05-31:
+   all five resolve to live commits in their respective upstream repositories (ref-43 resolves
+   via repository-rename redirect since `modelcontextprotocol/specification` was renamed to
+   `modelcontextprotocol/modelcontextprotocol`; the SHA itself is preserved). The live URLs
+   (refs 5, 6, 9, 10, 13, 29) also remain authoritative for tracking ongoing upstream changes.
 
 f. References 44 through 47 cover standards named in the architecture diagram and tool descriptions
    (ITU-T G.8275.1 PTP telecom profile, O-RAN WG4 Open Fronthaul, DMTF Redfish, TMF902 AI Model

@@ -6,7 +6,8 @@ Bibliography ref: 13, 14, 15, 43
 ## Source
 
 - Specification site: https://modelcontextprotocol.io
-- Specification repository: https://github.com/modelcontextprotocol/specification
+- Specification repository: https://github.com/modelcontextprotocol/modelcontextprotocol
+  (renamed from `modelcontextprotocol/specification`; GitHub preserves the redirect)
 - Python SDK: https://github.com/modelcontextprotocol/python-sdk
 - FastMCP framework: https://github.com/jlowin/fastmcp
 - Maintainer: Anthropic, with community contributions
