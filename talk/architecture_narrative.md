@@ -74,7 +74,8 @@ contract the harness reads. The schema each event populates is `harness/schemas/
 ## 2. The cognitive middle (the harness itself)
 
 The Agentic Gateway terminates the CloudEvents stream and exposes vendor-private tooling under
-controlled MCP interfaces (mTLS, OAuth2, IP allowlist). Three [FastMCP](../docs/references.md#ref-15) servers run behind the gateway:
+controlled MCP interfaces (mTLS, OAuth2, IP allowlist; architectural pattern, v0 lab trusts
+localhost). Three [FastMCP](../docs/references.md#ref-15) servers run behind the gateway:
 mcp-platform (linuxptp, host services, driver versions, NIC stats), mcp-ran (cell sync, PM counters,
 RAN parameters), and mcp-hardware (NIC PHC introspection, [BMC Redfish](../docs/references.md#ref-46), CPU performance counters). A
 fourth, mcp-ocloud, surfaces the [O-Cloud Manager](../docs/references.md#ref-6) Inventory and Alarms.

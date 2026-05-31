@@ -2,8 +2,17 @@
 
 Conforms to:
   O-RAN.WG6 O2 General Aspects and Principles (ref 2): the SMO-to-O-Cloud API contract surface
-  O-RAN.WG6 O2 IMS Interface Specification (ref 3): the DeploymentRequest envelope shape
+  O-RAN.WG6 O2 IMS Interface Specification (ref 3): the request/response envelope shape
 Bibliography refs: 2, 3, 6
+
+Terminology note: in the O-RAN.WG6.TS.O2IMS-Interface-R005 spec, the canonical REST resource for
+requesting infrastructure provisioning is `provisioningRequests` (Section 3.4) and the managed
+entity is `DeploymentManager`. This stub uses "DeploymentRequest" as the envelope label for the
+combined request-plus-response pair; the field names `deploymentManagerId` and
+`deploymentRequestId` map cleanly onto the DM identity and the provisioning action identity.
+The `_conforms_to.spec_section` deliberately reads "Infrastructure Management Services request
+and response envelope" so both interpretations are covered without overclaiming a specific
+section name.
 
 Represents the O-Cloud Manager (Red Hat oran-o2ims is the reference implementation, ref 6) sitting
 between the harness and the underlying delivery layer (Metal3 BMO, Machine Config Operator, KMM).
