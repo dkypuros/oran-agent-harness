@@ -3,7 +3,8 @@
 Research bench for closed-loop O-RAN remediation in multivendor Cloud RAN day-2 operations. The
 bench is the durable artifact: citation-anchored declarative contracts under `harness/`, a runnable
 platform substrate under `5G_O-RAN_SIM/`, five walkthrough scenarios under `scenarios/`, two OMC
-skill bundles under `omc-skills/`, and a Mac-local lab under `macbook_lab/`. One appearance of the
+skill bundles under `omc-skills/`, a Mac-local lab under `macbook_lab/`, and a Fedora + podman
+sibling under `linux_lab/`. One appearance of the
 bench is the talk *From Multivendor Diagnosis to Closed-Loop Remediation: An Agent Harness for
 Cloud RAN Day-2* at the O-RAN nGRG Workshop, Seattle, 4th [THU] JUN 2026, with submission
 artifacts under `talk/`. Long-form per-audience narratives that draw on the bench live under
