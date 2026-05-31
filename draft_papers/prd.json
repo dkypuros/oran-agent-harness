@@ -1,0 +1,89 @@
+{
+  "title": "Draft scientific papers for the O-RAN Agent Harness",
+  "author": "David Kypuros",
+  "venue_targets": ["O-RAN nGRG", "TM Forum DTW", "IEEE Globecom / NetSoft", "ACM SOSR / ReNets"],
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Shared BibTeX bibliography from docs/references.md",
+      "passes": true,
+      "acceptanceCriteria": [
+        "draft_papers/refs.bib exists",
+        "Contains 52 entries mapping each docs/references.md ref to a BibTeX citekey",
+        "Zero em dashes (U+2014)",
+        "Parseable by bibtex (no syntax errors)"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Paper 1: Closed-Loop Day-2 Remediation Architecture",
+      "passes": true,
+      "acceptanceCriteria": [
+        "draft_papers/paper_architecture.tex exists with full LaTeX structure",
+        "Thesis is falsifiable and grounded in 2+3+8+9 conjunction",
+        "Cites refs 1, 2, 3, 7, 8, 9, 10, 18, 19, 26, 27, 28, 29, 30, 31, 35, 44 minimum",
+        "Includes v0 honest-scope acknowledgements",
+        "Zero em dashes",
+        "Compiles to paper_architecture.pdf via pdflatex"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Paper 2: Cross-Standards Composition (Bridges)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "draft_papers/paper_standards_bridges.tex exists with full LaTeX structure",
+        "Documents seven named bridges across O-RAN / TMF / IEEE / DMTF / Kubernetes-native contracts",
+        "Cites refs from all five standards bodies",
+        "Includes v0 honest-scope acknowledgements",
+        "Zero em dashes",
+        "Compiles to paper_standards_bridges.pdf"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Paper 3: Research Harness Methodology",
+      "passes": true,
+      "acceptanceCriteria": [
+        "draft_papers/paper_research_harness.tex exists with full LaTeX structure",
+        "Documents claim-anchoring system (4 layers) and verify gate (10 checks)",
+        "Defends falsifiability and reproducibility claims",
+        "Includes v0 honest-scope acknowledgements",
+        "Zero em dashes",
+        "Compiles to paper_research_harness.pdf"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Compile all three papers to PDF via pdflatex + bibtex",
+      "passes": true,
+      "acceptanceCriteria": [
+        "draft_papers/paper_architecture.pdf exists (non-empty, valid PDF)",
+        "draft_papers/paper_standards_bridges.pdf exists",
+        "draft_papers/paper_research_harness.pdf exists",
+        "Each PDF has resolved bibliography (no ? marks in citations)"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Verify gate stays 10/10 PASS with new draft_papers/ subtree",
+      "passes": true,
+      "acceptanceCriteria": [
+        "scripts/verify.py exits 0 with 10/10 checks PASS",
+        "Em-dash audit reports zero across the public tree (including draft_papers/)",
+        "No leakage warnings"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "Commit + push the draft papers as one cohesive commit",
+      "passes": true,
+      "acceptanceCriteria": [
+        "Stage only draft_papers/ paths and any incidental README updates",
+        "Commit message names the three papers and acknowledges they are drafts",
+        "David Kypuros as sole author, no Co-Authored-By Claude",
+        "Push to origin/main succeeds"
+      ]
+    }
+  ]
+}

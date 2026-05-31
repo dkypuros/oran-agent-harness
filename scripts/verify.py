@@ -16,7 +16,8 @@ Checks:
   3. YAML parse on every .yaml and .yml in the public tree
   4. harness/conformance.md bidirectional completeness (no stale rows, no missing files)
   5. Em dash (U+2014) audit across the public tree, must be zero
-  6. Leakage guard: git ls-files must contain no .local/, python_demo/, .pdf, .env
+  6. Leakage guard: git ls-files must contain no .local/, python_demo/, .env; .pdf
+     allowed only under draft_papers/ (scientifically authored papers)
   7. README structure: 80-130 lines, three goals in the lede
   8. File counts: harness/ has 20 files, omc-skills/o-ran/ has 6 markdown files
   9. Schema validation: scenario data validates against declared harness/schemas/ (optional, requires jsonschema)
@@ -171,8 +172,17 @@ def main():
         tracked = subprocess.check_output(
             ["git", "ls-files"], cwd=str(REPO_ROOT)
         ).decode().split()
-        pattern = re.compile(r"\.local/|python_demo/|\.pdf$|\.env$")
-        leaks = [t for t in tracked if pattern.search(t)]
+        # PDFs under draft_papers/ are intentional: scientifically authored papers
+        # by the harness author. The .pdf rule otherwise defends against
+        # partner-confidential PDFs leaking elsewhere in the tree.
+        pattern_forbidden = re.compile(r"\.local/|python_demo/|\.env$")
+        pattern_pdf = re.compile(r"\.pdf$")
+        leaks = []
+        for t in tracked:
+            if pattern_forbidden.search(t):
+                leaks.append(t)
+            elif pattern_pdf.search(t) and not t.startswith("draft_papers/"):
+                leaks.append(t)
         record("no_leakage", not leaks, f"{len(leaks)} leaks" + (f": {leaks}" if leaks else ""))
     except Exception as e:
         record("no_leakage", False, f"git command failed: {e}")

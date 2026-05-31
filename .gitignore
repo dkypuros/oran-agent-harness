@@ -45,6 +45,19 @@ node_modules/
 
 # PDF redistribution guard (NG2 from plan)
 *.pdf
+# Exception: scientifically authored draft papers belong in the repo
+!draft_papers/*.pdf
+
+# LaTeX build artifacts (only .tex, .bib, .pdf are tracked under draft_papers/)
+draft_papers/*.aux
+draft_papers/*.log
+draft_papers/*.out
+draft_papers/*.bbl
+draft_papers/*.blg
+draft_papers/*.toc
+draft_papers/*.fls
+draft_papers/*.fdb_latexmk
+draft_papers/*.synctex.gz
 
 # Archive formats (defense in depth)
 *.tar
