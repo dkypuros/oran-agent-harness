@@ -47,8 +47,10 @@ BareMetalHost / HostFirmwareComponents are being touched, which phase the firmwa
      reconciler ([ref 7](../../docs/references.md#ref-7))
    - **Phases in flight** (live mode) or **phase pattern** (static mode):
      one line per phase with `component | phase | detail | bytes (if applicable)`
-   - **Scenario hint**: scenario E exercises this path with a 9.8 MB firmware blob
-     (Intel E810 PF0)
+   - **Scenario hint**: scenario E exercises this path with a 41.9 MB firmware blob
+     (Intel E810 PF0); scenario E_with_smo_reject exercises the same Metal3 push but with the
+     companion intent rejected by the partner SMO (so `dispatch_result.accepted: false`
+     lands on the AuditEvent even though the BareMetalHost apply itself proceeds)
    - **Routing context**: actions targeting `node_firmware` fire the DOWN-route via O2 IMS
      ([refs 2, 3](../../docs/references.md#ref-2)) and ALSO emit a TMF921 companion intent UP
      because firmware reboots require SMO coordination regardless of cell count

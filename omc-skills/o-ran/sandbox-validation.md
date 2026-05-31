@@ -32,13 +32,27 @@ place every time and in the same shape every time.
 1. **Load RemediationProposal**: Read the file path provided as argument. Validate against
    `../../harness/schemas/RemediationProposal.json`.
 
+1b. **Verify the sandbox verdict prerequisite (v0 two-key gate)**: confirm
+   `proposal.sandbox_verdict` is present and populated. In the v0 walker, this block is
+   attached by `../../harness/runtime/walker.py::sandbox_simulation()`, which reads the
+   per-scenario `sandbox_verdict` from `../../harness/runtime/scenario_stubs.json` and stamps
+   it onto the proposal before the guardrail runs. If `sandbox_verdict.apply_allowed` is
+   `False`, the guardrail engine at gate 2 raises `ValueError` and the apply is blocked at the
+   twin. This is the down-route half of the two-key authorization (operator approval is the
+   up-route half). The block carries `apply_allowed` (bool), `verdict` (string), and `reason`
+   (operator-facing summary). If the field is missing entirely, fail closed: the proposal was
+   constructed outside the canonical walker path and is not eligible for the v0 sandbox gate.
+
 2. **Run the guardrail engine** (from `../../harness/guardrails.yaml`):
-   - Check `action_allowlist`: `actionType` must be in the allowed list. Fail closed if not.
-   - Check `blast_radius`: count expected affected `nodes`, `sites`, `cells` based on the
-     `actionTarget` and the action_type semantics. Must not exceed the v0 hard caps (max_nodes=1,
-     max_sites=1, max_cells=4).
-   - Check `require_human_approval`: if `actionType` is in the list, ensure `requiresHumanApproval` is
-     true. (For v0, every action class requires human approval.)
+   - Gate 1: `crisis_mode` global override. If active, raise RuntimeError immediately.
+   - Gate 2: **sandbox apply-allowed**. Read `proposal.sandbox_verdict.apply_allowed` (set in
+     Step 1b). If False, raise ValueError("sandbox_verdict.apply_allowed is False").
+   - Gate 3: `action_allowlist`. `actionType` must be in the allowed list. Fail closed if not.
+   - Gate 4: `blast_radius`. Count expected affected `nodes`, `sites`, `cells` based on the
+     `actionTarget` and the action_type semantics. Must not exceed the v0 hard caps
+     (max_nodes=1, max_sites=1, max_cells=4).
+   - Gate 5: `require_human_approval`. If `actionType` is in the list, ensure
+     `requiresHumanApproval` is true. (For v0, every action class requires human approval.)
    - Record outcome (pass / fail / warn), rules evaluated, and blast radius. Populate
      `RemediationProposal.guardrailResult`.
 
@@ -74,6 +88,11 @@ but the schema enforcement is deterministic.
 
 <Verification>
 Output must validate against `../../harness/schemas/AuditEvent.json` AND the embedded reversibility_profile
-must validate against `../../harness/schemas/ReversibilityProfile.json`. For the two walkthrough
-scenarios, output must match `scenarios/A_*/audit_event.json` on the named material fields.
+must validate against `../../harness/schemas/ReversibilityProfile.json`. For the five walkthrough
+scenarios (A_fw_lldp_agent, A_prime_ice_driver, D_phc_drift_hw_only, E_nic_firmware_update,
+E_with_smo_reject), output must match the corresponding `scenarios/<id>/audit_event.json` on the
+named material fields, including `sandbox_verdict.apply_allowed` and (where present)
+`companion_intent.dispatch_result.accepted`. The negative-path test
+`tests/test_runtime.py::test_evaluate_sandbox_block_when_apply_disallowed` proves the gate 2
+behavior end-to-end.
 </Verification>

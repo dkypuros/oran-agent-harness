@@ -4,8 +4,9 @@ Conforms to:
   harness-unique orchestration, no upstream spec
 Bibliography refs: n/a (composition layer over the platform stubs and the harness walker)
 
-Orchestrates all 4 walkthrough scenarios end to end:
-  A_fw_lldp_agent, A_prime_ice_driver, D_phc_drift_hw_only, E_nic_firmware_update
+Orchestrates all 5 walkthrough scenarios end to end:
+  A_fw_lldp_agent, A_prime_ice_driver, D_phc_drift_hw_only, E_nic_firmware_update,
+  E_with_smo_reject
 
 For each scenario:
   1. Emit PTP operator alarm sequence via ptp_operator_stub.emit_alarm_sequence()
@@ -49,6 +50,7 @@ SCENARIO_IDS = [
     "A_prime_ice_driver",
     "D_phc_drift_hw_only",
     "E_nic_firmware_update",
+    "E_with_smo_reject",
 ]
 
 _FAULT_ID_BY_SCENARIO = {
@@ -56,6 +58,7 @@ _FAULT_ID_BY_SCENARIO = {
     "A_prime_ice_driver": "flt-2026-05-14-002",
     "D_phc_drift_hw_only": "flt-D-001",
     "E_nic_firmware_update": "flt-E-001",
+    "E_with_smo_reject": "flt-E-002",
 }
 
 _NODE_BY_SCENARIO = {
@@ -63,6 +66,7 @@ _NODE_BY_SCENARIO = {
     "A_prime_ice_driver": "worker-ran-02.dallas.example.com",
     "D_phc_drift_hw_only": "worker-ran-02.dallas.example.com",
     "E_nic_firmware_update": "worker-ran-02.dallas.example.com",
+    "E_with_smo_reject": "worker-ran-02.dallas.example.com",
 }
 
 
@@ -142,7 +146,7 @@ def run_scenario(scenario_id: str) -> dict[str, Any]:
         },
     )
 
-    if scenario_id == "E_nic_firmware_update":
+    if scenario_id in ("E_nic_firmware_update", "E_with_smo_reject"):
         from oam.metal3_bmo_stub import apply_firmware
         from oam.redfish_bmc_stub import simple_update, get_task_status
         from smo.tmf921_intent_emitter import emit_intent

@@ -160,7 +160,11 @@ cells in v0), and require-human-approval. The Sandbox gate is what makes "the tw
 the specific payload" concrete: if `sandbox_verdict.apply_allowed` is False, the apply is
 blocked before the action_allowlist or blast caps are even consulted. Co-authorship sits at
 the top of the gate stack: the harness drafts; the operator edits and commits. Not discrete
-HITL approve/reject.
+HITL approve/reject. (Scoping note: in v0 the draft / edit / commit framing in
+`harness/guardrails.yaml co_authorization` describes the contract surface, but the runtime
+enforces a boolean approval gate (`requiresHumanApproval` + `humanApprovalStatus`). Full
+edit-phase wiring, where the operator amends the proposal before commit instead of just
+approving or rejecting it, is the v1 target.)
 
 The proposal is then exercised against the Digital Twin substrate, a same-topology mirrored cluster
 (or a simulated linuxptp plus NIC driver stack) that supports three concurrent activities: the

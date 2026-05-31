@@ -18,10 +18,16 @@ Companion to the central `../../harness/conformance.md`.
 |------------------------------------------|---------------------------------------------------------------------|----------------------------------------------------------------------|
 | Scenario A end-to-end                    | `../../scenarios/A_fw_lldp_agent/fault_payload.json`               | `../../scenarios/A_fw_lldp_agent/audit_event.json` on material fields |
 | Scenario A-prime end-to-end              | `../../scenarios/A_prime_ice_driver/fault_payload.json`            | `../../scenarios/A_prime_ice_driver/audit_event.json` on material fields |
+| Scenario D end-to-end                    | `../../scenarios/D_phc_drift_hw_only/fault_payload.json`           | `../../scenarios/D_phc_drift_hw_only/audit_event.json` on material fields |
+| Scenario E end-to-end (accepted)         | `../../scenarios/E_nic_firmware_update/fault_payload.json`         | `../../scenarios/E_nic_firmware_update/audit_event.json` on material fields |
+| Scenario E end-to-end (SMO reject)       | `../../scenarios/E_with_smo_reject/fault_payload.json`             | `../../scenarios/E_with_smo_reject/audit_event.json` on material fields |
 
 Material fields (the fields that must match exactly, not just shape): `targetLayer`, `taxonomyMatch`,
 `actionType`, `ocloudInternalPath`, `dryRun`, `requiresHumanApproval`,
-`reversibility_profile.confidence_in_reversibility`.
+`reversibility_profile.confidence_in_reversibility`,
+`sandbox_verdict.apply_allowed` (v0 two-key gate, set by walker's `sandbox_simulation()`),
+`companion_intent.dispatch_result.accepted` (v0 SMO outcome, set by router's
+`_maybe_attach_dispatch_result()` from `harness/runtime/scenario_stubs.json`).
 
 Non-material fields (may differ across LLM provider, model, or run): timestamps, contributingSignals
 ordering, free-text descriptions, validation_history.last_twin_run_at.

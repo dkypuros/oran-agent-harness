@@ -7,6 +7,8 @@ citation_anchor:
   inputs:
     - ../../5G_O-RAN_SIM/smo/tmf921_intent_emitter.py
     - ../../scenarios/E_nic_firmware_update/companion_intent.json
+    - ../../scenarios/E_with_smo_reject/companion_intent.json
+    - ../../harness/runtime/router.py
   outputs:
     - ../../5G_O-RAN_SIM/shared_trace/E_nic_firmware_update.jsonl
   bibliography_refs: [18, 19]
@@ -43,14 +45,27 @@ actions; it emits a TMF921 intent and observes the result. This skill reports th
 4. **Format the survey output.** Always include:
    - **TMF921 context**: TMF921 Intent Management API ([ref 19](../../docs/references.md#ref-19))
      is the standardized contract for SMO-bound intents. The envelope carries `intent_id`,
-     `intent_type`, `affected_resources`, `window_start` / `window_end`, `service_impact_hint`,
-     `expected_handover_count`. TMF688 ([ref 18](../../docs/references.md#ref-18)) is the audit
-     event shape that wraps everything.
+     `intent_type`, `affected_resources`, `service_impact_hint`,
+     `expected_outage_window_minutes`, `dispatch_route`, `rationale`, and (when present) the
+     v0 `dispatch_result` subfield. TMF688 ([ref 18](../../docs/references.md#ref-18)) is the
+     audit event shape that wraps everything.
+   - **The `dispatch_result` field** (v0 implementation): the partner SMO's response to a
+     companion intent lands in `companion_intent.dispatch_result` on the AuditEvent, populated
+     by `harness/runtime/router.py::_maybe_attach_dispatch_result()` from the per-scenario
+     `smo_dispatch_outcome` block in `harness/runtime/scenario_stubs.json`. Surface it as
+     `accepted | rejection_reason | smo_response`. The operator sees both routes' outcomes
+     before co-authorization.
+   - **Dual-route teaching contrast**: scenario E (`scenarios/E_nic_firmware_update/`) shows
+     the accepted path (`dispatch_result.accepted: true`, SMO scheduled the handovers).
+     Scenario E_with_smo_reject (`scenarios/E_with_smo_reject/`) shows the rejected path
+     (`accepted: false`, `rejection_reason: neighboring_cells_at_capacity`). Compare the two
+     companion_intent.json fixtures side by side to see the teaching moment.
    - **Recent intents** (live mode) or **intent pattern** (static mode):
-     one line per intent with `intent_id | intent_type | affected | window`
-   - **Dual-route hint**: a companion intent firing alongside a Metal3 apply is the signature of
-     scenario E. The harness emits it for any `node_firmware` action regardless of blast cell
-     count, because firmware reboots require SMO coordination by their semantic.
+     one line per intent with `intent_id | intent_type | affected | dispatch_result.accepted`
+   - **Dual-route hint**: a companion intent firing alongside a Metal3 apply is the signature
+     of scenario E (both variants). The harness emits it for any `node_firmware` action
+     regardless of blast cell count, because firmware reboots require SMO coordination by their
+     semantic.
    - **Citation footer**: TMF921 ([ref 19](../../docs/references.md#ref-19)), TMF688
      ([ref 18](../../docs/references.md#ref-18))
 

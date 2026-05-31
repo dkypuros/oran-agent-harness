@@ -171,7 +171,7 @@ oran-agent-harness/
     |   |-- viewer.py                   CLI timeline reader
     |   `-- E_nic_firmware_update.example.jsonl   committed dual-route example trace
     |-- bench/                       research bench runner
-    |   |-- runner.py                   orchestrates all 4 scenarios end to end
+    |   |-- runner.py                   orchestrates all 5 scenarios end to end
     |   `-- summary.py                  comparative markdown table
     `-- dashboard/trace_view/        static HTML trace viewer (vanilla JS, no build step)
         |-- index.html                  4-up compare + per-scenario zoom
@@ -261,9 +261,11 @@ stub for a real component when moving to a bigger environment.
 
 ### Research bench and trace viewer
 
-The research bench at `5G_O-RAN_SIM/bench/` runs all 4 scenarios end to end, firing the platform
-stubs (PTP operator publisher, Metal3 BMO, Redfish BMC, TMF921 SMO emitter for Scenario E) and
-capturing per-stage records to JSONL files at `5G_O-RAN_SIM/shared_trace/`.
+The research bench at `5G_O-RAN_SIM/bench/` runs all 5 scenarios end to end (A_fw_lldp_agent,
+A_prime_ice_driver, D_phc_drift_hw_only, E_nic_firmware_update, E_with_smo_reject), firing the
+platform stubs (PTP operator publisher, Metal3 BMO, Redfish BMC, TMF921 SMO emitter for the two
+Scenario E variants) and capturing per-stage records to JSONL files at
+`5G_O-RAN_SIM/shared_trace/`.
 
 ```bash
 # Run the bench (produces shared_trace/*.jsonl + bench/last_run_summary.md)

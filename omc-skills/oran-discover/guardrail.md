@@ -34,12 +34,26 @@ policy currently allows and forbids.
    - Read `harness/guardrails.yaml`
    - Read `harness/runtime/guardrail.py` so the operator sees the evaluator that enforces it
 
-2. **Surface the four guardrail pillars.** The policy organizes around:
-   - **action_allowlist**: which action_type values the harness is allowed to propose at all
-   - **blast_radius caps**: max nodes, max sites, max cells per single action (v0 = 1 node,
-     1 site, 4 cells)
+2. **Surface the five v0 gates in execution order.** The deterministic evaluator at
+   `harness/runtime/guardrail.py:evaluate()` runs these checks in this exact sequence; each one
+   blocks the apply if it fails. The narrative's "five gates in v0" claim refers to this list:
+   1. `crisis_mode` global override (raises RuntimeError when active; `_CRISIS_MODE_ACTIVE`
+      seam at `harness/runtime/guardrail.py:45`)
+   2. **Sandbox apply-allowed gate**: reads `proposal.sandbox_verdict.apply_allowed`
+      (populated by `harness/runtime/walker.py sandbox_simulation()` from the per-scenario
+      `sandbox_verdict` block in `harness/runtime/scenario_stubs.json`). If False, the
+      evaluator raises `ValueError("sandbox_verdict.apply_allowed is False ... down-route
+      blocked at twin gate")` BEFORE reaching the allowlist or blast caps. Proven by
+      `tests/test_runtime.py::test_evaluate_sandbox_block_when_apply_disallowed`.
+   3. **action_allowlist**: which `actionType` values the harness is allowed to propose at all
+   4. **blast_radius caps**: max nodes, max sites, max cells per single action (v0 = 1 node,
+      1 site, 4 cells)
+   5. **require_human_approval**: which action types REQUIRE explicit operator co-authorization
+
+   Plus two policy levers configured in `harness/guardrails.yaml`:
    - **dry_run defaults**: which action types default to dry-run-required
-   - **requires_human_approval**: which action types REQUIRE explicit operator co-authorization
+   - **co_authorization phases**: draft / edit / commit framing in the YAML; v0 enforces a
+     boolean approval gate (full edit-phase wiring is the v1 target)
 
 3. **Surface the crisis_mode block.** Per `harness/guardrails.yaml`, crisis_mode is the global
    override. When active:
@@ -57,8 +71,10 @@ policy currently allows and forbids.
    expect in the audit log.
 
 5. **Two-key gate reminder.** The guardrail is half of the two-key authorization. The other half
-   is the sandbox / digital-twin pass. Surface this: the operator authorizes the ACTION CLASS;
-   the twin authorizes the SPECIFIC PAYLOAD.
+   is the sandbox / digital-twin pass. Concretely in v0: the operator authorizes the ACTION
+   CLASS (via `requiresHumanApproval` + `humanApprovalStatus`); the twin authorizes the
+   SPECIFIC PAYLOAD (via `sandbox_verdict.apply_allowed` attached by the walker's
+   `sandbox_simulation()` stage, enforced as gate 2 above).
 
 6. **Citation footer.** TMF688 ([ref 18](../../docs/references.md#ref-18)).
 

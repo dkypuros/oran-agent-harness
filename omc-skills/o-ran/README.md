@@ -1,7 +1,8 @@
 # OMC O-RAN Skill Bundle
 
 Reference operationalization for the O-RAN Agent Harness. Four skills that exercise the declarative
-contracts under `../../harness/` against the two walkthrough scenarios under `../../scenarios/`.
+contracts under `../../harness/` against the five walkthrough scenarios under `../../scenarios/`
+(A_fw_lldp_agent, A_prime_ice_driver, D_phc_drift_hw_only, E_nic_firmware_update, E_with_smo_reject).
 
 The harness pattern is operationalization-agnostic. This bundle provides one reference operationalization
 via [oh-my-claudecode (OMC)](https://github.com/yeachan-heo/oh-my-claudecode), an extensible multi-agent
@@ -45,6 +46,15 @@ metadata.
 
 # Scenario A-prime, outdated ice driver causing PHC drift
 /o-ran:plan scenarios/A_prime_ice_driver/fault_payload.json
+
+# Scenario D, hardware-only PHC drift (no software layer routing)
+/o-ran:plan scenarios/D_phc_drift_hw_only/fault_payload.json
+
+# Scenario E, NIC firmware update with TMF921 companion intent (SMO accepts)
+/o-ran:plan scenarios/E_nic_firmware_update/fault_payload.json
+
+# Scenario E_with_smo_reject, same firmware path but SMO rejects the companion intent
+/o-ran:plan scenarios/E_with_smo_reject/fault_payload.json
 ```
 
 Each run reads a FaultPayload, walks the evidence chain, picks a routing direction via the deterministic
