@@ -94,7 +94,7 @@ Now, a reviewer here might ask about transaction atomicity. Fair question, and I
 Slide 6: Live demo
 -------------------------------------------------------------------------
 
-OK, let's actually run it. What you're going to see now is a chat interface running on a MacBook in my office. The whole stack is 8 Docker containers. The harness, the four platform stubs (PTP, Metal3, Redfish, TMF921 SMO), a trace viewer, a fake vLLM mock, and a dashboard. The dashboard has a chat tab that talks to a tiny agent runtime we're calling oh-my-tiny-oran. It uses my Anthropic API key to drive an agent loop against the lab's HTTP wrappers and the committed repo files. Two read-only tools. No write paths.
+OK, let's actually run it. What you're going to see now is a chat interface running on a MacBook in my office. The whole stack is 9 Docker containers. The harness walker, the four platform stubs (PTP, Metal3, Redfish, TMF921 SMO), a trace viewer, a fake vLLM mock, a dashboard, and the tiny agent runtime we're calling oh-my-tiny-oran. The dashboard has a chat tab that talks to oh-my-tiny-oran. It uses my Anthropic API key to drive an agent loop against the lab's HTTP wrappers and the committed repo files. Two read-only tools. No write paths.
 
 I'm going to paste two prompts. The first is the pre-flight survey. The second is the dual-route exercise. Both prompts were captured working end-to-end on this machine yesterday, the transcripts are in the repo under talk/demo_logs.
 
