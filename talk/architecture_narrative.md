@@ -101,6 +101,17 @@ producing the confidence telemetry that travels with every RemediationProposal. 
 forward-direction test flight on the twin; Agentic Recoverability is the inverse-action validation
 on the twin. Both flow back UP into the Proposal artifact before it leaves the cognitive layer.
 
+The operator can interact with the cognitive middle in two complementary ways. The first is the
+deterministic walker (`harness/runtime/walker.py`), which always produces the same audit event
+for a given fault and is what the verify gate exercises end to end. The second is a chat-driven
+surface, **oh-my-tiny-oran** (`macbook_lab/http_wrappers/harness_chat_service.py`), a tiny
+OMC-shaped agent loop that loads the same `oran-discover` skill bundle, accepts conversational
+or slash-command input (e.g. `/oran-discover:plan`), and executes the documented steps with
+read-only tools (curl against the lab's HTTP wrappers, read against committed repo files) against
+the operator's Anthropic API key. The two surfaces share the same underlying contracts; the
+walker is the verifiable backbone, the chat is the live-narration layer. Both routes the same
+decision through the same taxonomy.
+
 ## 3. The routing decision (right side, high vs low)
 
 `harness/routing-rules/contribution-1-routing-rule.yaml` declares the rule. The harness splits actions
@@ -230,6 +241,30 @@ does not auto-parse the response into a deterministic classification in v0. Defa
 live realization of Contribution 3 (LLM-neutral substrate). Trace logs accumulate at
 `5G_O-RAN_SIM/llm/mock_traces.jsonl` (gitignored) for replay analysis as the p2p sync
 troubleshooting work unfolds.
+
+## 7. Reproducibility entry point
+
+A reader who wants to reproduce everything in this narrative on their own machine needs only
+Docker Desktop on a Mac (or any host with Docker). From the repo root:
+
+```
+cd macbook_lab && ./run.sh
+```
+
+That one command builds and starts eight containers: the four platform stubs (PTP operator,
+Metal3 BMO, Redfish BMC, TMF921 SMO), the harness walker, a fake vLLM mock, a static trace
+viewer, and the React dashboard at `http://localhost:8097`. With an Anthropic API key in
+`macbook_lab/.env` and `LLM_PROVIDER=anthropic`, an additional `oran-harness-chat` service
+boots oh-my-tiny-oran at `http://localhost:8097/#chat`. Two micro test harnesses (`scripts/
+test_oran_discover_skills.py` and `scripts/test_llm_live_path.py`) prove the discovery surface
+and the live LLM path respectively. Captured chat runs against this lab live under
+`talk/demo_logs/` as references the talk speaker can cite.
+
+The bench is the talk's truth-claim mechanism. Every assertion in this narrative resolves to
+a file path; every file path resolves to a runnable artifact; the verify gate at `scripts/
+verify.py` produces a falsifiable 10/10 PASS or a FAIL with the specific row that broke. A
+reviewer who disbelieves any architectural claim can clone the repo, run the gate, fire the
+scenarios, exercise the chat, and read the trace JSONL to confirm or refute.
 
 ## How to read this repo's diagrams
 

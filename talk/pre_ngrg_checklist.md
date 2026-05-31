@@ -115,9 +115,11 @@ operational artifact for that. But if something fails:
 | If this fails           | Fallback                                                      |
 |-------------------------|---------------------------------------------------------------|
 | MacBook lab live demo   | Recorded demo (loaded on laptop and USB)                      |
+| Recorded demo file      | oh-my-tiny-oran chat live at `:8097/#chat` (Path 3 in slide 6); falls back further to trace viewer at `:8095` |
+| oh-my-tiny-oran chat    | Trace timeline viewer at `:8095/dashboard/trace_view/index.html` (deterministic, no LLM, no internet) |
 | Slide deck native open  | PDF export from USB                                           |
 | Primary laptop          | Backup laptop, USB has everything needed                      |
-| Network connectivity    | Recorded demo + slides only, no live LLM, no live curl        |
+| Network connectivity    | Recorded demo + slides only, no live LLM, no live curl, oh-my-tiny-oran unavailable |
 | Projector connector     | Venue adapter (ask AV tech at T-30)                           |
 | Mermaid diagram render  | PNG export already committed alongside every `.mmd` in talk/  |
 | Forgotten slide content | Runsheet open in second window                                |

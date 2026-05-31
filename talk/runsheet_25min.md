@@ -72,15 +72,50 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
        because node firmware reboots require SMO coordination regardless of cell count.
   Fallback: walk the diagram on slide 3 again if the split-view rendering breaks.
 
-### Slide 6 (14:00, 4 min). Demo (recorded video)
+### Slide 6 (14:00, 4 min). Demo
 
-  Show: prerecorded screencast of `/oran-discover:plan` + scenario walk via the trace timeline
-        viewer at `:8095`. If scenario D was chosen, point at the software_ok vs hardware_anomaly
-        divergence. If scenario E was chosen, point at the dual-route firing.
-  Say: walk the viewer along with the recording. Pause on the verdict transitions. Name the
-       trace JSONL files the operator can replay after the run.
-  Fallback: still images of the viewer for each scenario stage. Read the verdict transitions
-       from the slides. The talk does not depend on a live network.
+  Three independent demo paths exist, all reaching the same teaching moment. Pick one as primary
+  and keep the others as fallbacks. Three captured runs from 2026-05-30 live under
+  `talk/demo_logs/` as references.
+
+  Path 1 (primary, safest). Prerecorded screencast of the trace timeline viewer at
+        `:8095/dashboard/trace_view/index.html`. If scenario D was chosen, point at the
+        software_ok vs hardware_anomaly divergence. If scenario E was chosen, point at the
+        dual-route firing. Does not depend on live network or LLM.
+
+  Path 2 (deterministic backup). Live walk of the trace timeline viewer at
+        `:8095/dashboard/trace_view/index.html` against `bench/all` on the harness walker.
+        Same content as the recording, but live. Does not require an LLM key.
+
+  Path 3 (live conversational, the one that proves the harness IS interactive). Open the
+        dashboard at `:8097` and click the **oh-my-tiny-oran** tab. Paste these two prompts in
+        order; the chat captures from 2026-05-30 in `talk/demo_logs/` confirm both work
+        end-to-end on real Docker against the real Anthropic key.
+
+        Prompt 1: `/oran-discover:plan`
+        Effect: the orchestrator skill walks all six discovery skills in one chat turn and
+        produces a one-page pre-flight survey covering left loop, infra loop, service loop,
+        taxonomy, and guardrails. About 30 seconds, ~10 tool calls.
+
+        Prompt 2: "Now actually fire scenario E by calling the harness walker's
+        /run/E_nic_firmware_update endpoint. Then re-check /oran-discover:metal3 and
+        /oran-discover:smo to show me the dual-route really happened. Compare before and
+        after."
+        Effect: the agent fires the real scenario, observes the dual-route firing in the
+        trace, and produces a structured before/after comparison naming the Metal3 firmware
+        phases (Preparing through Updated), the Redfish task lifecycle, and the TMF921
+        companion intent envelope. About 22 seconds, ~13 tool calls.
+
+  Say: name both prompts on stage. The first survey teaches what the lab looks like at rest;
+       the second exercise teaches what dual-route looks like in flight. Together they are the
+       2+3+8+9 conjunction in motion.
+
+  Fallback for Path 3 specifically: if the chat takes too long on stage or the Anthropic API
+        rate-limits, switch to Path 1 (recording) without narration about the failure. Audience
+        does not need to know.
+
+  Fallback for the whole slide: still images of the viewer for each scenario stage. Read the
+        verdict transitions from the slides. The talk does not depend on a live network.
 
 ### Slide 7 (18:00, 3 min). Trust loop. Digital Twin substrate, EvalOps, Killswitch
 
