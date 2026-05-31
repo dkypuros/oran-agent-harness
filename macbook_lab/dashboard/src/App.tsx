@@ -6,8 +6,9 @@ import { HardwareManagerTab } from "@/components/tabs/HardwareManagerTab";
 import { OCloudTab } from "@/components/tabs/OCloudTab";
 import { AlertsTab } from "@/components/tabs/AlertsTab";
 import { PtpLogsTab } from "@/components/tabs/PtpLogsTab";
+import { ChatTab } from "@/components/tabs/ChatTab";
 
-const TAB_IDS = ["overview", "smo", "hardware", "ocloud", "alerts", "ptp"] as const;
+const TAB_IDS = ["overview", "chat", "smo", "hardware", "ocloud", "alerts", "ptp"] as const;
 type TabId = (typeof TAB_IDS)[number];
 
 function initialTab(): TabId {
@@ -46,6 +47,7 @@ export default function App() {
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)}>
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="chat">oh-my-tiny-oran</TabsTrigger>
             <TabsTrigger value="smo">SMO</TabsTrigger>
             <TabsTrigger value="hardware">Hardware Manager</TabsTrigger>
             <TabsTrigger value="ocloud">O-Cloud</TabsTrigger>
@@ -53,6 +55,7 @@ export default function App() {
             <TabsTrigger value="ptp">PTP sync logs</TabsTrigger>
           </TabsList>
           <TabsContent value="overview"><OverviewTab /></TabsContent>
+          <TabsContent value="chat"><ChatTab /></TabsContent>
           <TabsContent value="smo"><SmoTab /></TabsContent>
           <TabsContent value="hardware"><HardwareManagerTab /></TabsContent>
           <TabsContent value="ocloud"><OCloudTab /></TabsContent>

@@ -99,6 +99,36 @@ services:
       timeout: 3s
       retries: 3
 
+  harness-chat:
+    # oh-my-tiny-oran: a tiny OMC-shaped chat harness scoped to the oran-discover
+    # skill bundle. POST /chat (multi-turn, session-keyed). Slash commands like
+    # /oran-discover:ptp inline the skill markdown into the user message the same
+    # way upstream OMC keyword-detector does. Anthropic agent loop with two
+    # read-only tools (curl_endpoint, read_file).
+    build:
+      context: ..
+      dockerfile: macbook_lab/Dockerfile.harness-chat
+    container_name: oran-harness-chat
+    ports:
+      - "8098:8098"
+    environment:
+      - PORT=8098
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-stub-replace-with-real-key}
+      - ANTHROPIC_MODEL_LOW=${ANTHROPIC_MODEL_LOW:-claude-haiku-4-5-20251001}
+      - TINY_ORAN_MAX_TURNS=${TINY_ORAN_MAX_TURNS:-10}
+    depends_on:
+      - ptp-operator-stub
+      - metal3-bmo-stub
+      - redfish-bmc-stub
+      - tmf921-smo-stub
+      - harness-walker
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8098/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   trace-viewer:
     build:
       context: ..

@@ -16,6 +16,7 @@ export default defineConfig({
       "/api/metal3": { target: "http://metal3-bmo-stub:8092", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/metal3/, "") },
       "/api/redfish": { target: "http://redfish-bmc-stub:8093", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/redfish/, "") },
       "/api/smo": { target: "http://tmf921-smo-stub:8094", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/smo/, "") },
+      "/api/chat": { target: "http://harness-chat:8098", changeOrigin: true, rewrite: (p) => p.replace(/^\/api\/chat/, "") },
     },
   },
 });
