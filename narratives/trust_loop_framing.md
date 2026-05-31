@@ -124,16 +124,27 @@ mid-proposal.
 
 ## Where these activities live in the talk and the bench
 
-  - EvalOps: hooks exist in the harness contract; full implementation is operational discipline
-    that matures with the deployment.
-  - Sandbox: hooks exist in the harness contract; the Twin substrate is the engineering
-    decision the deployment makes.
+  - EvalOps: hooks exist in the harness contract; full continuous-measurement implementation
+    is operational discipline that matures with the deployment.
+  - Sandbox: implemented in v0. The stage is `sandbox_simulation()` in
+    `../harness/runtime/walker.py`; the per-scenario twin verdict lives in
+    `../harness/runtime/scenario_stubs.json` `sandbox_verdict` blocks; the apply-allowed gate
+    is enforced in `../harness/runtime/guardrail.py` before the action_allowlist check; tested
+    in `../tests/test_runtime.py::test_evaluate_sandbox_block_when_apply_disallowed`. The Twin
+    substrate (same-topology mirrored cluster vs simulated subset) is the engineering
+    decision the deployment makes; the bench ships the contract and the gate.
   - Agentic Recoverability: the ReversibilityProfile schema is mandatory in v0 of the bench
-    (`../harness/schemas/ReversibilityProfile.json`). EvalOps and Sandbox are operational
-    disciplines the bench is opinionated about but does not force.
+    (`../harness/schemas/ReversibilityProfile.json`).
   - Intelligence Augmentation: the explicit banner over all three.
   - Killswitch: declared in `../harness/guardrails.yaml`, enforced in
-    `../harness/runtime/guardrail.py`, tested in `../tests/test_runtime.py`.
+    `../harness/runtime/guardrail.py`, tested in
+    `../tests/test_runtime.py::test_evaluate_crisis_mode_active`.
+  - SMO dispatch_result capture (the dual-route reconciliation field): implemented in
+    `../harness/runtime/router.py::_maybe_attach_dispatch_result()`, populated from
+    `../harness/runtime/scenario_stubs.json` `smo_dispatch_outcome` blocks. The accepted path
+    is `../scenarios/E_nic_firmware_update/`; the rejected path is
+    `../scenarios/E_with_smo_reject/`. Tested by
+    `../tests/test_runtime.py::test_dispatch_result_rejected_on_smo_reject_scenario`.
 
 The contribution is the assembly. A Digital Twin substrate, three activities running on it,
 Intelligence Augmentation as the explicit banner, and a global Killswitch as the operator's

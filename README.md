@@ -47,14 +47,15 @@ Three goals for this repository, in the author's words:
    guardrails, schemas, routing rules, MCP tool surfaces, upstream pointers) live under `harness/`.
    Every authored file carries a citation header tying it to an O-RAN, ETSI, IEEE, 3GPP, or TM Forum
    section. The central index is `harness/conformance.md`.
-3. **Here is where I actually test the use case.** Four walkthrough scenarios under `scenarios/`
-   exercise the harness against host-platform PTP faults (A, A-prime, D, E). A research bench at
-   `5G_O-RAN_SIM/bench/` runs them all end to end with platform stubs firing and trace files
-   accumulating. A static HTML trace viewer at `5G_O-RAN_SIM/dashboard/trace_view/` shows the
-   per-scenario timelines side by side. Two OMC skill bundles complement the harness: the
-   action-oriented bundle at `omc-skills/o-ran/` (troubleshoot, remediate, sandbox-validation,
-   plan) and the discovery-oriented bundle at `omc-skills/oran-discover/` (`:ptp`, `:metal3`,
-   `:redfish`, `:smo`, `:taxonomy`, `:guardrail`, `:plan` for pre-flight survey).
+3. **Here is where I actually test the use case.** Five walkthrough scenarios under `scenarios/`
+   exercise the harness against host-platform PTP faults (A, A-prime, D, E, and the dual-route
+   rejection variant E_with_smo_reject). A research bench at `5G_O-RAN_SIM/bench/` runs them
+   all end to end with platform stubs firing and trace files accumulating. A static HTML trace
+   viewer at `5G_O-RAN_SIM/dashboard/trace_view/` shows the per-scenario timelines side by
+   side. Two OMC skill bundles complement the harness: the action-oriented bundle at
+   `omc-skills/o-ran/` (troubleshoot, remediate, sandbox-validation, plan) and the
+   discovery-oriented bundle at `omc-skills/oran-discover/` (`:ptp`, `:metal3`, `:redfish`,
+   `:smo`, `:taxonomy`, `:guardrail`, `:plan` for pre-flight survey).
 
 ## What this repository is
 
@@ -76,11 +77,15 @@ An observation loop on the edge (Intel NIC PHC, the linuxptp daemon, and cloud-e
 O-RAN CloudEvents) captures PTP drift evidence. The agent harness in the middle (an Agentic Gateway
 over MCP, three domain agents for Platform, RAN, and Hardware, and a deterministic taxonomy with
 LLM-assist on ambiguous edges) classifies the fault. A routing rule then splits actions by O-RAN
-resource layer: service-layer fixes route UP to the partner SMO as a TMF921 intent; infrastructure
+resource layer: service-layer fixes route UP to the partner SMO as a TMF921 intent (with the SMO's
+acceptance or rejection captured as a `dispatch_result` field on the AuditEvent); infrastructure
 fixes route DOWN to the O-Cloud via the O-RAN O2 IMS API, where the Machine Config Operator or the
 Kernel Module Management Operator delivers the artifact. Before any live action, the proposal runs
-against a digital-twin sandbox; only sandbox-passing proposals reach the human operator with a
-populated reversibility profile. Full walkthrough at `talk/architecture_narrative.md`.
+through a Sandbox stage (`harness/runtime/walker.py sandbox_simulation()`) against a digital-twin
+verdict; the Guardrail engine blocks the apply if `sandbox_verdict.apply_allowed` is False. Only
+sandbox-passing proposals reach the human operator with a populated reversibility profile, and
+the operator sees both the Sandbox verdict and the SMO dispatch_result before signing. Full
+walkthrough at `talk/architecture_narrative.md`.
 
 ## Repository map
 

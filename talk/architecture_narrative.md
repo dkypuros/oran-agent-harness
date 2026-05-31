@@ -152,10 +152,15 @@ decision, two execution paths. That contrast is the architectural teaching point
 ## 4. The sandbox and the human-in-the-loop seam
 
 Before any RemediationProposal becomes a live action, the Guardrail engine
-(`harness/guardrails.yaml`) gates it deterministically: dry-run default, blast-radius caps (max one
-node, one site, four cells in v0), action allowlist, operator-harness co-authorization. Co-authorship
-is the deliberate framing: the harness drafts; the operator edits and commits. Not discrete HITL
-approve/reject.
+(`harness/guardrails.yaml` enforced by `harness/runtime/guardrail.py`) gates it
+deterministically. Five gates run in order in v0: crisis_mode global override, Sandbox
+apply-allowed (the twin-convergence verdict attached at `harness/runtime/walker.py`
+`sandbox_simulation()`), action allowlist, blast-radius caps (max one node, one site, four
+cells in v0), and require-human-approval. The Sandbox gate is what makes "the twin authorizes
+the specific payload" concrete: if `sandbox_verdict.apply_allowed` is False, the apply is
+blocked before the action_allowlist or blast caps are even consulted. Co-authorship sits at
+the top of the gate stack: the harness drafts; the operator edits and commits. Not discrete
+HITL approve/reject.
 
 The proposal is then exercised against the Digital Twin substrate, a same-topology mirrored cluster
 (or a simulated linuxptp plus NIC driver stack) that supports three concurrent activities: the
