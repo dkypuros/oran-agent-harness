@@ -249,12 +249,18 @@ troubleshooting work unfolds.
 
 ## 7. Reproducibility entry point
 
-A reader who wants to reproduce everything in this narrative on their own machine needs only
-Docker Desktop on a Mac (or any host with Docker). From the repo root:
+A reader who wants to reproduce everything in this narrative on their own machine needs Docker
+Desktop on a Mac OR a Fedora host with podman. Two parallel runtime overlays ship with the
+bench, both producing identical container behavior against the same Dockerfiles and the same
+docker-compose.yml. From the repo root:
 
 ```
-cd macbook_lab && ./run.sh
+cd macbook_lab && ./run.sh                          # macOS path, Docker Desktop
+cd linux_lab && ./setup_fedora.sh && ./run.sh       # Fedora path, rootless podman
 ```
+
+The Fedora path is verified end-to-end on Fedora 42 Cloud Edition with podman 5.4.1; capture
+at `linux_lab/verified_runs/2026-05-31_fedora42_podman.md`.
 
 That one command builds and starts nine containers: the four platform stubs (PTP operator,
 Metal3 BMO, Redfish BMC, TMF921 SMO), the harness walker, a fake vLLM mock, a static trace

@@ -21,12 +21,23 @@ Three reasons this is the canonical Linux story for the bench:
    into an OpenShift O-Cloud worker (which is RHCOS, the RHEL/Fedora kernel family), the same
    container images, the same compose surface, and the same SELinux boundaries apply.
 
+## Verified runs
+
+This lab has been exercised end-to-end on real Fedora. Capture lives under
+`verified_runs/`. Most recent:
+
+  `verified_runs/2026-05-31_fedora42_podman.md`
+    Fedora 42 Cloud Edition, podman 5.4.1, podman-compose 1.5.0.
+    All 9 containers up and healthy; both E scenarios (accepted and SMO-reject paths) walked
+    end-to-end producing the expected dual-route output. Reproducible from any Fedora host with
+    the two-command quickstart below.
+
 ## Prerequisites
 
-Tested on:
-- Fedora Workstation 39 and 40
-- Fedora CoreOS 39
-- Fedora Server 40 (headless)
+Verified on Fedora 42 Cloud Edition. Expected to work on:
+- Fedora Workstation 39, 40, 41, 42
+- Fedora CoreOS 39 through current
+- Fedora Server 40 through current
 
 You need:
 - 6 GB free RAM (the lab runs 8 to 9 containers; each is small but the dashboard + Anthropic
