@@ -27,6 +27,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -170,15 +171,29 @@ def expand_user_message(user_message: str) -> tuple[str, str | None]:
 
 
 def _resolve_curl(url: str) -> str:
-    m = re.match(r"https?://([^:/]+)(?::(\d+))?(/.*)?$", url)
-    if not m:
-        return json.dumps({"error": f"unrecognized URL: {url}"})
-    host = m.group(1)
-    port = int(m.group(2) or "0")
-    path = m.group(3) or "/"
+    """Parse the URL via urllib.parse (not regex) to avoid host-confusion edge cases.
+
+    urlparse correctly separates scheme/userinfo/host/port/path/query/fragment per RFC 3986,
+    rejecting auth-credential injection like http://evil@allowed-host/path.
+    """
+    try:
+        parsed = urlparse(url)
+    except ValueError as e:
+        return json.dumps({"error": f"unrecognized URL: {url} ({e})"})
+    if parsed.scheme not in ("http", "https"):
+        return json.dumps({"error": f"scheme not allowed: {parsed.scheme}"})
+    host = parsed.hostname
+    port = parsed.port or 0
+    path = parsed.path or "/"
+    if parsed.query:
+        path = f"{path}?{parsed.query}"
+    if host is None:
+        return json.dumps({"error": f"could not parse host from URL: {url}"})
     expected = ALLOWED_CURL_HOSTS.get(host)
     if expected is None or (port and port != expected):
         return json.dumps({"error": f"host not allowed: {host}:{port}"})
+    if parsed.username or parsed.password:
+        return json.dumps({"error": f"auth credentials not allowed in URL"})
     target = f"http://{host}:{expected}{path}"
     try:
         with httpx.Client(timeout=5.0) as client:
@@ -260,13 +275,23 @@ def _run_agent_turn(session_id: str, raw_user_message: str) -> ChatTurn:
     system = _system_prompt()
 
     for _ in range(MAX_AGENT_TURNS):
-        resp = client.messages.create(
-            model=ANTHROPIC_MODEL,
-            max_tokens=2048,
-            system=system,
-            tools=TOOLS_SPEC,
-            messages=history,
-        )
+        try:
+            resp = client.messages.create(
+                model=ANTHROPIC_MODEL,
+                max_tokens=2048,
+                system=system,
+                tools=TOOLS_SPEC,
+                messages=history,
+            )
+        except anthropic.RateLimitError:
+            final_text = "[Anthropic rate-limited the request. Wait a moment and retry.]"
+            break
+        except anthropic.APIStatusError as e:
+            final_text = f"[Anthropic API error: HTTP {e.status_code}. Retry shortly.]"
+            break
+        except anthropic.APIError as e:
+            final_text = f"[Anthropic API error: {type(e).__name__}: {e}]"
+            break
         total_in += resp.usage.input_tokens
         total_out += resp.usage.output_tokens
         text_parts = []

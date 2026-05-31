@@ -5,7 +5,6 @@ venue: O-RAN nGRG Workshop, Seattle
 date: 4th [THU] JUN 2026
 license: Apache-2.0
 status: speaker script, follows the 9-slide pacing in talk/runsheet_25min.md
-voice_reference: /Users/davidkypuros/Documents/Git_Offline/active/10.WORK_IBM_RedHat-BOOKMARK/8_Red-Hat_promotion_2026_v2/4_talk_track_v1/talk_track/9_talk_track_final.txt
 note: |
   Speaker script in David's voice. Em dashes converted to commas, periods,
   or parentheses to satisfy the bench's em-dash discipline. Slide cues in
@@ -88,7 +87,7 @@ But here's the interesting part. Some scenarios cross the boundary by their natu
 
 So the routing rule fires both branches at the same time. The Metal3 apply goes down through O2 IMS. The TMF921 companion intent goes up to the partner SMO. Two routes in parallel, neither vendor loses authority. That's the dual-route pattern. And that's what I'm going to fire live in the demo.
 
-Now, a reviewer here might ask about transaction atomicity. Fair question, and I want to be precise. The dual-route is parallel emission, not a distributed two-phase commit. All three reconciliation mechanisms are implemented in v0 of the bench, end to end, and exercised by the test suite. First, the Sandbox runs the proposed Metal3 apply against the Digital Twin BEFORE the live commit, and the guardrail engine blocks the apply if the twin does not converge. Second, the SMO's response to the TMF921 companion intent is captured as a `dispatch_result` field on the AuditEvent BEFORE operator co-authorization, so the operator sees both routes' outcomes before signing. There's a fifth scenario in the repo, scenario E_with_smo_reject, that demonstrates the rejection path: same firmware push as scenario E, different worker, SMO says no because neighboring cells are at capacity. Third, the Killswitch (crisis_mode) is the global abort if reconciliation fails mid-flight. All three are file-path anchored in the reviewer FAQ Q14 and proven by the test suite at 8 out of 8 pass. The architectural commitment is operator-mediated reconciliation; distributed two-phase commit is out of scope for v0 and is the Day-3 multi-site coordination workstream.
+There's a transaction-atomicity question this raises (what if the SMO rejects the companion intent after the firmware push has already started). The short answer is: parallel emission with three reconciliation mechanisms (Sandbox apply-allowed gate, dispatch_result capture, Killswitch), all implemented in v0 and proven by the test suite at 8 out of 8 pass. Scenario E_with_smo_reject in the repo exercises the rejection path. Full file-path anchored answer is in the reviewer FAQ as Q14. Happy to walk it in Q&A.
 
 
 Slide 6: Live demo
@@ -148,9 +147,9 @@ Slide 8: Novelty positioning and repo handoff
 
 So bringing it together. The bench is at github dot com slash dkypuros slash oran-agent-harness. Apache 2.0. The 2+3+8+9 conjunction is the novelty claim. The boundary at the top is the O-RAN O2 spec. The delivery inside is the production Kubernetes contracts. A single RemediationProposal travels from the cognitive layer through a standardized O-RAN interface into a concrete Kubernetes-native contract that already runs in production O-Cloud deployments. That's what makes the right-side execution path concretely operationalizable, not a paper architecture.
 
-And the whole thing is reproducible. Clone the repo. Run macbook_lab slash run dot sh. That brings up the 8 containers in about a minute on Docker Desktop. Open the dashboard at localhost colon 8097. Click the oh-my-tiny-oran tab. Paste the two prompts I just showed you. You get the same chain firing on your machine.
+And the whole thing is reproducible. Clone the repo. Run macbook_lab slash run dot sh. That brings up the 9 containers in about a minute on Docker Desktop. Open the dashboard at localhost colon 8097. Click the oh-my-tiny-oran tab. Paste the two prompts I just showed you. You get the same chain firing on your machine.
 
-The repo also has, under talk slash, a runsheet for this talk, a reviewer FAQ with 13 anticipated questions, a 5-minute pitch and a 1-minute pitch for hallway capture, and the demo logs I just walked you through. Under narratives slash, there are 5 long-form per-audience cuts: an operator-day narrative for SREs, a trust-loop framing for architects, a standards-conformance walkthrough for working-group chairs, a multivendor interop narrative for vendor PMs, and a Day-3 trajectory for workshop reviewers.
+The repo also has, under talk slash, a runsheet for this talk, a reviewer FAQ with 14 anticipated questions, a 5-minute pitch and a 1-minute pitch for hallway capture, and the demo logs I just walked you through. Under narratives slash, there are 5 long-form per-audience cuts: an operator-day narrative for SREs, a trust-loop framing for architects, a standards-conformance walkthrough for working-group chairs, a multivendor interop narrative for vendor PMs, and a Day-3 trajectory for workshop reviewers.
 
 So if you want to use this as a research substrate for your own closed-loop work, the bench is durable. The talk is one moment. The bench is the artifact.
 
@@ -158,6 +157,6 @@ So if you want to use this as a research substrate for your own closed-loop work
 Slide 9: Q&A
 -------------------------------------------------------------------------
 
-That's the work. I'll take your questions. If we don't get to your question in the time we have, the reviewer FAQ in the repo covers the 13 most-anticipated ones, citation-anchored, and I'm here through the rest of the day for follow-up.
+That's the work. I'll take your questions. If we don't get to your question in the time we have, the reviewer FAQ in the repo covers the 14 most-anticipated ones, citation-anchored, and I'm here through the rest of the day for follow-up.
 
 Thank you.

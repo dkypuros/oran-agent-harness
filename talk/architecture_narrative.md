@@ -256,11 +256,11 @@ Docker Desktop on a Mac (or any host with Docker). From the repo root:
 cd macbook_lab && ./run.sh
 ```
 
-That one command builds and starts eight containers: the four platform stubs (PTP operator,
+That one command builds and starts nine containers: the four platform stubs (PTP operator,
 Metal3 BMO, Redfish BMC, TMF921 SMO), the harness walker, a fake vLLM mock, a static trace
-viewer, and the React dashboard at `http://localhost:8097`. With an Anthropic API key in
-`macbook_lab/.env` and `LLM_PROVIDER=anthropic`, an additional `oran-harness-chat` service
-boots oh-my-tiny-oran at `http://localhost:8097/#chat`. Two micro test harnesses (`scripts/
+viewer, the React dashboard at `http://localhost:8097`, and the oh-my-tiny-oran chat service
+at `http://localhost:8097/#chat` (active when `LLM_PROVIDER=anthropic` is set in
+`macbook_lab/.env` with a real API key). Two micro test harnesses (`scripts/
 test_oran_discover_skills.py` and `scripts/test_llm_live_path.py`) prove the discovery surface
 and the live LLM path respectively. Captured chat runs against this lab live under
 `talk/demo_logs/` as references the talk speaker can cite.

@@ -15,7 +15,7 @@
   "properties": {
     "eventId": {
       "type": "string",
-      "pattern": "^evt-flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}-\\d{3}$"
+      "pattern": "^evt-flt-[A-Za-z0-9-]+$"
     },
     "eventTime": {
       "type": "string",
@@ -37,7 +37,7 @@
       "properties": {
         "correlatedEventId": {
           "type": "string",
-          "pattern": "^flt-\\d{4}-\\d{2}-\\d{2}-\\d{3}$",
+          "pattern": "^flt-[A-Za-z0-9-]+$",
           "description": "References the originating FaultPayload.fault_id."
         },
         "domain": {
@@ -64,6 +64,14 @@
             "guardrailResult": {"type": "object"},
             "requiresHumanApproval": {"type": "boolean"},
             "humanApprovalStatus": {"type": "string"},
+            "sandbox_verdict": {
+              "type": "object",
+              "description": "Harness-unique extension attached by walker.py sandbox_simulation(). Carries simulator_version, twin_converged, baseline_match, deviation_observed, apply_allowed, simulator_run_at, rationale. The guardrail engine gates on apply_allowed."
+            },
+            "companion_intent": {
+              "type": "object",
+              "description": "Harness-unique extension attached by router.py _maybe_build_companion_intent() for dual-route node_firmware actions. Carries a TMF921 envelope plus an optional dispatch_result subfield recording the partner SMO's response."
+            },
             "reversibility_profile": {
               "type": "object",
               "description": "Optional in v0. When present, conforms to harness/schemas/ReversibilityProfile.json."

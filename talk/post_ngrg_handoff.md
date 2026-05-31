@@ -30,7 +30,7 @@ Every template ends with the repo URL. The repo carries the talk forward.
 > operator's reserve power.
 >
 > The bench is the durable artifact. The talk was one moment. The repo has the full
-> architecture narrative, the runnable research bench across four scenarios, a MacBook-local
+> architecture narrative, the runnable research bench across five scenarios, a MacBook-local
 > lab anyone with Docker can run, and per-audience narratives under narratives/.
 >
 > Grateful to the Ericsson Red Hat Intel team that built the foundation this draws on. Open to
@@ -98,7 +98,7 @@ bench public on GitHub
 > github.com/dkypuros/oran-agent-harness under Apache 2.0.
 >
 > The bench is citation-anchored declarative contracts under harness/, a runnable platform
-> substrate under 5G_O-RAN_SIM/, four walkthrough scenarios under scenarios/, two OMC skill
+> substrate under 5G_O-RAN_SIM/, five walkthrough scenarios under scenarios/, two OMC skill
 > bundles under omc-skills/, and a MacBook-local lab at macbook_lab/ that runs the whole thing
 > on Docker Desktop in 60 seconds. The talk artifacts are under talk/. Long-form per-audience
 > narratives are under narratives/.
@@ -131,9 +131,9 @@ bench public on GitHub
   appears within the first 30 minutes.
 - **Same evening (within 4 hours)**: LinkedIn post.
 - **Next business day**: Red Hat internal Slack + email.
-- **Within a week**: a session-log entry on the personal repo at `0.Log_Master_Catalog/`,
-  recording how the talk landed and what came back in audience feedback. That is for the
-  personal second brain, not for the public.
+- **Within a week**: a session-log entry on the author's personal repo recording how the talk
+  landed and what came back in audience feedback. That is for the personal second brain, not
+  for the public.
 
 ## After-talk follow-up template
 

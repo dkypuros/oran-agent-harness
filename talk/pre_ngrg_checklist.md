@@ -17,7 +17,7 @@ failing live is much higher than the cost of checking it 30 minutes before.
 
   - [ ] **Laptop battery at 100 percent.** Both the demo laptop and the backup.
   - [ ] **MacBook lab cold start.** Run `cd macbook_lab && ./run.sh` from a fresh terminal.
-        Verify the 7 services come up (8 with `--profile dashboard`).
+        Verify the 8 services come up (9 with `--profile dashboard`).
   - [ ] **Health endpoints all green.** Run all 8 curl checks:
         ```
         curl -sf http://localhost:8090/                           # fake-vllm

@@ -49,13 +49,15 @@ def evaluate(proposal: dict[str, Any], fault_id: str) -> dict[str, Any]:
     """Take a RemediationProposal, return an AuditEvent.
 
     Steps:
-      1. crisis_mode global override check (pass-through in v0)
-      2. action_allowlist check
-      3. blast_radius caps check
-      4. require_human_approval check
-      5. populate proposal.guardrailResult
-      6. build TMF688 AuditEvent envelope
-      7. populate reversibility_profile sub-object
+      1. crisis_mode global override check
+      2. Sandbox apply-allowed gate (proposal.sandbox_verdict.apply_allowed from walker's
+         sandbox_simulation stage; blocks the down-route at the twin gate if False)
+      3. action_allowlist check
+      4. blast_radius caps check
+      5. require_human_approval check
+      6. populate proposal.guardrailResult
+      7. build TMF688 AuditEvent envelope
+      8. populate reversibility_profile sub-object
     """
     rules = _GUARDRAILS["rules"]
 

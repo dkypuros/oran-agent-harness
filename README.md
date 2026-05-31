@@ -2,7 +2,7 @@
 
 Research bench for closed-loop O-RAN remediation in multivendor Cloud RAN day-2 operations. The
 bench is the durable artifact: citation-anchored declarative contracts under `harness/`, a runnable
-platform substrate under `5G_O-RAN_SIM/`, four walkthrough scenarios under `scenarios/`, two OMC
+platform substrate under `5G_O-RAN_SIM/`, five walkthrough scenarios under `scenarios/`, two OMC
 skill bundles under `omc-skills/`, and a Mac-local lab under `macbook_lab/`. One appearance of the
 bench is the talk *From Multivendor Diagnosis to Closed-Loop Remediation: An Agent Harness for
 Cloud RAN Day-2* at the O-RAN nGRG Workshop, Seattle, 4th [THU] JUN 2026, with submission
@@ -131,12 +131,13 @@ oran-agent-harness/
 |   |-- routing-rules/   3 YAMLs, one per talk contribution
 |   |-- mcp-tool-schemas/ 4 FastMCP tool surfaces
 |   `-- references/      5 upstream contract pointers, commit-SHA pinnable
-|-- scenarios/           4 PTP host-platform walkthroughs
+|-- scenarios/           5 PTP host-platform walkthroughs
 |   |-- README.md             walkthrough narrative, what is stubbed vs real
 |   |-- A_fw_lldp_agent/      fw-lldp-agent service interferes with PTP (5 fixtures)
 |   |-- A_prime_ice_driver/   ice driver 1.11.x causes PHC drift (5 fixtures)
 |   |-- D_phc_drift_hw_only/  software-LOCKED vs hardware-NOT-OK divergence (5 fixtures)
-|   `-- E_nic_firmware_update/ NIC firmware update via Metal3 + TMF921 companion intent (5 fixtures)
+|   |-- E_nic_firmware_update/ NIC firmware update via Metal3 + TMF921 companion intent (6 fixtures)
+|   `-- E_with_smo_reject/    Same firmware push, SMO rejects companion intent (6 fixtures)
 |-- harness/runtime/     deterministic Python runtime (stubs + real Router + real Guardrail)
 |   |-- router.py             real deterministic Router (taxonomy lookup)
 |   |-- guardrail.py          real deterministic Guardrail engine (audit emission)
@@ -148,7 +149,7 @@ oran-agent-harness/
 |   `-- demo.sh               walks both scenarios end to end with --verbose
 |-- tests/               runtime unit tests for the harness Router and Guardrail
 |   |-- __init__.py
-|   `-- test_runtime.py       6 tests covering service / ambiguous / unknown layer / empty / crisis_mode / LLM-mode branches
+|   `-- test_runtime.py       8 tests covering service / ambiguous / unknown layer / empty / crisis_mode / LLM-mode / sandbox-block / dispatch-result branches
 `-- 5G_O-RAN_SIM/        platform substrate (BF3-5G-Demo, Apache 2.0 re-licensed by the author)
     |-- open-digital-platform-2_0/   13 O-RAN service implementations across WG1-WG11
     |-- demo_front-end/              React dashboard

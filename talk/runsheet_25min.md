@@ -21,9 +21,9 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
 | Motivation, the "From" half of the title | 3 | 4 |
 | Architecture macro, the 7-box diagram | 2 | 6 |
 | Cognitive middle, deterministic taxonomy plus LLM-on-ambiguous | 4 | 10 |
-| Routing decision, high side TMF921, low side O2 IMS plus CRDs | 4 | 14 |
-| Demo, recorded video of scenario D or E | 4 | 18 |
-| Trust loop, Digital Twin substrate, EvalOps, Killswitch | 3 | 21 |
+| Routing decision, high side TMF921, low side O2 IMS plus CRDs | 3 | 13 |
+| Demo, recorded video of scenario D or E | 4 | 17 |
+| Trust loop, Digital Twin substrate, EvalOps, Killswitch | 4 | 21 |
 | Novelty positioning + repo handoff | 2 | 23 |
 | Q&A buffer | 2 | 25 |
 
@@ -62,7 +62,7 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
        everything to the model" agentic-X demo.
   Fallback: read taxonomy.yaml from the live repo if the slide screenshot is wrong size.
 
-### Slide 5 (10:00, 4 min). Routing decision. High side TMF921, low side O2 IMS plus CRDs
+### Slide 5 (10:00, 3 min). Routing decision. High side TMF921, low side O2 IMS plus CRDs
 
   Show: routing rule split view with sample TMF921 intent on the right, sample O2 IMS apply on
         the left. `scenarios/E_nic_firmware_update/companion_intent.json` for the right side.
@@ -72,7 +72,7 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
        because node firmware reboots require SMO coordination regardless of cell count.
   Fallback: walk the diagram on slide 3 again if the split-view rendering breaks.
 
-### Slide 6 (14:00, 4 min). Demo
+### Slide 6 (13:00, 4 min). Demo
 
   Three independent demo paths exist, all reaching the same teaching moment. Pick one as primary
   and keep the others as fallbacks. Three captured runs from 2026-05-30 live under
@@ -117,7 +117,7 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
   Fallback for the whole slide: still images of the viewer for each scenario stage. Read the
         verdict transitions from the slides. The talk does not depend on a live network.
 
-### Slide 7 (18:00, 3 min). Trust loop. Digital Twin substrate, EvalOps, Killswitch
+### Slide 7 (17:00, 4 min). Trust loop. Digital Twin substrate, EvalOps, Killswitch
 
   Show: Digital Twin substrate diagram from `talk/architecture_zoom_cognitive.mmd`.
   Say: the trust layer that sits ON TOP of the three contributions. Twin is the floor, three
@@ -157,5 +157,4 @@ Total clock: 25 minutes plus a 5 minute Q&A buffer.
 - Twitter / LinkedIn / Slack / email post templates with the repo URL live in
   `talk/post_ngrg_handoff.md`.
 - Anyone who asks for the slides is pointed at the repo, not sent the deck. The repo has more.
-- A short follow-up note in `0.Log_Master_Catalog/` on David's personal repo (not this repo)
-  captures live audience reactions.
+- A short follow-up note on the author's personal session log captures live audience reactions.
