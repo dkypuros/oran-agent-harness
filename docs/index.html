@@ -106,6 +106,8 @@
     }
     .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .media { width: 100%; border-radius: 16px; border: 1px solid var(--line); background: #081225; display: block; }
+    figure { margin: 0; }
+    figcaption { margin-top: 10px; color: var(--muted); font-size: .94rem; }
     .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
     .pill { padding: 7px 10px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--muted); font-size: .86rem; }
     .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
@@ -198,27 +200,62 @@
       </article>
     </section>
 
-    <section class="grid" id="diagrams" aria-label="Diagrams">
+    <section class="grid" id="diagrams" aria-label="Selected PDF page screenshots">
       <article class="card wide">
-        <h2>Primary architecture</h2>
-        <p class="muted">The macro diagram for the harness: observation, agentic reasoning, sandboxing, governance, and O-Cloud / SMO handoff.</p>
-        <img class="media" src="overview.png" alt="O-RAN Agent Harness overview architecture diagram" />
+        <h2>Selected pages from the conference PDF</h2>
+        <p class="muted">
+          I kept the pages that work best as standalone web visuals: clean architecture, dual-route routing,
+          deterministic safety, auditability, and the interactive discovery flow. The repository still carries
+          the deeper source material; this page shows the slides attendees can understand at a glance.
+        </p>
       </article>
-      <article class="card">
-        <h2>Three-loop harness</h2>
-        <img class="media" src="three_loop.png" alt="Three-loop O-RAN agent harness diagram" />
+
+      <article class="card wide">
+        <h2>Closed-loop remediation harness</h2>
+        <figure>
+          <img class="media" src="assets/pdf-pages/slide-03-closed-loop-harness.png" alt="PDF page screenshot showing the closed-loop remediation agent harness architecture with observation, cognitive, and remediation loops" />
+          <figcaption>Page 3 - the best single orientation slide for the three-part harness design.</figcaption>
+        </figure>
       </article>
-      <article class="card">
-        <h2>Lifecycle sequence</h2>
-        <img class="media" src="sequence.png" alt="Anomaly lifecycle sequence diagram" />
+
+      <article class="card wide">
+        <h2>Dual-route automation architecture</h2>
+        <figure>
+          <img class="media" src="assets/pdf-pages/slide-04-dual-route-architecture.png" alt="PDF page screenshot showing closed-loop day-two network automation blending O-RAN telemetry and TM Forum business intent" />
+          <figcaption>Page 4 - shows where human/IA validation, sandboxing, service-layer intent, and infrastructure handoff meet.</figcaption>
+        </figure>
       </article>
+
       <article class="card">
-        <h2>O2 IMS to operator bridge</h2>
-        <img class="media" src="bridge.png" alt="O2 IMS to Kubernetes operator bridge diagram" />
+        <h2>Deterministic control plane</h2>
+        <figure>
+          <img class="media" src="assets/pdf-pages/slide-12-control-plane-decoupling.png" alt="PDF page screenshot explaining that LLM reasoning is decoupled from the deterministic handoff control plane" />
+          <figcaption>Page 12 - the core trust argument: LLMs inspect; deterministic code gates execution.</figcaption>
+        </figure>
       </article>
+
       <article class="card">
-        <h2>Governance and trust loop</h2>
-        <img class="media" src="governance.png" alt="Governance and trust-loop diagram" />
+        <h2>Scenario D vs. Scenario E</h2>
+        <figure>
+          <img class="media" src="assets/pdf-pages/slide-13-dual-route-scenarios.png" alt="PDF page screenshot comparing Scenario D down-only operational efficiency with Scenario E down plus up strategic governance" />
+          <figcaption>Page 13 - the cleanest explanation of why some fixes stay local and others require SMO alignment.</figcaption>
+        </figure>
+      </article>
+
+      <article class="card">
+        <h2>AuditEvent sidecar</h2>
+        <figure>
+          <img class="media" src="assets/pdf-pages/slide-14-auditevent-sidecar.png" alt="PDF page screenshot showing Harness-Walker and the AuditEvent sidecar turning agentic reasoning into a structured audit record" />
+          <figcaption>Page 14 - makes the traceability and no-black-box argument concrete.</figcaption>
+        </figure>
+      </article>
+
+      <article class="card">
+        <h2>Interactive discovery flow</h2>
+        <figure>
+          <img class="media" src="assets/pdf-pages/slide-15-discovery-flow.png" alt="PDF page screenshot showing oh-my-tiny-oran discovery with slash commands and MCP probes" />
+          <figcaption>Page 15 - a strong demo handoff: operator console, slash commands, MCP probes, and expert checklist framing.</figcaption>
+        </figure>
       </article>
     </section>
 
