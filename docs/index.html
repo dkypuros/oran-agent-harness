@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>O-RAN Agent Harness | nGRG Workshop Talk</title>
+  <meta name="description" content="Conference companion page for the O-RAN Agent Harness talk, with video, MP3 audio, diagrams, and repository handoff links." />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07101f;
+      --bg-2: #0d1b33;
+      --card: rgba(14, 27, 50, 0.88);
+      --card-2: rgba(19, 37, 68, 0.92);
+      --line: rgba(137, 170, 220, 0.22);
+      --text: #eef5ff;
+      --muted: #b6c7e3;
+      --blue: #61b3ff;
+      --green: #7ee787;
+      --orange: #ffca7a;
+      --shadow: 0 22px 80px rgba(0,0,0,.34);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 8%, rgba(97,179,255,.25), transparent 28rem),
+        radial-gradient(circle at 90% 4%, rgba(126,231,135,.14), transparent 24rem),
+        linear-gradient(135deg, #050b15 0%, var(--bg) 46%, #101522 100%);
+    }
+    a { color: var(--blue); }
+    .shell { max-width: 1180px; margin: 0 auto; padding: 28px 18px 56px; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: clamp(28px, 5vw, 58px);
+      background: linear-gradient(135deg, rgba(20,42,80,.96), rgba(9,18,35,.9));
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% -44% 35%;
+      height: 340px;
+      background: radial-gradient(circle, rgba(97,179,255,.22), transparent 70%);
+      transform: rotate(-8deg);
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      color: var(--green);
+      font-size: 0.92rem;
+      letter-spacing: .02em;
+    }
+    h1 { margin: 22px 0 14px; max-width: 920px; font-size: clamp(2.15rem, 6vw, 4.75rem); line-height: .98; letter-spacing: -.055em; }
+    .lede { max-width: 850px; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.28rem); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      padding: 11px 16px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .btn.primary { background: linear-gradient(135deg, #1f83ff, #3fc17c); border: 0; color: white; }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; margin-top: 18px; }
+    .card {
+      grid-column: span 6;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--card);
+      box-shadow: 0 16px 44px rgba(0,0,0,.22);
+      padding: 22px;
+    }
+    .card.wide { grid-column: span 12; }
+    .card.third { grid-column: span 4; }
+    h2 { margin: 0 0 12px; font-size: clamp(1.35rem, 2.4vw, 2rem); letter-spacing: -.025em; }
+    h3 { margin: 0 0 8px; font-size: 1.08rem; }
+    .muted { color: var(--muted); }
+    audio { width: 100%; margin: 10px 0 8px; }
+    .video {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding-top: 56.25%;
+      background: #050b15;
+    }
+    .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .media { width: 100%; border-radius: 16px; border: 1px solid var(--line); background: #081225; display: block; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .pill { padding: 7px 10px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--muted); font-size: .86rem; }
+    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .step { border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: var(--card-2); min-height: 118px; }
+    .step b { color: var(--green); display: block; margin-bottom: 6px; }
+    ul { padding-left: 1.15rem; margin: 10px 0 0; }
+    li { margin: 7px 0; }
+    code { color: var(--orange); }
+    footer { margin-top: 26px; color: var(--muted); text-align: center; font-size: .92rem; }
+    @media (max-width: 860px) {
+      .card, .card.third { grid-column: span 12; }
+      .flow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <span class="eyebrow">O-RAN nGRG Workshop · Seattle · June 4, 2026</span>
+      <h1>From Multivendor Diagnosis to Closed-Loop Remediation</h1>
+      <p class="lede">
+        A conference handoff for the O-RAN Agent Harness: the durable research bench behind the talk,
+        a runnable two-loop demo, the generated MP3 talk track, the YouTube video, and the diagrams that
+        explain how the harness turns day-2 Cloud RAN evidence into governed remediation proposals.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="#audio">Listen to the MP3</a>
+        <a class="btn" href="#video">Watch the video</a>
+        <a class="btn" href="https://github.com/dkypuros/oran-agent-harness" target="_blank" rel="noopener">Open GitHub repo</a>
+        <a class="btn" href="#diagrams">See the diagrams</a>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="Talk media">
+      <article class="card" id="audio">
+        <h2>Audio talk track</h2>
+        <p class="muted">Generated from the final demo talk track using Google Cloud Chirp HD / Charon voice.</p>
+        <audio controls preload="metadata" src="assets/ultimate_demo_talk_track.mp3"></audio>
+        <p><a href="assets/ultimate_demo_talk_track.mp3" download>Download the MP3</a></p>
+        <div class="pill-row">
+          <span class="pill">MP3 asset</span>
+          <span class="pill">Conference rehearsal</span>
+          <span class="pill">Source text: Demo Talk Track</span>
+        </div>
+      </article>
+
+      <article class="card" id="video">
+        <h2>YouTube video</h2>
+        <div class="video">
+          <iframe src="https://www.youtube.com/embed/gFCSkPKoQNs" title="O-RAN Agent Harness conference video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <p class="muted">Direct link: <a href="https://youtu.be/gFCSkPKoQNs" target="_blank" rel="noopener">https://youtu.be/gFCSkPKoQNs</a></p>
+      </article>
+    </section>
+
+    <section class="grid" aria-label="Project overview">
+      <article class="card wide">
+        <h2>What the repository demonstrates</h2>
+        <div class="flow">
+          <div class="step"><b>1 · Observe</b>PTP drift, hardware inventory, SMO intent context, and trace evidence are normalized into harness inputs.</div>
+          <div class="step"><b>2 · Classify</b>A deterministic O-RAN resource taxonomy routes known cases and isolates ambiguous edges for LLM-assisted reasoning.</div>
+          <div class="step"><b>3 · Govern</b>Sandbox verdicts, guardrails, SMO acceptance/rejection, and operator sign-off gate every remediation proposal.</div>
+          <div class="step"><b>4 · Handoff</b>Infrastructure fixes route down through O2 IMS / Kubernetes-native contracts; service intents route up to the SMO.</div>
+        </div>
+      </article>
+
+      <article class="card third">
+        <h3>For conference attendees</h3>
+        <ul>
+          <li>Start with <a href="https://github.com/dkypuros/oran-agent-harness/blob/main/talk/runsheet_25min.md" target="_blank" rel="noopener">talk/runsheet_25min.md</a>.</li>
+          <li>Read the architecture narrative for the system walkthrough.</li>
+          <li>Use the diagrams below to orient the execution path.</li>
+        </ul>
+      </article>
+      <article class="card third">
+        <h3>For builders</h3>
+        <ul>
+          <li>Run the deterministic MacBook lab locally.</li>
+          <li>Inspect harness contracts under <code>harness/</code>.</li>
+          <li>Replay scenarios under <code>scenarios/</code> and <code>5G_O-RAN_SIM/bench/</code>.</li>
+        </ul>
+      </article>
+      <article class="card third">
+        <h3>For reviewers</h3>
+        <ul>
+          <li>Check the security posture before forking.</li>
+          <li>Trace every authored artifact to O-RAN, ETSI, IEEE, 3GPP, or TM Forum references.</li>
+          <li>Use CI verification as the public trust gate.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="grid" id="diagrams" aria-label="Diagrams">
+      <article class="card wide">
+        <h2>Primary architecture</h2>
+        <p class="muted">The macro diagram for the harness: observation, agentic reasoning, sandboxing, governance, and O-Cloud / SMO handoff.</p>
+        <img class="media" src="overview.png" alt="O-RAN Agent Harness overview architecture diagram" />
+      </article>
+      <article class="card">
+        <h2>Three-loop harness</h2>
+        <img class="media" src="three_loop.png" alt="Three-loop O-RAN agent harness diagram" />
+      </article>
+      <article class="card">
+        <h2>Lifecycle sequence</h2>
+        <img class="media" src="sequence.png" alt="Anomaly lifecycle sequence diagram" />
+      </article>
+      <article class="card">
+        <h2>O2 IMS to operator bridge</h2>
+        <img class="media" src="bridge.png" alt="O2 IMS to Kubernetes operator bridge diagram" />
+      </article>
+      <article class="card">
+        <h2>Governance and trust loop</h2>
+        <img class="media" src="governance.png" alt="Governance and trust-loop diagram" />
+      </article>
+    </section>
+
+    <section class="grid" aria-label="Repository links">
+      <article class="card wide">
+        <h2>Public handoff links</h2>
+        <p class="muted">Give attendees both links: the repository for source and the page for the guided conference handoff.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://dkypuros.github.io/oran-agent-harness/" target="_blank" rel="noopener">GitHub Page</a>
+          <a class="btn" href="https://github.com/dkypuros/oran-agent-harness" target="_blank" rel="noopener">GitHub Repository</a>
+          <a class="btn" href="https://github.com/dkypuros/oran-agent-harness/blob/main/talk/architecture_narrative.md" target="_blank" rel="noopener">Architecture narrative</a>
+          <a class="btn" href="https://github.com/dkypuros/oran-agent-harness/blob/main/docs/references.md" target="_blank" rel="noopener">References</a>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      This static page is served from <code>docs/index.html</code>. Real credentials and local runtime state are intentionally excluded from Git.
+    </footer>
+  </main>
+</body>
+</html>

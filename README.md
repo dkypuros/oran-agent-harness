@@ -12,8 +12,9 @@ artifacts under `talk/`. Long-form per-audience narratives that draw on the benc
 `narratives/`. The talk is one moment; the bench is durable.
 
 **Two front doors.** Coming from the nGRG talk and want the box-check walk? Start at
-`talk/runsheet_25min.md`. Trying to use this as a research substrate for your own closed-loop
-work? Start at `narratives/README.md`.
+`talk/runsheet_25min.md` or the public conference handoff page at
+`https://dkypuros.github.io/oran-agent-harness/`. Trying to use this as a research substrate
+for your own closed-loop work? Start at `narratives/README.md`.
 
 **Empirical MacBook two-loop demo.** The Mac-local dashboard also exposes a reviewer-operable
 slice of the harness: open `http://localhost:8097`, use `/commands` to show the scoped
