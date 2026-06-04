@@ -72,5 +72,8 @@ draft_papers/*.synctex.gz
 .idea/
 .vscode/
 
+# Generated talk-track audio is published from docs/assets/; keep source-output copies local.
+Demo Talk Track/*.mp3
+
 # TypeScript incremental build artifacts
 *.tsbuildinfo
