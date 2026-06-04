@@ -90,3 +90,5 @@ disciplines that mature with the deployment.
 The contribution is the assembly: a Digital Twin substrate, three activities running on it,
 Intelligence Augmentation as the explicit banner, and a global Killswitch as the operator's reserve
 power.
+
+For the implementation-level status of EvalOps, validation gates, and what is real versus stubbed in v0, see `../docs/evalops-and-validation.md`.

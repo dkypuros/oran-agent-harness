@@ -76,6 +76,8 @@ graph TD
 
 To establish human trust, the harness enforces a **strict split between read-only discovery probes and write-capable remediation execution**:
 
+The `/oran-discover` commands are deliberately read-before-write. They inspect PTP state, Metal3 state, Redfish state, SMO intent state, taxonomy, and guardrails; they do not apply remediation. The assistant can use those surfaces to explain the environment, but write-capable action remains behind the harness-walker, guardrail engine, sandbox verdict, AuditEvent, and operator co-authorization path.
+
 ### 1. The Six Discovery Probes
 *   **`:ptp` (`ptp.md`):** Collects raw PTP synchronization events, PHC offsets, and `cloud-event-proxy` states, explaining their **IEEE 1588 / G.8275.1** lineage.
 *   **`:metal3` (`metal3.md`):** Inspects host platform and bare-metal firmware states behind **O-RAN O2ims** shapes.

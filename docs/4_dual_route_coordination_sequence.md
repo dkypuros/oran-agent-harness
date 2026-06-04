@@ -79,3 +79,6 @@ Because a NIC firmware update requires offline host reboots, the harness initiat
 
 ### 4. Human-Governed Co-Authorization
 The `guardrail.py` engine processes the outputs, attaches the **7-field Reversibility Profile**, and blocks physical dispatch. The NOC Operator reviews the draft, inspects the SMO's maintenance window decision, and commits (promotes) the action, prompting live O2ims execution and TMF688 audit storage.
+
+### Scenario E and E-with-SMO-reject Nuance
+The dual-route pattern is parallel emission, not hidden two-phase commit. Scenario E sends the infrastructure preparation down through O2ims while the companion service context goes up through TMF921. Scenario E-with-SMO-reject keeps the same infrastructure-side sandbox verdict but captures `dispatch_result.accepted=false` from the partner SMO. That rejection lands in the AuditEvent before operator co-authorization, so the operator sees both facts at once: the twin says the payload can land, and the SMO says the service window is not safe yet.

@@ -44,6 +44,8 @@ the historical accuracy of both the deterministic classifier and the LLM-assist 
 LLM response on the ambiguous path is recorded in the AuditEvent's `knowledge_base_lookups`
 field, so the bias case has an audit trail.
 
+Implementation status for this in v0 is tracked in `../docs/evalops-and-validation.md`: EvalOps fields and schemas exist today, while live telemetry is the v1 replacement for fixture-backed values.
+
 ## Q4. How does this interact with the O1 / O2 vs MCP-private telemetry boundary?
 
 The MCP servers consume O-Cloud-internal platform telemetry (linuxptp state, MachineConfig pool

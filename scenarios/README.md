@@ -64,6 +64,8 @@ deterministic core. The walker's output is fully reproducible across runs becaus
 non-deterministic component (the LLM substrate) is only called on ambiguous_path, which no
 committed scenario hits.
 
+For the implementation-level EvalOps and validation status, including what is real versus stubbed in v0, see `../docs/evalops-and-validation.md`.
+
 ## Running the demo
 
 From the repo root:

@@ -124,6 +124,15 @@ graph TD
 *   **Deterministic Policies:** The `guardrail.py` engine processes the `sandbox_verdict` and five structural checks declared in `guardrails.yaml`.
 *   **Co-Authorization:** NOC operators retain absolute authority. They review the draft proposal, inspect the diagnostic evidence, and commit changes with the 7-field `ReversibilityProfile` appended.
 
+### Trust and Validation Status
+*   **Router:** Real deterministic Python in `harness/runtime/router.py`.
+*   **Sandbox gate:** Real enforcement gate in `guardrail.py`; the current twin verdict is fixture-backed through `scenario_stubs.json`.
+*   **Guardrail engine:** Real deterministic Python enforcing crisis mode, sandbox `apply_allowed`, action allowlist, blast radius, and human approval.
+*   **AuditEvent emission:** Real TMF688-shaped envelope with ReversibilityProfile attached.
+*   **EvalOps telemetry:** Contracted in the AuditEvent/ReversibilityProfile fields today; live telemetry is a v1 replacement for fixture values.
+
+See `evalops-and-validation.md` for the implementation-level status table.
+
 ### 4. Right Loop (Action)
 *   **Infrastructure Handoff:** Dispatched via O-Cloud Manager stubs utilizing the **O-RAN O2ims** boundary towards Kubernetes controllers (`MCO`, `KMM`, or `Metal3`).
 *   **Service Coordination:** Dispatched upward to the partner SMO using **TM Forum TMF921** intent models.

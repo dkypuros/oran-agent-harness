@@ -246,6 +246,7 @@ A, `medium` for A-prime, `medium` for D, `medium` for E). Scenario E additionall
 The verify gate's walker_e2e check enforces matching output for all 5 committed scenarios.
 
 See `scenarios/README.md` for the walkthrough narrative and the table of what is stubbed vs real.
+For the implementation-level view of EvalOps, validation gates, and what is real vs stubbed in v0, see `docs/evalops-and-validation.md`.
 
 ## Running the walkthroughs
 
