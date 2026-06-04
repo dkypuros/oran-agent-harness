@@ -238,7 +238,7 @@
         <h2>Scenario D vs. Scenario E</h2>
         <figure>
           <img class="media" src="assets/pdf-pages/slide-13-dual-route-scenarios.png" alt="PDF page screenshot comparing Scenario D down-only operational efficiency with Scenario E down plus up strategic governance" />
-          <figcaption>Page 13 - the cleanest explanation of why some fixes stay local and others require SMO alignment.</figcaption>
+          <figcaption>Page 13 - This is the fork I care about. Scenario D is the clean down-only case: the fault is local to the platform, so the harness can route through O2 IMS into KMM and keep it operational. Scenario E is different. Firmware touches the O-Cloud, but it also has service impact, so the harness has to go down to Metal3 and Redfish and up to the SMO through TMF921. That is the standards story: not every fix needs the SMO, but the ones that change service context need to be visible there.</figcaption>
         </figure>
       </article>
 
