@@ -214,7 +214,7 @@
         <h2>Closed-loop remediation harness</h2>
         <figure>
           <img class="media" src="assets/pdf-pages/slide-03-closed-loop-harness.png" alt="PDF page screenshot showing the closed-loop remediation agent harness architecture with observation, cognitive, and remediation loops" />
-          <figcaption>The best single orientation slide for the three-part harness design.</figcaption>
+          <figcaption>This is the architecture in one picture. The left loop is observation and recommendation. The middle is where the human and IA work together, but the harness defines what can be inspected and what can be routed. The right loop is remediation, and that is where the standards handoff becomes real. The important point is that the assistant is helpful, but the harness is load-bearing.</figcaption>
         </figure>
       </article>
 
@@ -222,7 +222,7 @@
         <h2>Dual-route automation architecture</h2>
         <figure>
           <img class="media" src="assets/pdf-pages/slide-04-dual-route-architecture.png" alt="PDF page screenshot showing closed-loop day-two network automation blending O-RAN telemetry and TM Forum business intent" />
-          <figcaption>Shows where human/IA validation, sandboxing, service-layer intent, and infrastructure handoff meet.</figcaption>
+          <figcaption>This is the slide that makes the safety story concrete. Before anything routes, the proposed remediation has to pass compliance, intent validation, sandbox evidence, and a human/IA checkpoint. Then the harness can decide whether the action belongs up at the service layer through TMF921, down into the O-Cloud through O2 IMS, or both. The value is not speed by itself. The value is controlled speed with multiple places to stop.</figcaption>
         </figure>
       </article>
 
@@ -230,7 +230,7 @@
         <h2>Deterministic control plane</h2>
         <figure>
           <img class="media" src="assets/pdf-pages/slide-12-control-plane-decoupling.png" alt="PDF page screenshot explaining that LLM reasoning is decoupled from the deterministic handoff control plane" />
-          <figcaption>The core trust argument: LLMs inspect; deterministic code gates execution.</figcaption>
+          <figcaption>This is the trust boundary I keep coming back to. The LLM can reason, summarize, and help the operator understand the situation, but it is not the thing that gets to push the network. The control plane is deterministic: router.py, taxonomy.yaml, guardrails.yaml, and the schemas decide what path is even allowed. That is how we make AI useful without making the model the production authority.</figcaption>
         </figure>
       </article>
 
@@ -246,7 +246,7 @@
         <h2>AuditEvent sidecar</h2>
         <figure>
           <img class="media" src="assets/pdf-pages/slide-14-auditevent-sidecar.png" alt="PDF page screenshot showing Harness-Walker and the AuditEvent sidecar turning agentic reasoning into a structured audit record" />
-          <figcaption>Makes the traceability and no-black-box argument concrete.</figcaption>
+          <figcaption>This is why I care about the harness-walker. I do not want the artifact of the demo to be a chat transcript. I want the artifact to be an AuditEvent that says what was proposed, what the router decided, what the guardrail allowed, what the sandbox found, and what still needs human approval. That is the trust loop. If we cannot audit it, we should not let it near remediation.</figcaption>
         </figure>
       </article>
 
@@ -254,7 +254,7 @@
         <h2>Interactive discovery flow</h2>
         <figure>
           <img class="media" src="assets/pdf-pages/slide-15-discovery-flow.png" alt="PDF page screenshot showing oh-my-tiny-oran discovery with slash commands and MCP probes" />
-          <figcaption>A strong demo handoff: operator console, slash commands, MCP probes, and expert checklist framing.</figcaption>
+          <figcaption>This is the operator experience I want people to remember. The assistant is not free-styling against production. It is working through slash commands and MCP probes that are intentionally scoped: plan, PTP, Metal3, Redfish, SMO, taxonomy, guardrail. The operator can inspect the environment first, then ask for an explanation. That is human-machine teaming in a telco shape: guided discovery, explicit surfaces, and no hidden write path.</figcaption>
         </figure>
       </article>
     </section>
