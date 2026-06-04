@@ -247,10 +247,10 @@ stack:
 - The harness pattern at `harness/` provides the closed-loop intelligence: Agentic Gateway,
   MCP servers, Domain Agents, Router (with ambiguous_path now wired to live LLM-assist), the
   Guardrail engine, and TMF688 audit emission.
-- The LLM inference layer at `5G_O-RAN_SIM/llm/` provides a unified `completion()` client and
-  a fake OpenShift AI vLLM mock server on port 8090. Anthropic Claude and OpenAI GPT are
-  configurable in `5G_O-RAN_SIM/.env` (template at `.env.example`). The default is the local
-  vLLM mock so the demo runs without external network calls.
+- The LLM inference layer at `5G_O-RAN_SIM/llm/` provides a unified `completion()` client.
+  Anthropic Claude, the OpenAI API, and OpenAI-compatible on-prem vLLM endpoints such as
+  Red Hat OpenShift AI are configurable in `5G_O-RAN_SIM/.env` (template at `.env.example`).
+  The MacBook lab uses the operator's Anthropic API key for the dashboard chat service.
 
 The integration seam is at `harness/runtime/router.py` `_resolve_ambiguous()`: when the
 `ORAN_LLM_MODE=live` environment variable is set, the router calls the inference client with
@@ -259,9 +259,8 @@ end-to-end (the LLM hint appears in the router's NotImplementedError message); t
 does not auto-parse the response into a deterministic classification in v0. Default behavior
 (env var unset) preserves the historical `NotImplementedError` so the existing verify gate at
 10/10 PASS and the unit test `test_route_ambiguous_raises` remain unaffected. This is the
-live realization of Contribution 3 (LLM-neutral substrate). Trace logs accumulate at
-`5G_O-RAN_SIM/llm/mock_traces.jsonl` (gitignored) for replay analysis as the p2p sync
-troubleshooting work unfolds.
+live realization of Contribution 3 (LLM-neutral substrate). If no provider is configured,
+the client returns a clear unavailable hint rather than fabricating a model answer.
 
 ## 7. Reproducibility entry point
 
@@ -278,11 +277,11 @@ cd linux_lab && ./setup_fedora.sh && ./run.sh       # Fedora path, rootless podm
 The Fedora path is verified end-to-end on Fedora 42 Cloud Edition with podman 5.4.1; capture
 at `linux_lab/verified_runs/2026-05-31_fedora42_podman.md`.
 
-That one command builds and starts nine containers: the four platform stubs (PTP operator,
-Metal3 BMO, Redfish BMC, TMF921 SMO), the harness walker, a fake vLLM mock, a static trace
-viewer, the React dashboard at `http://localhost:8097`, and the oh-my-tiny-oran chat service
-at `http://localhost:8097/#chat` (active when `LLM_PROVIDER=anthropic` is set in
-`macbook_lab/.env` with a real API key). Two micro test harnesses (`scripts/
+That one command builds and starts the lab containers: the four platform stubs (PTP operator,
+Metal3 BMO, Redfish BMC, TMF921 SMO), the harness walker, a static trace viewer, the React
+dashboard at `http://localhost:8097`, and the oh-my-tiny-oran chat service at
+`http://localhost:8097/#chat` (active when `ANTHROPIC_API_KEY` is set in `macbook_lab/.env`
+with a real API key). Two micro test harnesses (`scripts/
 test_oran_discover_skills.py` and `scripts/test_llm_live_path.py`) prove the discovery surface
 and the live LLM path respectively. Captured chat runs against this lab live under
 `talk/demo_logs/` as references the talk speaker can cite.

@@ -2,8 +2,8 @@
 %% Companion to: docs/title_and_abstract_final.txt
 %% v4 changes vs v3:
 %%   replaced generic LiteLLM cluster with Unified LLM Inference Client showing the three
-%%     providers actually wired in the bench: Anthropic Claude, OpenAI GPT, vLLM
-%%     (OpenShift AI in production; fake mock in lab) plus the ORAN_LLM_MODE env gate
+%%     providers supported by the bench: Anthropic Claude, OpenAI GPT, and
+%%     OpenAI-compatible vLLM such as Red Hat OpenShift AI plus the ORAN_LLM_MODE env gate
 %%   added scenario E (NIC firmware) explicit edges: Metal3 -> HostFirmwareComponents
 %%     -> BareMetalHost -> BMC -> Redfish UpdateService.SimpleUpdate -> NIC firmware
 %%   added scenario D verdict divergence: linuxptp reports software_ok while NIC reports
@@ -83,10 +83,10 @@ flowchart TB
         end
 
         subgraph LlmLayer["Unified LLM Inference Client (env-gated by ORAN_LLM_MODE, consumed by agents + router)"]
-            InfClient["Inference Client<br/>(5G_O-RAN_SIM/llm/client.py)<br/>provider selection by env;<br/>heuristic fallback if no key"]:::llm
+            InfClient["Inference Client<br/>(5G_O-RAN_SIM/llm/inference_client.py)<br/>provider selection by env;<br/>explicit unavailable result if unconfigured"]:::llm
             Claude["Anthropic Claude<br/>(ANTHROPIC_API_KEY)"]:::llmBackend
             GPT["OpenAI GPT<br/>(OPENAI_API_KEY)"]:::llmBackend
-            VLLM["vLLM<br/>(OpenShift AI in prod;<br/>fake mock at :8090 in lab)"]:::llmBackend
+            VLLM["vLLM<br/>(OpenShift AI or other<br/>on-prem OpenAI-compatible endpoint)"]:::llmBackend
             InfClient --> Claude
             InfClient --> GPT
             InfClient --> VLLM

@@ -1,0 +1,37 @@
+flowchart TD
+    classDef smo fill:#f9f2f4,stroke:#d3a4b4,stroke-width:2px;
+    classDef ric fill:#eef2f5,stroke:#9ba8b2,stroke-width:2px;
+    classDef cloud fill:#e6f5ea,stroke:#8cb398,stroke-width:2px;
+    classDef radio fill:#fff5e6,stroke:#d3b482,stroke-width:2px;
+
+    subgraph SMO_Domain ["Service Management & Orchestration (SMO)"]
+        NonRT["Non-RT RIC (#72)"]:::ric
+        SMO_Core["SMO Core Functions"]:::smo
+    end
+
+    subgraph OCloud_Domain ["O-Cloud Infrastructure (#129)"]
+        NearRT["Near-RT RIC (#90)"]:::ric
+        OCU["O-CU (Central Unit)"]:::radio
+        ODU["O-DU (Distributed Unit)"]:::radio
+    end
+
+    ORU["O-RU (Radio Unit)<br/>White-box Hardware (#147)"]:::radio
+
+    %% Policy & Intelligence
+    NonRT -- "A1 Interface (#67)<br/>Policies & Enrichment Data" --> NearRT
+
+    %% Near-RT Control
+    NearRT -- "E2 Interface (#83)<br/>Control & Telemetry" --> OCU
+    NearRT -- "E2 Interface (#83)<br/>Control & Telemetry" --> ODU
+
+    %% Disaggregated Radio
+    OCU -- "F1 Interface<br/>(3GPP defined)" --> ODU
+    ODU -- "Open Fronthaul (#100)<br/>CUS & M-Plane (#103)" --> ORU
+
+    %% Management & Orchestration
+    SMO_Core -- "O1 Interface (#11)<br/>FCAPS Management" --> NearRT
+    SMO_Core -- "O1 Interface (#11)" --> OCU
+    SMO_Core -- "O1 Interface (#11)" --> ODU
+    SMO_Core -- "O1 Interface (#11)" --> ORU
+
+    SMO_Core -- "O2 Interface (#129)<br/>Cloud Lifecycle Mgt" --> OCloud_Domain

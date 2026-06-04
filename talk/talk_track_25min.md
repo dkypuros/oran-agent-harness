@@ -87,13 +87,13 @@ But here's the interesting part. Some scenarios cross the boundary by their natu
 
 So the routing rule fires both branches at the same time. The Metal3 apply goes down through O2 IMS. The TMF921 companion intent goes up to the partner SMO. Two routes in parallel, neither vendor loses authority. That's the dual-route pattern. And that's what I'm going to fire live in the demo.
 
-There's a transaction-atomicity question this raises (what if the SMO rejects the companion intent after the firmware push has already started). The short answer is: parallel emission with three reconciliation mechanisms (Sandbox apply-allowed gate, dispatch_result capture, Killswitch), all implemented in v0 and proven by the test suite at 8 out of 8 pass. Scenario E_with_smo_reject in the repo exercises the rejection path. Full file-path anchored answer is in the reviewer FAQ as Q14. Happy to walk it in Q&A.
+There's a transaction-atomicity question this raises (what if the SMO rejects the companion intent after the firmware push has already started). The short answer is: parallel emission with three reconciliation mechanisms (Sandbox apply-allowed gate, dispatch_result capture, Killswitch), all implemented in v0 and proven by the test suite at 9 out of 9 pass. Scenario E_with_smo_reject in the repo exercises the rejection path. Full file-path anchored answer is in the reviewer FAQ as Q14. Happy to walk it in Q&A.
 
 
 Slide 6: Live demo
 -------------------------------------------------------------------------
 
-OK, let's actually run it. What you're going to see now is a chat interface running on a MacBook in my office. The whole stack is 9 Docker containers. The harness walker, the four platform stubs (PTP, Metal3, Redfish, TMF921 SMO), a trace viewer, a fake vLLM mock, a dashboard, and the tiny agent runtime we're calling oh-my-tiny-oran. The dashboard has a chat tab that talks to oh-my-tiny-oran. It uses my Anthropic API key to drive an agent loop against the lab's HTTP wrappers and the committed repo files. Two read-only tools. No write paths.
+OK, let's actually run it. What you're going to see now is a chat interface running on a MacBook in my office. The whole stack is Docker containers. The harness walker, the four platform stubs (PTP, Metal3, Redfish, TMF921 SMO), a trace viewer, a dashboard, and the tiny agent runtime we're calling oh-my-tiny-oran. The dashboard has a chat tab that talks to oh-my-tiny-oran. It uses my Anthropic API key from the project environment to drive an agent loop against the lab's HTTP wrappers and the committed repo files. The LLM substrate is provider-neutral: Anthropic, OpenAI API, or on-prem OpenAI-compatible vLLM such as Red Hat OpenShift AI. Two read-only tools. No write paths.
 
 I'm going to paste two prompts. The first is the pre-flight survey. The second is the dual-route exercise. Both prompts were captured working end-to-end on this machine yesterday, the transcripts are in the repo under talk/demo_logs.
 
@@ -147,7 +147,7 @@ Slide 8: Novelty positioning and repo handoff
 
 So bringing it together. The bench is at github dot com slash dkypuros slash oran-agent-harness. Apache 2.0. The 2+3+8+9 conjunction is the novelty claim. The boundary at the top is the O-RAN O2 spec. The delivery inside is the production Kubernetes contracts. A single RemediationProposal travels from the cognitive layer through a standardized O-RAN interface into a concrete Kubernetes-native contract that already runs in production O-Cloud deployments. That's what makes the right-side execution path concretely operationalizable, not a paper architecture.
 
-And the whole thing is reproducible. Clone the repo. Run macbook_lab slash run dot sh. That brings up the 9 containers in about a minute on Docker Desktop. Open the dashboard at localhost colon 8097. Click the oh-my-tiny-oran tab. Paste the two prompts I just showed you. You get the same chain firing on your machine.
+And the whole thing is reproducible. Clone the repo. Run macbook_lab slash run dot sh. That brings up the lab containers in about a minute on Docker Desktop. Open the dashboard at localhost colon 8097. Click the oh-my-tiny-oran tab. Paste the two prompts I just showed you. You get the same chain firing on your machine.
 
 The repo also has, under talk slash, a runsheet for this talk, a reviewer FAQ with 14 anticipated questions, a 5-minute pitch and a 1-minute pitch for hallway capture, and the demo logs I just walked you through. Under narratives slash, there are 5 long-form per-audience cuts: an operator-day narrative for SREs, a trust-loop framing for architects, a standards-conformance walkthrough for working-group chairs, a multivendor interop narrative for vendor PMs, and a Day-3 trajectory for workshop reviewers.
 

@@ -288,7 +288,7 @@ reviewer presses on.
 ## How to use these prompts in the dashboard
 
 1. Bring up the lab: `cd macbook_lab && ./run.sh`
-2. Wait for the 9 containers to come up healthy (about 60 seconds on first run, instant on rerun)
+2. Wait for the lab containers to come up healthy (about 60 seconds on first run, instant on rerun)
 3. Open `http://localhost:8097` in a browser
 4. Click the **oh-my-tiny-oran** tab (second tab from the left)
 5. Either click a slash shortcut button above the chat input (pre-fills `/oran-discover:<name>`) or paste a prompt from this file

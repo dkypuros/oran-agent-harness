@@ -17,10 +17,9 @@ failing live is much higher than the cost of checking it 30 minutes before.
 
   - [ ] **Laptop battery at 100 percent.** Both the demo laptop and the backup.
   - [ ] **MacBook lab cold start.** Run `cd macbook_lab && ./run.sh` from a fresh terminal.
-        Verify the 8 services come up (9 with `--profile dashboard`).
-  - [ ] **Health endpoints all green.** Run all 8 curl checks:
+        Verify the platform stubs, walker, trace viewer, dashboard, and chat service come up.
+  - [ ] **Health endpoints all green.** Run the curl checks:
         ```
-        curl -sf http://localhost:8090/                           # fake-vllm
         curl -sf http://localhost:8091/health                     # ptp-operator
         curl -sf http://localhost:8092/health                     # metal3-bmo
         curl -sf http://localhost:8093/health                     # redfish-bmc
@@ -28,6 +27,7 @@ failing live is much higher than the cost of checking it 30 minutes before.
         curl -sf http://localhost:8095/dashboard/trace_view/      # trace viewer
         curl -sf http://localhost:8096/health                     # harness-walker
         curl -sf http://localhost:8097                            # dashboard
+        curl -sf http://localhost:8098/health                     # oh-my-tiny-oran chat
         ```
         Every one should return non-error within 60 seconds. If any fail, fix or pivot to the
         recorded demo (see Fallbacks below).
@@ -55,8 +55,8 @@ failing live is much higher than the cost of checking it 30 minutes before.
         an index card. Stick it in your pocket. Anyone who asks for the slides gets the URL
         instead.
   - [ ] **Network check.** Test the venue WiFi with `curl -sf https://api.anthropic.com`
-        if the talk uses LLM live mode, OR confirm `ORAN_LLM_MODE` is unset (default fake
-        vLLM mock) if the talk does not need a live call.
+        if the talk uses Anthropic live mode. If the venue network is unreliable, switch to
+        the deterministic bench or the recorded demo rather than using a placeholder local model.
   - [ ] **Phone charged and on silent.** No notifications during the talk.
 
 ## T-30 minutes

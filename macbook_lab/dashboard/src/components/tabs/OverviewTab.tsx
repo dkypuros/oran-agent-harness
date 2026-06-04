@@ -16,7 +16,7 @@ export function OverviewTab() {
           <div>
             <CardTitle>Overview</CardTitle>
             <CardDescription>
-              Bench summary across all 4 scenarios, plus the trace files currently on disk.
+              Bench summary across all 5 scenarios, plus the trace files currently on disk.
             </CardDescription>
           </div>
           <Button onClick={() => { bench.refresh(); traces.refresh(); }}>Refresh</Button>

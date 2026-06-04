@@ -1,27 +1,11 @@
 # MacBook lab docker-compose orchestration.
 # One command brings up all platform stubs, the harness walker, the trace viewer,
-# the fake vLLM mock, and (when Issue #57 lands) the React dashboard.
+# the Anthropic-backed chat service, and the React dashboard when enabled.
 #
 # Build context is the repo root (one directory up) so the Dockerfiles can COPY
 # both 5G_O-RAN_SIM/ and harness/ paths.
 
 services:
-
-  fake-vllm:
-    build:
-      context: ..
-      dockerfile: macbook_lab/Dockerfile.fake-vllm
-    container_name: oran-fake-vllm
-    ports:
-      - "8090:8090"
-    environment:
-      - VLLM_MOCK_PORT=8090
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/').read()"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
 
   ptp-operator-stub:
     build:
@@ -111,11 +95,14 @@ services:
     container_name: oran-harness-chat
     ports:
       - "8098:8098"
+    env_file:
+      - anthropic.env
     environment:
       - PORT=8098
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-stub-replace-with-real-key}
       - ANTHROPIC_MODEL_LOW=${ANTHROPIC_MODEL_LOW:-claude-haiku-4-5-20251001}
       - TINY_ORAN_MAX_TURNS=${TINY_ORAN_MAX_TURNS:-10}
+      - TINY_ORAN_RESPONSE_MAX_TOKENS=${TINY_ORAN_RESPONSE_MAX_TOKENS:-900}
+      - TINY_ORAN_FINAL_SYNTHESIS_TOKENS=${TINY_ORAN_FINAL_SYNTHESIS_TOKENS:-700}
     depends_on:
       - ptp-operator-stub
       - metal3-bmo-stub
@@ -148,13 +135,23 @@ services:
     environment:
       - PORT=8096
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-stub-replace-with-real-key}
+      - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://api.anthropic.com}
+      - ANTHROPIC_MODEL_HIGH=${ANTHROPIC_MODEL_HIGH:-claude-opus-4-7}
+      - ANTHROPIC_MODEL_MEDIUM=${ANTHROPIC_MODEL_MEDIUM:-claude-sonnet-4-6}
+      - ANTHROPIC_MODEL_LOW=${ANTHROPIC_MODEL_LOW:-claude-haiku-4-5}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-stub-replace-with-real-key}
-      - LLM_PROVIDER=${LLM_PROVIDER:-vllm}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - OPENAI_MODEL_HIGH=${OPENAI_MODEL_HIGH:-gpt-4o}
+      - OPENAI_MODEL_MEDIUM=${OPENAI_MODEL_MEDIUM:-gpt-4o-mini}
+      - OPENAI_MODEL_LOW=${OPENAI_MODEL_LOW:-gpt-4o-mini}
+      - VLLM_API_KEY=${VLLM_API_KEY:-}
+      - VLLM_BASE_URL=${VLLM_BASE_URL:-}
+      - VLLM_MODEL_HIGH=${VLLM_MODEL_HIGH:-granite-7b-instruct}
+      - VLLM_MODEL_MEDIUM=${VLLM_MODEL_MEDIUM:-llama-3-8b-instruct}
+      - VLLM_MODEL_LOW=${VLLM_MODEL_LOW:-mistral-7b-instruct}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
       - ORAN_LLM_MODE=${ORAN_LLM_MODE:-heuristic}
-      - VLLM_BASE_URL=http://fake-vllm:8090/v1
-      - VLLM_API_KEY=demo-no-auth-required
     depends_on:
-      - fake-vllm
       - ptp-operator-stub
       - metal3-bmo-stub
       - redfish-bmc-stub

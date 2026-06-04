@@ -53,6 +53,9 @@ ALLOWED_CURL_HOSTS = {
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL_LOW", "claude-haiku-4-5-20251001")
 MAX_AGENT_TURNS = int(os.environ.get("TINY_ORAN_MAX_TURNS", "10"))
+MAX_RESPONSE_TOKENS = int(os.environ.get("TINY_ORAN_RESPONSE_MAX_TOKENS", "900"))
+FINAL_SYNTHESIS_TOKENS = int(os.environ.get("TINY_ORAN_FINAL_SYNTHESIS_TOKENS", "700"))
+MAX_SESSION_MESSAGES = int(os.environ.get("TINY_ORAN_SESSION_MESSAGES", "8"))
 
 app = FastAPI(title="oh-my-tiny-oran")
 
@@ -85,7 +88,7 @@ TOOLS_SPEC = [
     },
 ]
 
-SLASH_PATTERN = re.compile(r"^/(oran-discover):([a-z][a-z0-9_-]*)\b\s*(.*)$", re.IGNORECASE)
+SLASH_PATTERN = re.compile(r"/(oran-discover):([a-z][a-z0-9_-]*)\b\s*(.*)$", re.IGNORECASE)
 
 
 class ChatRequest(BaseModel):
@@ -141,14 +144,33 @@ def detect_slash_skill(user_message: str) -> tuple[str | None, str]:
 
     Returns (skill_name_or_none, remaining_user_text).
     """
-    m = SLASH_PATTERN.match(user_message.strip())
+    stripped = user_message.strip()
+    m = SLASH_PATTERN.match(stripped)
+    if not m:
+        m = SLASH_PATTERN.search(stripped)
     if not m:
         return None, user_message
     bundle, stem, remainder = m.group(1), m.group(2), m.group(3).strip()
     skill_name = f"{bundle}:{stem}"
     if skill_name not in SKILLS:
         return None, user_message
-    return skill_name, remainder
+    if m.start() == 0:
+        return skill_name, remainder
+
+    prefix = stripped[: m.start()].strip(" ,.:;-")
+    suffix = remainder.strip(" ,.:;-")
+    normalized = " ".join(part for part in (prefix, suffix) if part)
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    if normalized.lower() in {
+        "skill",
+        "run this skill",
+        "run the skill",
+        "let's do a skill",
+        "let's do an skill",
+        "do the skill",
+    }:
+        normalized = ""
+    return skill_name, normalized
 
 
 def expand_user_message(user_message: str) -> tuple[str, str | None]:
@@ -249,8 +271,63 @@ def _system_prompt() -> str:
         "When the user invokes a slash command, the skill markdown will be injected into their "
         "message as `[SKILL INVOKED: ...]`. Execute the Steps section of that skill using the "
         "tools above. For ordinary questions, answer directly with tool use when needed. "
+        "Default to a compact operator-facing answer: prefer 4-6 bullets and stay under roughly "
+        "220 words unless the user explicitly asks for a deep report. "
+        "When a harness-walker `/run/{scenario_id}` result is available, treat that AuditEvent as "
+        "the primary source of truth and avoid redundant file/tool reads unless needed to explain a gate or route. "
         "Stay read-only; do not propose actions that mutate state. "
         "Always synthesize a final answer for the user, even if you are running low on turns."
+    )
+
+
+def _force_final_text(
+    client: Any,
+    anthropic_module: Any,
+    system: str,
+    conversation: list[dict[str, Any]],
+) -> tuple[str, int, int]:
+    """Ask for a final no-tool synthesis when the tool loop ends without text.
+
+    Claude can spend every allowed agent turn gathering evidence. The UI still
+    needs a visible operator-facing answer, so this final pass disables tools and
+    asks for a compact synthesis from the already-collected conversation.
+    """
+    try:
+        resp = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=FINAL_SYNTHESIS_TOKENS,
+            system=(
+                f"{system}\n\n"
+                "You have no tools in this final pass. Use only the evidence "
+                "already present in the conversation and produce the final "
+                "operator-facing answer now. Be concise and concrete."
+            ),
+            messages=[
+                *conversation,
+                {
+                    "role": "user",
+                    "content": (
+                        "Final answer required now. Summarize the harness "
+                        "finding, route, guardrail/sandbox status, and what "
+                        "remains operator-controlled. Do not request more tools."
+                    ),
+                },
+            ],
+        )
+    except anthropic_module.RateLimitError:
+        return "[Anthropic rate-limited the final synthesis. Wait a moment and retry.]", 0, 0
+    except anthropic_module.APIStatusError as e:
+        return f"[Anthropic API error during final synthesis: HTTP {e.status_code}. Retry shortly.]", 0, 0
+    except anthropic_module.APIError as e:
+        return f"[Anthropic API error during final synthesis: {type(e).__name__}: {e}]", 0, 0
+
+    text = "\n".join(
+        block.text for block in resp.content if getattr(block, "type", None) == "text"
+    ).strip()
+    return (
+        text or "[final synthesis returned no text]",
+        resp.usage.input_tokens,
+        resp.usage.output_tokens,
     )
 
 
@@ -264,8 +341,8 @@ def _run_agent_turn(session_id: str, raw_user_message: str) -> ChatTurn:
 
     expanded_message, skill_invoked = expand_user_message(raw_user_message)
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    history = SESSIONS.setdefault(session_id, [])
-    history.append({"role": "user", "content": expanded_message})
+    prior_history = list(SESSIONS.setdefault(session_id, []))
+    conversation = [*prior_history, {"role": "user", "content": expanded_message}]
 
     total_in = 0
     total_out = 0
@@ -274,23 +351,27 @@ def _run_agent_turn(session_id: str, raw_user_message: str) -> ChatTurn:
     start = time.monotonic()
     system = _system_prompt()
 
+    reached_turn_limit = True
     for _ in range(MAX_AGENT_TURNS):
         try:
             resp = client.messages.create(
                 model=ANTHROPIC_MODEL,
-                max_tokens=2048,
+                max_tokens=MAX_RESPONSE_TOKENS,
                 system=system,
                 tools=TOOLS_SPEC,
-                messages=history,
+                messages=conversation,
             )
         except anthropic.RateLimitError:
             final_text = "[Anthropic rate-limited the request. Wait a moment and retry.]"
+            reached_turn_limit = False
             break
         except anthropic.APIStatusError as e:
             final_text = f"[Anthropic API error: HTTP {e.status_code}. Retry shortly.]"
+            reached_turn_limit = False
             break
         except anthropic.APIError as e:
             final_text = f"[Anthropic API error: {type(e).__name__}: {e}]"
+            reached_turn_limit = False
             break
         total_in += resp.usage.input_tokens
         total_out += resp.usage.output_tokens
@@ -302,21 +383,30 @@ def _run_agent_turn(session_id: str, raw_user_message: str) -> ChatTurn:
             elif block.type == "tool_use":
                 tool_uses.append(block)
                 tool_uses_collected.append(ToolCallRecord(name=block.name, input=block.input))
-        history.append({"role": "assistant", "content": resp.content})
+        conversation.append({"role": "assistant", "content": resp.content})
 
         if resp.stop_reason == "end_turn" or not tool_uses:
             final_text = "\n".join(text_parts).strip()
+            reached_turn_limit = False
             break
 
         tool_results = []
         for tu in tool_uses:
             result = _run_tool(tu.name, tu.input)
             tool_results.append({"type": "tool_result", "tool_use_id": tu.id, "content": result})
-        history.append({"role": "user", "content": tool_results})
-    else:
-        final_text = "[agent loop reached MAX_AGENT_TURNS]"
+        conversation.append({"role": "user", "content": tool_results})
+    if reached_turn_limit or not final_text.strip() or final_text == "[agent loop reached MAX_AGENT_TURNS]":
+        final_text, extra_in, extra_out = _force_final_text(client, anthropic, system, conversation)
+        total_in += extra_in
+        total_out += extra_out
 
     elapsed = time.monotonic() - start
+    compact_history = [
+        *prior_history,
+        {"role": "user", "content": raw_user_message.strip()},
+        {"role": "assistant", "content": final_text or "(no text)"},
+    ]
+    SESSIONS[session_id] = compact_history[-MAX_SESSION_MESSAGES:]
     return ChatTurn(
         role="assistant",
         content=final_text or "(no text)",
@@ -337,6 +427,8 @@ def health() -> dict[str, Any]:
         "anthropic_key_set": bool(ANTHROPIC_API_KEY) and ANTHROPIC_API_KEY != "stub-replace-with-real-key",
         "model": ANTHROPIC_MODEL,
         "max_turns": MAX_AGENT_TURNS,
+        "max_response_tokens": MAX_RESPONSE_TOKENS,
+        "final_synthesis_tokens": FINAL_SYNTHESIS_TOKENS,
     }
 
 

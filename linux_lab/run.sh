@@ -30,8 +30,9 @@ if [ ! -f .env ]; then
   cp .env.example .env
   echo "Created macbook_lab/.env from .env.example."
   echo ""
-  echo "If you have an Anthropic or OpenAI API key you want to use, edit it now."
-  echo "Otherwise the local fake vLLM mock serves canned responses (no internet needed)."
+  echo "Set ANTHROPIC_API_KEY for the dashboard chat service."
+  echo "For the Router LLM seam, choose LLM_PROVIDER=anthropic, openai, or vllm."
+  echo "For on-prem vLLM, set VLLM_BASE_URL to your OpenShift AI route."
   echo ""
   echo "Re-run linux_lab/run.sh when ready."
   exit 0
@@ -59,7 +60,6 @@ echo "  PTP operator stub  http://localhost:8091/health"
 echo "  Metal3 BMO stub    http://localhost:8092/health"
 echo "  Redfish BMC stub   http://localhost:8093/health"
 echo "  TMF921 SMO stub    http://localhost:8094/health"
-echo "  Fake vLLM          http://localhost:8090/"
 if [ "$INCLUDE_DASHBOARD" -eq 1 ]; then
   echo "  Dashboard          http://localhost:8097"
   echo "  oh-my-tiny-oran    http://localhost:8097/#chat (requires ANTHROPIC_API_KEY in .env)"

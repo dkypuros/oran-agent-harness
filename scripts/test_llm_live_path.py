@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Micro harness test for the LIVE LLM path (Anthropic Claude via 5G_O-RAN_SIM/llm/inference_client.py).
+"""Micro harness test for the LIVE LLM path via 5G_O-RAN_SIM/llm/inference_client.py.
 
-Proves the harness can actually reach the configured LLM provider with the real API key.
+Proves the harness can actually reach the configured LLM provider with real provider settings.
 Distinct from scripts/test_oran_discover_skills.py, which tests the read-only discovery surface.
 
 What this test asks:
-  1. Is LLM_PROVIDER configured (not the default stub)?
-  2. Is the API key set and not the stub sentinel?
-  3. Does inference_client.completion() return a real model response, NOT the canned fallback?
+  1. Is LLM_PROVIDER configured as anthropic, openai, or vllm?
+  2. Are the required provider settings present?
+  3. Does inference_client.completion() return a real model response, not an unavailable marker?
   4. (Optional) Does the Router-level ambiguous_path gate fire when ORAN_LLM_MODE=live?
 
 Usage:
@@ -32,8 +32,8 @@ SIM_ROOT = REPO_ROOT / "5G_O-RAN_SIM"
 if str(SIM_ROOT) not in sys.path:
     sys.path.insert(0, str(SIM_ROOT))
 
-# Match the lab's inference_client behavior: detect canned fallback by sentinel prefix.
-CANNED_PREFIX = "stub disambiguation:"
+UNAVAILABLE_PREFIX = "LLM provider "
+STUB_SENTINEL = "stub-replace-with-real-key"
 
 
 def section(title: str) -> None:
@@ -43,21 +43,30 @@ def section(title: str) -> None:
 def check_env() -> tuple[bool, dict]:
     section("Environment")
     provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
-    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     mode = os.environ.get("ORAN_LLM_MODE", "").strip().lower()
 
     print(f"  LLM_PROVIDER     = {provider or '<unset>'}")
-    print(f"  ANTHROPIC_API_KEY= {'<set, length ' + str(len(key)) + '>' if key and key != 'stub-replace-with-real-key' else '<stub or unset>'}")
     print(f"  ORAN_LLM_MODE    = {mode or '<unset>'} (note: gates Router, not inference_client)")
 
     ok = True
-    if provider != "anthropic":
-        print(f"  FAIL: LLM_PROVIDER is {provider!r}; this test exercises anthropic specifically")
+    if provider not in {"anthropic", "openai", "vllm"}:
+        print(f"  FAIL: LLM_PROVIDER is {provider!r}; expected anthropic, openai, or vllm")
         ok = False
-    if not key or key == "stub-replace-with-real-key":
-        print("  FAIL: ANTHROPIC_API_KEY missing or is the stub sentinel")
-        ok = False
-    return ok, {"provider": provider, "key_set": bool(key and key != 'stub-replace-with-real-key'), "mode": mode}
+    required = []
+    if provider == "anthropic":
+        required = ["ANTHROPIC_API_KEY"]
+    elif provider == "openai":
+        required = ["OPENAI_API_KEY"]
+    elif provider == "vllm":
+        required = ["VLLM_BASE_URL"]
+    for name in required:
+        value = os.environ.get(name, "").strip()
+        printable = "<set>" if value and value != STUB_SENTINEL else "<stub or unset>"
+        print(f"  {name:<16}= {printable}")
+        if not value or value == STUB_SENTINEL:
+            print(f"  FAIL: {name} missing or is the stub sentinel")
+            ok = False
+    return ok, {"provider": provider, "mode": mode}
 
 
 def check_live_completion() -> tuple[bool, dict]:
@@ -89,13 +98,13 @@ def check_live_completion() -> tuple[bool, dict]:
     print(f"  response length  = {len(response)} chars")
     print(f"  response preview = {response[:160]}{'...' if len(response) > 160 else ''}")
 
-    fell_back = response.startswith(CANNED_PREFIX) or CANNED_PREFIX in response
-    if fell_back:
-        print("  FAIL: response starts with the canned-fallback sentinel; the call did NOT reach Anthropic")
-        return False, {"latency_s": elapsed, "fallback": True, "response": response}
+    unavailable = response.startswith(UNAVAILABLE_PREFIX) and "No LLM disambiguation was performed" in response
+    if unavailable:
+        print("  FAIL: provider unavailable; the call did NOT reach a live LLM")
+        return False, {"latency_s": elapsed, "unavailable": True, "response": response}
 
-    print("  PASS: response is non-canned; the call reached the live LLM provider")
-    return True, {"latency_s": elapsed, "fallback": False, "response": response}
+    print("  PASS: response came from the configured live LLM provider")
+    return True, {"latency_s": elapsed, "unavailable": False, "response": response}
 
 
 def main() -> int:
@@ -115,10 +124,10 @@ def main() -> int:
 
     print("SUMMARY: FAIL")
     if not env_ok:
-        print("  env config: provider/key not aligned with anthropic")
+        print("  env config: provider settings incomplete")
     if not live_ok:
-        if live_info.get("fallback"):
-            print("  live call: fell back to canned response (provider unreachable or key invalid)")
+        if live_info.get("unavailable"):
+            print("  live call: provider unavailable or key invalid")
         else:
             print("  live call: exception or import failure")
     print("OVERALL: FAIL")

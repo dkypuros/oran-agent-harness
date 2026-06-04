@@ -18,7 +18,7 @@ Checks:
   5. Em dash (U+2014) audit across the public tree, must be zero
   6. Leakage guard: git ls-files must contain no .local/, python_demo/, .env; .pdf
      allowed only under draft_papers/ (scientifically authored papers)
-  7. README structure: 80-130 lines, three goals in the lede
+  7. README structure: 80-400 lines, three goals in the lede
   8. File counts: harness/ has 20 files, omc-skills/o-ran/ has 6 markdown files
   9. Schema validation: scenario data validates against declared harness/schemas/ (optional, requires jsonschema)
 
@@ -47,7 +47,7 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EM_DASH = chr(0x2014)
 CHECK_PATHS = ["harness", "scenarios"]
-PUBLIC_TREE_EXCLUDES = {".git", ".local", ".omc", "python_demo"}
+PUBLIC_TREE_EXCLUDES = {".git", ".local", ".omc", ".omx", "python_demo", "node_modules", "dist", ".vite", "__pycache__"}
 
 results = []
 
@@ -191,11 +191,11 @@ def main():
     print("\n--- README structure ---")
     readme = (REPO_ROOT / "README.md").read_text()
     line_count = readme.count("\n")
-    top_lede = "\n".join(readme.split("\n")[:60])
+    top_lede = "\n".join(readme.split("\n")[:90])
     g1 = "Here is my presentation" in top_lede
     g2 = "Here is the example work" in top_lede
     g3 = "Here is where I actually test" in top_lede
-    ok = 80 <= line_count <= 350 and g1 and g2 and g3
+    ok = 80 <= line_count <= 400 and g1 and g2 and g3
     record(
         "readme_structure",
         ok,

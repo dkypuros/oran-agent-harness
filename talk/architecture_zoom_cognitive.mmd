@@ -1,8 +1,8 @@
 %% architecture_zoom_cognitive.mmd v2
 %% v2 changes vs v1:
 %%   replaced generic LiteLLM node with Unified LLM Inference Client showing the three
-%%     providers actually wired in the bench: Anthropic Claude, OpenAI GPT, fake vLLM mock
-%%     (OpenShift AI in production)
+%%     providers supported by the bench: Anthropic Claude, OpenAI GPT, and
+%%     OpenAI-compatible vLLM such as Red Hat OpenShift AI
 %%   added ORAN_LLM_MODE env gate annotation (live vs default heuristic fallback)
 %%   added Trace JSONL persistence as durable output stream from Router and Agents
 %%   added oran-discover OMC bundle as parallel read-only observability surface
@@ -47,10 +47,10 @@ flowchart TB
 
         subgraph LlmClient["Unified LLM Inference Client (env-gated by ORAN_LLM_MODE)"]
             direction LR
-            ClientCore["Inference Client<br/>(5G_O-RAN_SIM/llm/client.py)<br/>provider selection by env"]:::llm
+            ClientCore["Inference Client<br/>(5G_O-RAN_SIM/llm/inference_client.py)<br/>provider selection by env"]:::llm
             Anthropic["Anthropic Claude<br/>(ANTHROPIC_API_KEY)"]:::llmBackend
             OpenAI["OpenAI GPT<br/>(OPENAI_API_KEY)"]:::llmBackend
-            VLLM["vLLM<br/>(OpenShift AI in prod;<br/>fake mock at :8090 in lab)"]:::llmBackend
+            VLLM["vLLM<br/>(OpenShift AI or other<br/>on-prem OpenAI-compatible endpoint)"]:::llmBackend
             ClientCore --> Anthropic
             ClientCore --> OpenAI
             ClientCore --> VLLM

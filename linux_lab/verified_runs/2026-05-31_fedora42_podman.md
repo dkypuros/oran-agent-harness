@@ -16,7 +16,7 @@ note: This file is the canonical verification anchor for the linux_lab/. A revie
 
 This file records the live verification of `linux_lab/` against a real Fedora 42 VM. The bench
 came up end-to-end under rootless podman with `podman-compose` against the unmodified
-`macbook_lab/docker-compose.yml`. All 9 services responded to health checks; both scenario E
+`macbook_lab/docker-compose.yml`. All current lab services responded to health checks; both scenario E
 variants walked through the harness pipeline producing the expected dual-route output.
 
 The test was run by spinning up a Fedora 42 Cloud Edition VM via Lima on macOS, mounting the
@@ -39,7 +39,6 @@ starts ~5 minutes (first run, all images built fresh).
 
 ```
 NAMES                   STATUS
-oran-fake-vllm          Up 42 seconds (healthy)
 oran-ptp-operator-stub  Up 42 seconds (healthy)
 oran-metal3-bmo-stub    Up 41 seconds (healthy)
 oran-redfish-bmc-stub   Up 41 seconds (healthy)
@@ -50,14 +49,13 @@ oran-harness-chat       Up 40 seconds (healthy)
 oran-dashboard          Up 40 seconds
 ```
 
-All 9 services from `macbook_lab/docker-compose.yml` (including the dashboard profile and
+All current services from `macbook_lab/docker-compose.yml` (including the dashboard profile and
 oh-my-tiny-oran). Containers with healthchecks report healthy; trace-viewer and dashboard
 have no healthcheck so they report only "Up" which is correct.
 
 ## Health endpoint smoke test
 
 ```
-http://localhost:8090/                        OK    fake-vllm
 http://localhost:8091/health                  OK    ptp-operator-stub
 http://localhost:8092/health                  OK    metal3-bmo-stub
 http://localhost:8093/health                  OK    redfish-bmc-stub
@@ -68,7 +66,7 @@ http://localhost:8095/dashboard/trace_view/   HTTP/1.0 200 OK
 http://localhost:8097                         HTTP/1.1 200 OK
 ```
 
-All 9 endpoints respond inside the VM. The host's Docker stack on macOS was running
+All current endpoints respond inside the VM. The host's Docker stack on macOS was running
 simultaneously at the same port numbers; the VM boundary prevents conflict because the VM
 exposes ports on its own loopback, not the host's.
 
@@ -111,7 +109,7 @@ and Q14 in `talk/reviewer_faq.md` describe.
    `macbook_lab/docker-compose.yml` parses and runs under `podman-compose` 1.5.0 (compose-spec
    compliant).
 2. **The Dockerfiles are genuinely runtime-portable.** Same Dockerfile.harness-walker,
-   Dockerfile.platform-stub, Dockerfile.fake-vllm, Dockerfile.trace-viewer, Dockerfile.dashboard,
+   Dockerfile.platform-stub, Dockerfile.trace-viewer, Dockerfile.dashboard,
    and Dockerfile.harness-chat build and run under podman.
 3. **The bench's deterministic behavior is reproducible across container engines.** Same
    scenario walks produce the same audit event shapes (taxonomy match, target layer, action
@@ -133,7 +131,7 @@ cd oran-agent-harness
 # Run the linux_lab setup + start
 cd linux_lab
 ./setup_fedora.sh   # installs podman-compose + jq (podman pre-installed on Fedora Cloud)
-./run.sh            # builds and starts the 9 containers via podman-compose
+./run.sh            # builds and starts the lab containers via podman-compose
 
 # Verify (from any shell on the Fedora host)
 curl -sS http://localhost:8096/run/E_nic_firmware_update | jq '.event.remediation.companion_intent.dispatch_result'

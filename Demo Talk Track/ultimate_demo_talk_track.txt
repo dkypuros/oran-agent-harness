@@ -1,0 +1,533 @@
+O-RAN Agent Harness Lab - Ultimate Demo Talk Track
+=========================================================================
+
+Purpose
+-------------------------------------------------------------------------
+This is the live talk track for the simple two-loop O-RAN Agent Harness demo.
+
+The key idea is simple:
+
+The left loop is alert + harness.
+The right loop is remediation + harness.
+
+The assistant is helpful, but the assistant is not load-bearing. The harness is
+load-bearing. The endpoints are stubbed, but the wiring, the routing decision,
+the guardrail check, the sandbox verdict, and the AuditEvent contract are the
+real thing.
+
+That is the whole point of the demo.
+
+
+Opening Frame
+-------------------------------------------------------------------------
+So, here's what I want to show you.
+
+This is not a chatbot demo where the model just says something confident and
+then we pretend that's operations. That's not what this is.
+
+This is a harness demo.
+
+And the reason I care about that distinction is because in a telco environment,
+especially when you are talking about RAN, timing, O-Cloud, SMO, hardware,
+firmware, drivers, Kubernetes, Redfish, Metal3, all of these things - the model
+can't be the thing that is making the production decision.
+
+The model can help the operator understand what happened.
+The model can explain the evidence.
+The model can help navigate the environment.
+
+But the evidence has to come from somewhere else.
+
+So what I'm showing here is a very small, very focused version of that idea.
+There are two loops.
+
+On the left side, we have the discovery loop. A PTP drift alert comes in. The
+harness investigates it. It looks at the PTP signal, PHC behavior, Redfish,
+Metal3, operator state, and the taxonomy. And then it says, "This looks like a
+NIC / PHC hardware issue."
+
+On the right side, we have the remediation loop. And this is the part that I
+really want you to focus on. The right side is not just a static proposal. It is
+also connected to a harness. It has a chat surface, it has slash commands, it has
+stubbed O-RAN endpoints, and it has a harness-walker AuditEvent that becomes the
+load-bearing proof.
+
+So the left loop is alert + harness.
+The right loop is remediation + harness.
+
+That's the architecture.
+
+
+Demo Flow Summary
+-------------------------------------------------------------------------
+The live flow is five moves:
+
+1. Click /commands.
+2. Click Pre-flight survey.
+3. Switch the scenario to E: Firmware + SMO.
+4. Click Run harness-walker sidecar.
+5. Ask the assistant: "Explain what the harness walker just proved, and what
+   remains blocked behind the operator?"
+
+That flow is strong because it shows:
+
+discover first -> choose remediation slice -> run harness evidence -> ask the
+assistant to explain -> keep the harness load-bearing and keep production behind
+operator control.
+
+
+1. Click /commands
+-------------------------------------------------------------------------
+[Presenter action]
+Click the /commands button in the right-loop chat harness.
+
+[Talk track]
+First, I'm going to click `/commands`.
+
+And this is an important first step because I don't want this to look like a
+free-form chatbot where anything can happen.
+
+What I want to show is that the right loop has a real command surface. These are
+slash commands. They are intentionally scoped. They represent the surfaces the
+operator can inspect.
+
+So you can see commands like:
+
+- `/oran-discover:guardrail`
+- `/oran-discover:plan`
+- `/oran-discover:ptp`
+- `/oran-discover:metal3`
+- `/oran-discover:redfish`
+- `/oran-discover:smo`
+
+And then you can also see the harness-walker run path.
+
+That matters because the demo is not saying, "Let the LLM go do whatever it
+wants."
+
+The demo is saying, "Here are the governed surfaces. Here are the deterministic
+inspection paths. Here are the things the assistant can use to help the operator
+understand the environment."
+
+So this first click proves the right loop is a slash-command harness surface.
+It is not just text on the screen.
+
+And this is also where you can start to see the boundary between the assistant
+and the harness. The assistant can call tools and explain results, but the
+harness is what defines what is allowed to be inspected.
+
+
+2. Click Pre-flight survey
+-------------------------------------------------------------------------
+[Presenter action]
+Click Pre-flight survey.
+
+[Talk track]
+Now I'm going to click `Pre-flight survey`.
+
+This is the "look before you touch" step.
+
+Before I ask the system to do any remediation analysis, I want to know what the
+environment looks like. And this is where the harness goes out across the stubbed
+surfaces.
+
+It checks the PTP side.
+It checks Metal3.
+It checks Redfish.
+It checks the SMO side.
+It checks the taxonomy.
+It checks the guardrails.
+
+And again, this is stubbed equipment, but the important part is that the harness
+is actually touching those surfaces through the same pattern that we would use in
+a real environment.
+
+So if I say this in telco terms, this is the system asking:
+
+- What is the timing state?
+- What is the bare-metal state?
+- Is there a Redfish task already running?
+- Is there an SMO / TMF921 companion intent already in flight?
+- How does the taxonomy classify this fault?
+- What do the guardrails allow?
+
+That's the value of the pre-flight.
+
+It keeps us honest.
+
+We're not jumping from "I saw an alarm" straight to "apply a fix."
+We're saying, "Let's inspect the environment first. Let's understand the surfaces
+that would be affected. Let's make sure the right loop is clean before we show a
+remediation path."
+
+This is also where the story starts to feel like O-RAN and not just generic
+AIOps. Because now we are using the language of O-Cloud, SMO, Redfish, Metal3,
+taxonomy, guardrails, and operator intent.
+
+
+3. Switch scenario to E: Firmware + SMO
+-------------------------------------------------------------------------
+[Presenter action]
+Switch the remediation slice from D: Driver / KMM to E: Firmware + SMO.
+
+[Talk track]
+Now I'm going to switch the scenario to `E: Firmware + SMO`.
+
+This is where the demo gets more interesting.
+
+The D path is useful because it shows a down-only remediation. The finding
+becomes `host_driver`, router.py and taxonomy.yaml classify it, and the right
+loop routes it through O2 IMS into the O-Cloud KMM driver path.
+
+That's a clean story:
+
+PTP / PHC issue -> host driver -> O2 IMS -> KMM.
+
+But the E path gives us the dual-route story.
+
+This is the part I really like because it shows both directions.
+
+On the down route, the firmware remediation goes through O2 IMS into the
+infrastructure side - Metal3, Redfish, the hardware lifecycle surfaces.
+
+On the up route, the harness emits the service-side companion context through
+SMO / TMF921.
+
+So now we have:
+
+node_firmware -> O2 IMS + TMF921.
+
+That is the standards story.
+
+The down route says, "This is infrastructure. This touches the O-Cloud and the
+hardware lifecycle layer."
+
+The up route says, "This also has service context. The SMO should know what is
+happening. The intent envelope needs to be visible."
+
+And that's exactly the nuance we wanted in this demo. We are not trying to model
+every possible O-RAN remediation. We are showing one credible slice of how these
+pieces connect.
+
+The stubs are there so we can tell the story safely.
+The harness is there so the story is real.
+
+
+4. Click Run harness-walker sidecar
+-------------------------------------------------------------------------
+[Presenter action]
+Click Run harness-walker sidecar.
+
+[Talk track]
+Now I'm going to click `Run harness-walker sidecar`.
+
+This is the key moment.
+
+Up until this point, the UI has been setting the scene. We looked at commands,
+we did a pre-flight survey, and we selected the remediation slice.
+
+Now the harness-walker actually runs.
+
+And when it runs, the topology becomes live.
+
+You can see the orchestrator light up.
+You can see router.py and taxonomy.yaml light up.
+You can see guardrail.py and guardrails.yaml light up.
+You can see the O2 IMS / O-Cloud Manager route.
+You can see the Metal3 / Redfish or KMM endpoint depending on the scenario.
+And for the E path, you can see the SMO / TMF921 up route as part of the story.
+
+This is the part I would slow down on when presenting.
+
+Because this is where we prove the demo is not just a visual.
+
+The right loop asks harness-walker for an AuditEvent. That AuditEvent is what
+records the remediation proposal, the routing decision, the guardrail result, the
+sandbox verdict, the approval status, and the endpoint evidence.
+
+So the assistant is not inventing this.
+The UI is not inventing this.
+The proof comes from the harness-walker result.
+
+For the D path, the sidecar shows something like:
+
+- action: `apply_kmm_module`
+- target: `worker-ran-02.dallas.example.com`
+- approval: `requiresHumanApproval=true`
+- guardrail: pass
+- sandbox: `apply_allowed=true`
+- O2 IMS down route: accepted
+- SMO up route: quiet, because driver-only remediation does not need a companion
+  TMF921 intent
+
+For the E path, the point is that the firmware remediation has both the down
+route and the up route.
+
+The down route is O2 IMS into the O-Cloud / hardware lifecycle side.
+The up route is SMO / TMF921 so the service-side context is visible.
+
+That is the O-RAN harness story in a small form.
+
+The endpoints are stubs, but the contract is not fake.
+
+The contract is:
+
+- classify the fault deterministically
+- route it through the taxonomy
+- evaluate guardrails
+- run the sandbox
+- emit an AuditEvent
+- expose the right O-RAN surfaces
+- keep production blocked behind the operator
+
+That is what the harness-walker proves.
+
+
+5. Ask the assistant what the harness proved
+-------------------------------------------------------------------------
+[Presenter action]
+In the chat prompt, ask:
+
+Explain what the harness walker just proved, and what remains blocked behind the
+operator?
+
+Then press Enter / Send.
+
+[Talk track]
+Now I ask the assistant the question that a real operator would ask:
+
+"Explain what the harness walker just proved, and what remains blocked behind the
+operator?"
+
+And this is where the assistant is finally useful in the way I want it to be
+useful.
+
+The assistant is not deciding.
+The assistant is not remediating.
+The assistant is not secretly crossing the gate.
+
+The assistant is looking at the harness output and explaining it in human terms.
+
+So it should say something like:
+
+The harness proved that the detection chain is consistent.
+The taxonomy converged on the correct remediation type.
+The right-loop routing decision was made.
+The guardrails passed.
+The sandbox simulation stayed inside the envelope.
+The O2 IMS route accepted the request.
+And in the E path, the SMO / TMF921 route carries the companion service intent.
+
+But then the most important part is what remains blocked.
+
+Human approval remains required.
+Production action remains blocked behind operator control.
+
+That is the sentence I want people to remember.
+
+The harness can prove.
+The assistant can explain.
+The operator still decides.
+
+That is the safe pattern.
+
+And if someone asks, "Is this autonomous remediation?" the answer is no.
+
+This is governed remediation.
+This is evidence-backed remediation.
+This is operator-controlled remediation.
+
+That distinction matters a lot.
+
+Because in a RAN environment, the goal is not to let an LLM run loose. The goal is
+to compress the time between detection, evidence, decision, and safe action -
+without removing the human from the load-bearing approval path.
+
+
+What Just Happened - The Full Story
+-------------------------------------------------------------------------
+So if I step back, here's what just happened end to end.
+
+The left loop gave us the finding.
+
+A PTP drift alarm showed up on a timing-sensitive worker. The harness correlated
+that with PHC behavior, hardware timestamp evidence, driver information, and the
+other O-RAN-adjacent surfaces. The output of that loop was not "go fix it." The
+output was a recommendation: this looks like a NIC / PHC hardware issue.
+
+Then the right loop took over.
+
+The right loop did not say, "I am going to remediate production." It said, "I am
+going to prepare a standards-backed remediation proposal and run it through the
+harness."
+
+That proposal can take different shapes.
+
+The D path is driver / KMM. That is a down-only path:
+
+host_driver -> O2 IMS -> KMM.
+
+The E path is firmware + SMO. That is the dual-route path:
+
+node_firmware -> O2 IMS / Metal3 / Redfish down,
+and SMO / TMF921 up.
+
+Then the harness-walker ran.
+
+It produced an AuditEvent.
+It showed what the router decided.
+It showed what the taxonomy matched.
+It showed what the guardrails allowed.
+It showed what the sandbox simulation found.
+It showed what endpoint route was active.
+It showed what still required human approval.
+
+Then the assistant explained the result.
+
+And the key point is: the assistant explanation came after the harness evidence,
+not before it.
+
+That's the difference between this and a normal agent demo.
+
+A normal agent demo often says, "Trust the model."
+
+This demo says, "Trust the harness, inspect the evidence, and let the model help
+the operator understand what happened."
+
+That's the whole thing.
+
+
+The Message to Land
+-------------------------------------------------------------------------
+The message I want to land is this:
+
+This is how you make AI useful in a serious telco environment.
+
+You don't make the model the authority.
+You don't let it jump straight into remediation.
+You don't hide the infrastructure path.
+You don't skip the service context.
+
+You give it a harness.
+
+You make the surfaces explicit.
+You use slash commands.
+You use deterministic taxonomy.
+You use guardrails.
+You use sandbox evidence.
+You emit an AuditEvent.
+You show the O2 IMS path.
+You show the SMO / TMF921 path.
+And you keep human approval as the hard boundary.
+
+That is what makes this credible.
+
+And that is why this demo is powerful even though the endpoints are stubbed.
+
+The stubs let us safely simulate the environment.
+The harness proves the operating model.
+
+
+Short Version - If I Only Have 90 Seconds
+-------------------------------------------------------------------------
+If I only have 90 seconds, I would say it this way:
+
+This demo shows a two-loop O-RAN agent harness.
+
+The left loop is alert plus harness. A PTP drift alarm comes in, and the harness
+correlates the evidence into a NIC / PHC recommendation.
+
+The right loop is remediation plus harness. The operator chooses a remediation
+slice, uses slash commands to inspect the environment, runs a pre-flight survey,
+and then triggers harness-walker to produce a real AuditEvent.
+
+For the driver path, the remediation routes down through O2 IMS into KMM.
+For the firmware path, the remediation routes down through O2 IMS into
+Metal3/Redfish and up through SMO / TMF921 as companion service context.
+
+The endpoints are stubs, but the harness contract is real: router, taxonomy,
+guardrails, sandbox, endpoint evidence, and AuditEvent.
+
+Then the assistant explains what the harness proved.
+
+The important part is that the assistant is not load-bearing. The harness is
+load-bearing. And production remains blocked behind human approval.
+
+So this is not autonomous remediation.
+This is governed, evidence-backed, operator-controlled remediation.
+
+
+Presenter Notes / Emphasis
+-------------------------------------------------------------------------
+Use these phrases deliberately:
+
+- "The endpoints are stubs, but the harness is real."
+- "The assistant explains; the harness proves."
+- "The LLM is not load-bearing."
+- "The left loop is alert + harness. The right loop is remediation + harness."
+- "We look before we touch."
+- "Production stays blocked behind the operator."
+- "This is governed remediation, not autonomous remediation."
+
+Places to slow down:
+
+1. When showing /commands, emphasize that the operator is using a governed
+   command surface, not a random chat box.
+
+2. When showing Pre-flight survey, emphasize that the harness checks PTP,
+   Metal3, Redfish, SMO, taxonomy, and guardrails before any remediation story.
+
+3. When switching to E: Firmware + SMO, emphasize why E is the dual-route story:
+   O2 IMS down, TMF921 up.
+
+4. When running harness-walker sidecar, emphasize that the AuditEvent is the
+   load-bearing proof.
+
+5. When asking the assistant to explain, emphasize that explanation is useful,
+   but approval remains human.
+
+
+If Someone Asks: "What Is Real Here?"
+-------------------------------------------------------------------------
+The honest answer is:
+
+The equipment endpoints are stubbed.
+The O-RAN lab surfaces are simulated.
+The topology cards are there to make the path visible.
+
+But the harness behavior is real.
+
+The right loop is actually wired to the harness-walker path. The assistant is
+actually using slash-command-style inspection. The demo is actually surfacing the
+routing decision, taxonomy match, guardrail result, sandbox verdict, and
+AuditEvent as the evidence sidecar.
+
+So this is not pretending there is a real RAN in the room.
+
+This is proving the control pattern that would let you safely connect to one.
+
+
+If Someone Asks: "Why Does This Matter?"
+-------------------------------------------------------------------------
+Because telco remediation is not one thing.
+
+Sometimes it is down into the infrastructure.
+Sometimes it is up into the service management layer.
+Sometimes it is both.
+
+A driver/KMM issue may only need the O2 IMS / O-Cloud path.
+A firmware remediation may also need Metal3, Redfish, and SMO / TMF921 context.
+A rejected maintenance window should stop the action even if the technical path
+looks valid.
+
+That is why the harness matters.
+
+It lets us encode those boundaries.
+It lets us show the operator the exact path.
+It lets us explain what was proven.
+And it prevents the assistant from becoming the production authority.
+
+That's the future-facing part of the demo.
+
+It's not just AI in front of telco operations.
+It's AI inside a governed, standards-aware, evidence-backed operating loop.

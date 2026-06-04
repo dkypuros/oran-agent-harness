@@ -15,6 +15,15 @@ artifacts under `talk/`. Long-form per-audience narratives that draw on the benc
 `talk/runsheet_25min.md`. Trying to use this as a research substrate for your own closed-loop
 work? Start at `narratives/README.md`.
 
+**Empirical MacBook two-loop demo.** The Mac-local dashboard also exposes a reviewer-operable
+slice of the harness: open `http://localhost:8097`, use `/commands` to show the scoped
+slash-command surface, run `/oran-discover:plan` for a read-only pre-flight survey, switch among
+the D/E/E-reject remediation slices, run the `harness-walker` sidecar to attach the live
+`AuditEvent`, and then ask the assistant to explain what the run proved and what remains blocked
+behind the operator. The endpoints are stubs; the routing decision, guardrail result, sandbox
+verdict, `AuditEvent`, chat wiring, and sidecar wiring are real harness behavior. The assistant
+explains evidence; it does not route, authorize, or execute production remediation.
+
 ## What is novel
 
 The right-side execution path grounds infrastructure remediation in two standardized contracts at
@@ -37,9 +46,11 @@ cd macbook_lab && ./run.sh
 # then open http://localhost:8097 in a browser
 ```
 
-Requires Docker Desktop on a Mac. No other dependencies. Optionally set
-`ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `macbook_lab/.env`; absent that, a
-local fake-vllm mock serves canned responses with no internet required.
+Requires Docker Desktop on a Mac. No other dependencies for the deterministic bench.
+For the dashboard chat service, copy `macbook_lab/anthropic.env.example` to
+`macbook_lab/anthropic.env` and set `ANTHROPIC_API_KEY`. The Router's live LLM seam can use
+Anthropic, the OpenAI API, or an OpenAI-compatible on-prem vLLM endpoint such as Red Hat
+OpenShift AI.
 
 Three goals for this repository, in the author's words:
 
@@ -65,8 +76,9 @@ A citation-grounded declarative artifact set (harness pattern) with a runnable p
 (`5G_O-RAN_SIM/`) underneath. The harness pattern itself stays declarative (taxonomy, guardrails,
 schemas, routing rules, MCP tool surfaces); the platform substrate provides 13 O-RAN service
 implementations across WG1 to WG11, stub publishers for PTP alarms / Metal3 firmware / Redfish BMC
-/ TMF921 SMO companion intents, and a unified LLM inference client routable across Anthropic, OpenAI,
-and a local OpenShift AI vLLM mock. The architectural pattern is operationalization-agnostic; the
+/ TMF921 SMO companion intents, and a unified LLM inference client routable across Anthropic, the
+OpenAI API, and OpenAI-compatible on-prem vLLM endpoints such as Red Hat OpenShift AI. The
+architectural pattern is operationalization-agnostic; the
 contracts are portable to LangGraph, OpenAI Agents SDK, Microsoft Semantic Kernel, or any agent
 framework that can read JSON Schema and YAML.
 
@@ -148,10 +160,10 @@ oran-agent-harness/
 |   `-- o-ran/                4 skills + README + conformance index
 |-- scripts/             executable verify gate and demo runner
 |   |-- verify.py             10 deterministic checks, exits non-zero on any failure
-|   `-- demo.sh               walks both scenarios end to end with --verbose
+|   `-- demo.sh               walks all scenarios end to end with --verbose
 |-- tests/               runtime unit tests for the harness Router and Guardrail
 |   |-- __init__.py
-|   `-- test_runtime.py       8 tests covering service / ambiguous / unknown layer / empty / crisis_mode / LLM-mode / sandbox-block / dispatch-result branches
+|   `-- test_runtime.py       9 tests covering service / ambiguous / unknown layer / empty / crisis_mode / LLM-mode / sandbox-block / dispatch-result branches
 `-- 5G_O-RAN_SIM/        platform substrate (BF3-5G-Demo, Apache 2.0 re-licensed by the author)
     |-- open-digital-platform-2_0/   13 O-RAN service implementations across WG1-WG11
     |-- demo_front-end/              React dashboard
@@ -164,7 +176,6 @@ oran-agent-harness/
     |   `-- tmf921_intent_emitter.py    TMF921 SMO companion intent envelope builder
     |-- llm/                         LLM inference layer (Issue #48)
     |   |-- inference_client.py         unified completion() across Anthropic / OpenAI / vLLM
-    |   |-- fake_vllm_server.py         fake OpenShift AI vLLM mock on port 8090
     |   `-- .env.example                template, copy to .env to configure providers
     |-- shared_trace/                file-based JSONL trace layer for cross-stage replay
     |   |-- writer.py                   append_trace(scenario_id, stage, payload)
@@ -210,7 +221,7 @@ git clone https://github.com/dkypuros/oran-agent-harness.git
 cd oran-agent-harness
 pip install pyyaml jsonschema       # PyYAML for parse + runtime, jsonschema for check 9
 
-# Walk both scenarios end to end (real Router + Guardrail, stubbed Gateway/MCP/Agents/Twin)
+# Walk all scenarios end to end (real Router + Guardrail, stubbed Gateway/MCP/Agents/Twin)
 ./scripts/demo.sh
 
 # Full verify gate (10 checks)
@@ -231,7 +242,7 @@ Expected output of `./scripts/demo.sh` (truncated): each scenario prints four pi
 A, `medium` for A-prime, `medium` for D, `medium` for E). Scenario E additionally carries a
 `companion_intent` (TMF921 envelope) in the remediation block reflecting the dual-route case.
 
-The verify gate's walker_e2e check enforces matching output for all 4 committed scenarios.
+The verify gate's walker_e2e check enforces matching output for all 5 committed scenarios.
 
 See `scenarios/README.md` for the walkthrough narrative and the table of what is stubbed vs real.
 
@@ -288,22 +299,22 @@ python 5G_O-RAN_SIM/dashboard/trace_view/serve.py
 The harness Router's `ambiguous_path` is wired through a unified LLM inference client at
 `5G_O-RAN_SIM/llm/inference_client.py`. By default the seam is dormant (`ORAN_LLM_MODE` unset, the
 existing `NotImplementedError` raises so the verify gate stays clean). When `ORAN_LLM_MODE=live`,
-the router routes through Anthropic, OpenAI, or a local fake vLLM mock per the configured
+the router routes through Anthropic, the OpenAI API, or an OpenAI-compatible vLLM endpoint per the configured
 `LLM_PROVIDER` env var:
 
 ```bash
-# Boot the local fake OpenShift AI vLLM mock (port 8090)
-python 5G_O-RAN_SIM/llm/fake_vllm_server.py
-
 # Copy the template and configure provider keys
 cd 5G_O-RAN_SIM && cp .env.example .env
+# Choose LLM_PROVIDER=anthropic, openai, or vllm.
+# For vLLM, set VLLM_BASE_URL to your OpenShift AI route.
 
 # Drive the harness with the LLM seam live
 ORAN_LLM_MODE=live python3 -m harness.runtime.walker scenarios/A_fw_lldp_agent/fault_payload.json
 ```
 
-Stub-safety: if the configured provider key is the `stub-replace-with-real-key` placeholder, the
-client returns a deterministic canned disambiguation without making any network call.
+Provider-safety: if the selected provider is not configured, the client returns a clear
+unavailable message instead of synthesizing a model answer. The v0 router records the
+hint but does not auto-apply it.
 
 ### OMC reference operationalization (Claude Code skills)
 
@@ -323,6 +334,9 @@ See `omc-skills/o-ran/README.md` (action-oriented) and `omc-skills/oran-discover
 Discovery walks: `/oran-discover:plan` invokes the seven-step pre-flight; individual surfaces are
 reachable via `/oran-discover:ptp`, `/oran-discover:metal3`, `/oran-discover:redfish`,
 `/oran-discover:smo`, `/oran-discover:taxonomy`, `/oran-discover:guardrail`.
+Those slash commands are inspection surfaces. The separate `harness-walker /run/<scenario>`
+sidecar attaches the live `AuditEvent` evidence used by the right-loop demo, including the
+`D_phc_drift_hw_only`, `E_nic_firmware_update`, and `E_with_smo_reject` branches.
 
 Each end-to-end run reads a FaultPayload, walks the evidence chain across three domain agents (Platform,
 RAN, Hardware), picks a routing direction via the deterministic taxonomy lookup (with LLM-assist on
@@ -335,7 +349,7 @@ populated ReversibilityProfile.
 |------------------------------------------|--------------------------------------------------------------|----------------------------------------------|
 | Remediation routing rule                 | harness/routing-rules/contribution-1-routing-rule.yaml      | omc-skills/o-ran/remediate.md                |
 | Guardrail contract layer                 | harness/routing-rules/contribution-2-guardrail-contract.yaml plus harness/guardrails.yaml | omc-skills/o-ran/sandbox-validation.md       |
-| LLM-neutral substrate                    | harness/routing-rules/contribution-3-llm-neutrality.yaml    | 5G_O-RAN_SIM/llm/inference_client.py routing across Anthropic / OpenAI / vLLM (with fake_vllm_server.py mock) |
+| LLM-neutral substrate                    | harness/routing-rules/contribution-3-llm-neutrality.yaml    | 5G_O-RAN_SIM/llm/inference_client.py routing across Anthropic / OpenAI / on-prem vLLM |
 
 ## License
 

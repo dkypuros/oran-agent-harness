@@ -4,21 +4,21 @@ Conforms to:
   bibliography ref 13 (Anthropic Model Context Protocol, the broader provider context),
   bibliography ref 17 (LiteLLM-style provider abstraction)
 
-Reads 5G_O-RAN_SIM/.env (template at .env.example) to route LLM calls across three
-providers:
+Reads 5G_O-RAN_SIM/.env (template at .env.example) to route LLM calls across
+operator-selected providers:
 
 - anthropic: Anthropic Claude messages API
 - openai:    OpenAI chat completions API
-- vllm:      OpenAI-compatible vLLM endpoint, default local fake mock on port 8090
+- vllm:      OpenAI-compatible on-prem vLLM endpoint, for example Red Hat
+             OpenShift AI
 
 The harness Router consumes this client from harness/runtime/router.py when
 ORAN_LLM_MODE=live is set (per Issue #49). Default behavior (env unset) keeps the
 NotImplementedError path so the existing verify gate at 10/10 PASS is unaffected.
 
-Stub safety: if the configured provider key is missing, empty, or the placeholder
-"stub-replace-with-real-key" string from .env.example, completion() returns a canned
-response without making a network call. This lets the demo run end-to-end without
-real API keys.
+Provider safety: if the selected provider is not configured, completion() returns a
+clear unavailable message rather than synthesizing a model answer. The router does
+not auto-apply the hint in v0, so this remains safe for ambiguous-path tests.
 """
 
 from __future__ import annotations
@@ -42,11 +42,13 @@ except ImportError:
 
 STUB_KEY_SENTINEL = "stub-replace-with-real-key"
 
-_CANNED_RESPONSE = (
-    "stub disambiguation: the platform-layer signal is dominant; classify as host_driver "
-    "with target_layer infra and confidence medium. Reasoning: PHC drift correlates with "
-    "kernel module version, not RAN-side processing. Recommended path: O2 IMS apply_kmm_module."
-)
+
+def _unavailable(provider: str, reason: str) -> str:
+    """Return an explicit non-inference response for safe live-mode diagnostics."""
+    return (
+        f"LLM provider {provider!r} unavailable: {reason}. "
+        "No LLM disambiguation was performed."
+    )
 
 
 def _env(name: str, default: str = "") -> str:
@@ -69,7 +71,7 @@ def _completion_anthropic(prompt: str, tier: str) -> str:
     """Call Anthropic Claude messages API."""
     key = _env("ANTHROPIC_API_KEY")
     if _is_stub_key(key):
-        return _CANNED_RESPONSE
+        return _unavailable("anthropic", "set ANTHROPIC_API_KEY to use Claude")
     base = _env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
     model = _resolve_model("anthropic", tier)
     try:
@@ -93,7 +95,7 @@ def _completion_anthropic(prompt: str, tier: str) -> str:
         data = resp.json()
         return data["content"][0]["text"]
     except Exception as e:
-        return f"{_CANNED_RESPONSE}\n[anthropic call failed: {e}]"
+        return _unavailable("anthropic", f"provider call failed: {e}")
 
 
 def _completion_openai_compatible(provider: str, prompt: str, tier: str) -> str:
@@ -101,14 +103,15 @@ def _completion_openai_compatible(provider: str, prompt: str, tier: str) -> str:
     key = _env(f"{provider.upper()}_API_KEY")
     base = _env(f"{provider.upper()}_BASE_URL")
     model = _resolve_model(provider, tier)
-    # vllm uses an OpenAI-compatible mock so empty key is fine there; still bail on stub
+    if not base:
+        return _unavailable(provider, f"set {provider.upper()}_BASE_URL")
     if provider == "openai" and _is_stub_key(key):
-        return _CANNED_RESPONSE
+        return _unavailable("openai", "set OPENAI_API_KEY to use the OpenAI API")
     try:
         import httpx
 
         headers = {"content-type": "application/json"}
-        if key and key != "demo-no-auth-required":
+        if key and key not in ("demo-no-auth-required", STUB_KEY_SENTINEL):
             headers["authorization"] = f"Bearer {key}"
         resp = httpx.post(
             f"{base}/chat/completions",
@@ -124,7 +127,7 @@ def _completion_openai_compatible(provider: str, prompt: str, tier: str) -> str:
         data = resp.json()
         return data["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"{_CANNED_RESPONSE}\n[{provider} call failed: {e}]"
+        return _unavailable(provider, f"provider call failed: {e}")
 
 
 def completion(prompt: str, tier: str = "medium") -> str:
@@ -135,15 +138,15 @@ def completion(prompt: str, tier: str = "medium") -> str:
       tier:   "high" | "medium" | "low" mapped to the provider-specific model id
 
     Returns:
-      The model's textual completion. Falls back to a deterministic canned response
-      if the configured provider key is a stub or the network call fails.
+      The model's textual completion, or an explicit unavailable message when the
+      selected provider is not configured or the call fails.
     """
-    provider = _env("LLM_PROVIDER", "vllm").lower()
+    provider = _env("LLM_PROVIDER", "anthropic").lower()
     if provider == "anthropic":
         return _completion_anthropic(prompt, tier)
     if provider in ("openai", "vllm"):
         return _completion_openai_compatible(provider, prompt, tier)
-    return f"{_CANNED_RESPONSE}\n[unknown LLM_PROVIDER {provider!r}, used canned response]"
+    return _unavailable(provider, "LLM_PROVIDER must be anthropic, openai, or vllm")
 
 
 if __name__ == "__main__":

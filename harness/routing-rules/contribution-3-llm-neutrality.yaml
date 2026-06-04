@@ -28,7 +28,8 @@ llm_neutrality_assertion:
     accepted_patterns:
       - LiteLLM-style unified gateway
       - OMC's omc ask provider router
-      - operator-deployed gateway (e.g., self-hosted Granite via Ollama)
+      - hosted provider API (Anthropic or OpenAI)
+      - operator-deployed OpenAI-compatible vLLM gateway (e.g., Red Hat OpenShift AI)
 
   # In the OMC reference operationalization at omc-skills/o-ran/, provider abstraction is
   # already automatic. OMC routes by model tier (haiku, sonnet, opus) and supports provider
@@ -38,11 +39,11 @@ llm_neutrality_assertion:
     mechanism: "OMC's Skill tool already abstracts model routing via model parameter (haiku/sonnet/opus). The skills in omc-skills/o-ran/ never import an SDK directly; they delegate via the OMC Skill tool, which the operator configures."
     operator_controls:
       - model_routing: "operator-configured per skill via model parameter"
-      - provider_swap: "operator-configured via omc ask <provider>"
-      - data_residency: "operator can route to self-hosted Granite via Ollama for sovereignty-sensitive deployments"
+      - provider_swap: "operator-configured via Anthropic, OpenAI, or OpenAI-compatible vLLM provider settings"
+      - data_residency: "operator can route to an on-prem vLLM endpoint, for example Red Hat OpenShift AI, for sovereignty-sensitive deployments"
 
   # Data sovereignty: the harness MUST permit operator-controlled routing to on-prem models
   # for deployments under data-residency constraints (telco regulator, government carrier).
   data_sovereignty:
-    requirement: "The harness MUST NOT make outbound API calls to a hosted LLM when the operator has configured a local backend. Verification: a local Ollama with Granite 8B should produce the same RemediationProposal shape (not necessarily the same content)."
-    test_method: "Operator runs the same scenario against (a) a hosted provider and (b) a local Granite 8B. Both runs MUST produce a RemediationProposal validating against harness/schemas/RemediationProposal.json. Decision content may differ; envelope shape must not."
+    requirement: "The harness MUST NOT make outbound API calls to a hosted LLM when the operator has configured an on-prem backend. Verification: an OpenAI-compatible vLLM endpoint should produce the same RemediationProposal shape (not necessarily the same content)."
+    test_method: "Operator runs the same scenario against (a) a hosted provider and (b) an on-prem vLLM model. Both runs MUST produce a RemediationProposal validating against harness/schemas/RemediationProposal.json. Decision content may differ; envelope shape must not."

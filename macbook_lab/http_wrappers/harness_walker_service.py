@@ -9,7 +9,7 @@ Endpoints:
   GET  /health             -> 200 with service info
   GET  /scenarios          -> list of known scenario ids
   GET  /run/{scenario_id}  -> walk one scenario, return AuditEvent
-  GET  /bench/all          -> run all 4 scenarios via the bench, return summary
+  GET  /bench/all          -> run all 5 scenarios via the bench, return summary
   GET  /traces             -> list available trace files
   GET  /traces/{scenario_id}  -> return the per-scenario JSONL trace contents
 """

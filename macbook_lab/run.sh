@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # MacBook lab one-command launcher.
-# Brings up the platform stubs, the harness walker, the trace viewer, the fake vLLM,
-# and (if Issue #57 has landed) the React dashboard.
+# Brings up the platform stubs, the harness walker, the trace viewer, the
+# Anthropic-backed chat service, and the React dashboard when available.
 #
 # Prereqs: macOS with Docker Desktop running. Nothing else.
 
@@ -12,12 +12,25 @@ if [ ! -f .env ]; then
   cp .env.example .env
   echo "Created macbook_lab/.env from .env.example."
   echo ""
-  echo "If you have an Anthropic or OpenAI API key you want to use, edit it now."
-  echo "Otherwise the local fake vLLM mock serves canned responses (no internet needed)."
+  echo "Set ANTHROPIC_API_KEY for the dashboard chat service."
+  echo "For the Router LLM seam, choose LLM_PROVIDER=anthropic, openai, or vllm."
+  echo "For on-prem vLLM, set VLLM_BASE_URL to your OpenShift AI route."
   echo ""
   echo "Re-run ./run.sh when ready."
   exit 0
 fi
+
+# Compose reads .env for variable interpolation, but the demo may keep Anthropic-only
+# secrets in anthropic.env so they can be managed separately from provider-neutral lab
+# settings. Load .env first, then anthropic.env as an override when present.
+set -a
+# shellcheck disable=SC1091
+. ./.env
+if [ -f anthropic.env ]; then
+  # shellcheck disable=SC1091
+  . ./anthropic.env
+fi
+set +a
 
 INCLUDE_DASHBOARD=0
 if [ -d "dashboard" ] && [ -f "dashboard/package.json" ]; then
@@ -41,9 +54,9 @@ echo "  PTP operator stub  http://localhost:8091/health"
 echo "  Metal3 BMO stub    http://localhost:8092/health"
 echo "  Redfish BMC stub   http://localhost:8093/health"
 echo "  TMF921 SMO stub    http://localhost:8094/health"
-echo "  Fake vLLM          http://localhost:8090/"
 if [ "$INCLUDE_DASHBOARD" -eq 1 ]; then
   echo "  Dashboard          http://localhost:8097"
+  echo "  Chat tab           http://localhost:8097/#chat"
 fi
 echo ""
 echo "Useful one-liners:"

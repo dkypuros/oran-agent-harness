@@ -6,7 +6,12 @@ export interface ScenarioList {
 
 export interface TraceList {
   count: number;
-  traces: Array<{ scenario_id: string; name: string; size_bytes: number; example?: boolean }>;
+  traces: Array<{
+    scenario_id: string;
+    name: string;
+    size_bytes: number;
+    example?: boolean;
+  }>;
 }
 
 export interface TraceRecords {
@@ -14,6 +19,15 @@ export interface TraceRecords {
   source: string;
   count: number;
   records: Record<string, unknown>[];
+}
+
+export interface HarnessRunEvent {
+  eventId?: string;
+  eventType?: string;
+  event?: {
+    correlatedEventId?: string;
+    remediation?: Record<string, unknown>;
+  };
 }
 
 export interface BenchSummary {
@@ -40,5 +54,10 @@ export const harnessApi = {
   trace: (scenarioId: string, limit = 200) =>
     fetchJson<TraceRecords>(`/api/harness/traces/${scenarioId}?limit=${limit}`),
   benchAll: () => fetchJson<BenchSummary>("/api/harness/bench/all"),
-  health: () => fetchJson<{ service: string; scenarios_dir?: string }>("/api/harness/health"),
+  runScenario: (scenarioId: string) =>
+    fetchJson<HarnessRunEvent>(`/api/harness/run/${scenarioId}`),
+  health: () =>
+    fetchJson<{ service: string; scenarios_dir?: string }>(
+      "/api/harness/health",
+    ),
 };

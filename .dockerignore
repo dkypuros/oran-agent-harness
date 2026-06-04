@@ -1,0 +1,24 @@
+# Keep local credentials and runtime state out of Docker build contexts.
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python and Node build noise.
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+**/.vite/
+
+# Git and editor noise.
+.git/
+.DS_Store
+*.log

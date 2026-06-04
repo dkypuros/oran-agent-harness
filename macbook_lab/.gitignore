@@ -1,5 +1,6 @@
 # MacBook lab runtime artifacts
 .env
+anthropic.env
 *.log
 node_modules/
 dist/

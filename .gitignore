@@ -4,8 +4,9 @@
 # Internal sprint output (decision 5 of the plan)
 python_demo/
 
-# OMC state, plans, PRD, progress tracking (working directory only)
+# OMC/OMX state, plans, PRD, progress tracking (working directory only)
 .omc/
+.omx/
 
 # macOS noise
 .DS_Store
@@ -34,8 +35,9 @@ node_modules/
 # Environment and secrets (block real env files, allow template through)
 .env
 .env.*
+anthropic.env
 !.env.example
-# 5G_O-RAN_SIM runtime trace logs (created by the fake vLLM mock, never committed)
+# 5G_O-RAN_SIM runtime trace logs (never committed)
 5G_O-RAN_SIM/llm/mock_traces.jsonl
 # 5G_O-RAN_SIM shared trace layer: runtime traces gitignored, committed examples (.example.jsonl) allowed
 5G_O-RAN_SIM/shared_trace/*.jsonl
@@ -69,3 +71,6 @@ draft_papers/*.synctex.gz
 # IDE
 .idea/
 .vscode/
+
+# TypeScript incremental build artifacts
+*.tsbuildinfo

@@ -28,7 +28,7 @@ This lab has been exercised end-to-end on real Fedora. Capture lives under
 
   `verified_runs/2026-05-31_fedora42_podman.md`
     Fedora 42 Cloud Edition, podman 5.4.1, podman-compose 1.5.0.
-    All 9 containers up and healthy; both E scenarios (accepted and SMO-reject paths) walked
+    All lab containers up and healthy; both E scenarios (accepted and SMO-reject paths) walked
     end-to-end producing the expected dual-route output. Reproducible from any Fedora host with
     the two-command quickstart below.
 
@@ -40,10 +40,11 @@ Verified on Fedora 42 Cloud Edition. Expected to work on:
 - Fedora Server 40 through current
 
 You need:
-- 6 GB free RAM (the lab runs 8 to 9 containers; each is small but the dashboard + Anthropic
+- 6 GB free RAM (the lab runs the platform stubs, walker, trace viewer, dashboard, and chat
   client + harness walker do consume real memory at burst)
 - ~3 GB free disk for image layers
-- An Anthropic API key OR willingness to use the bundled fake-vLLM mock for chat demos
+- An Anthropic API key for the dashboard chat service, or a provider configuration for the
+  Router's optional ambiguous-path LLM seam
 
 You do NOT need:
 - Docker, Docker Desktop, or any docker-shim
@@ -62,15 +63,14 @@ cd linux_lab
 there. Treat `linux_lab/` as the Fedora runtime overlay; treat `macbook_lab/` as the canonical
 container definitions.
 
-When the stack is up, open `http://localhost:8097` in your browser. The same 8 (or 9 with
-dashboard profile) services run as on macbook_lab.
+When the stack is up, open `http://localhost:8097` in your browser. The same services run as
+on macbook_lab.
 
 ## What gets built
 
 Identical to `macbook_lab`. Refer to [`../macbook_lab/README.md`](../macbook_lab/README.md) for
 the full inventory. Briefly:
 
-  fake-vllm                :8090   fake OpenShift AI vLLM mock
   ptp-operator-stub        :8091   PTP CloudEvents publisher
   metal3-bmo-stub          :8092   Metal3 BareMetalHost firmware push lifecycle
   redfish-bmc-stub         :8093   DMTF Redfish UpdateService task lifecycle
@@ -93,14 +93,17 @@ remove images too:
 podman compose -f ../macbook_lab/docker-compose.yml --profile dashboard down --rmi all
 ```
 
-## Switching providers (Anthropic vs fake-vLLM)
+## Switching providers
 
 Same `.env` mechanism as macbook_lab. Edit `../macbook_lab/.env` (created on first run from
 `.env.example`):
 
   LLM_PROVIDER=anthropic       # uses your Anthropic API key
-  LLM_PROVIDER=vllm            # uses the bundled fake-vllm mock (default)
-  ANTHROPIC_API_KEY=sk-ant-... # only needed if LLM_PROVIDER=anthropic
+  LLM_PROVIDER=openai          # uses OPENAI_API_KEY
+  LLM_PROVIDER=vllm            # uses VLLM_BASE_URL, for example OpenShift AI
+  ANTHROPIC_API_KEY=sk-ant-... # needed for dashboard chat and Anthropic live mode
+  OPENAI_API_KEY=sk-...        # needed if LLM_PROVIDER=openai
+  VLLM_BASE_URL=https://.../v1 # needed if LLM_PROVIDER=vllm
   ORAN_LLM_MODE=live           # set this to actually invoke the LLM on ambiguous-path
 
 Restart with `./run.sh` after changes (it rebuilds and recreates only what changed).
