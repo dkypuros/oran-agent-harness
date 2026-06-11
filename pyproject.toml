@@ -34,6 +34,9 @@ dependencies = [
 test = [
     "jsonschema>=4.0",
 ]
+langgraph = [
+    "langgraph>=1.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/dkypuros/oran-agent-harness"

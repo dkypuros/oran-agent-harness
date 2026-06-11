@@ -155,6 +155,7 @@ oran-agent-harness/
 |   `-- E_with_smo_reject/    Same firmware push, SMO rejects companion intent (6 fixtures)
 |-- harness/runtime/     deterministic Python runtime (stubs + real Router + real Guardrail)
 |   |-- router.py             real deterministic Router (taxonomy lookup)
+|   |-- taxonomy_graph.py     LangGraph-compatible taxonomy orchestration runner with fallback
 |   |-- guardrail.py          real deterministic Guardrail engine (audit emission)
 |   `-- walker.py             orchestrator with CLI entry point
 |-- omc-skills/          reference operationalization (OMC)
