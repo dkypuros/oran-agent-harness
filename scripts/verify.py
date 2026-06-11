@@ -19,7 +19,7 @@ Checks:
   6. Leakage guard: git ls-files must contain no .local/, python_demo/, .env; .pdf
      allowed only under draft_papers/ (scientifically authored papers)
   7. README structure: 80-400 lines, three goals in the lede
-  8. File counts: harness/ has 20 files, omc-skills/o-ran/ has 6 markdown files
+  8. File counts: harness/ has 27 files, omc-skills/o-ran/ has 6 markdown files
   9. Schema validation: scenario data validates against declared harness/schemas/ (optional, requires jsonschema)
 
 Dependencies:

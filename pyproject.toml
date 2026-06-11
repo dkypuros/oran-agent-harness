@@ -35,7 +35,7 @@ test = [
     "jsonschema>=4.0",
 ]
 langgraph = [
-    "langgraph>=1.0",
+    "langgraph>=1.0; python_version >= '3.10'",
 ]
 
 [project.urls]
@@ -48,4 +48,12 @@ include = ["harness*"]
 exclude = ["scripts*", "scenarios*", "tests*", "talk*", "docs*", "omc-skills*"]
 
 [tool.setuptools.package-data]
+"harness" = [
+    "*.yaml",
+    "*.md",
+    "mcp-tool-schemas/*.json",
+    "references/*.md",
+    "routing-rules/*.yaml",
+    "schemas/*.json",
+]
 "harness.runtime" = ["*.json", "*.yaml"]

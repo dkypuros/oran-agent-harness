@@ -1,6 +1,6 @@
 # LangGraph Taxonomy Runner
 
-Status: optional runtime target for the taxonomy harness.
+Status: optional orchestration target for the taxonomy harness.
 
 `harness/taxonomy.yaml` remains the canonical taxonomy. The LangGraph upgrade is intentionally thin:
 `harness/runtime/taxonomy_graph.py` wraps the existing deterministic router, sandbox, and guardrail
@@ -13,11 +13,32 @@ and CI stay stable.
 | Node | Responsibility |
 |---|---|
 | `load_taxonomy` | Load and flatten `harness/taxonomy.yaml` into graph state. |
-| `classify_fault` | Read the top RCA candidate and attach taxonomy metadata. |
-| `ambiguity_assist_boundary` | Stop ambiguous classifications at the LLM-assist boundary unless live ambiguous handling is explicitly enabled. |
-| `route_decision` | Call the existing deterministic `router.route()` implementation. |
+| `classify_fault` | Validate the top RCA candidate against taxonomy.yaml, attach taxonomy metadata, and replace any missing layer with the canonical taxonomy layer. |
+| `ambiguity_assist_boundary` | Stop ambiguous classifications for human review. Optional LLM-assist text is stored only as review context and is not parsed into an automated route in v0. |
+| `route_decision` | Call the existing deterministic `router.route()` implementation only after taxonomy authorization. |
 | `sandbox_gate` | Attach the existing digital-twin sandbox verdict before guardrails. |
 | `guardrail_human_approval_gate` | Call `guardrail.evaluate()` and emit the TMF688-shaped audit event with pending human approval. |
+
+## Boundary guarantees
+
+The graph does not let RCA producers override the taxonomy boundary:
+
+- unknown `taxonomy_match` values are rejected before routing;
+- a supplied `target_layer` must match the layer in `taxonomy.yaml`;
+- ambiguous taxonomy entries remain blocked for review even when the LLM-assist seam returns a hint;
+- only non-ambiguous, taxonomy-authorized candidates can reach `router.route()`.
+
+This is the important LangGraph seam for continue/demo purposes: graph state makes each decision point
+visible without moving classification authority into prompts.
+
+## What LangGraph adds now vs. later
+
+Implemented now: a LangGraph-compatible state graph with a deterministic fallback runner and matching
+node traces for the supported path.
+
+Not implemented yet: durable checkpoint persistence, `thread_id`/config-driven continue, LangGraph
+interrupts, or production human-in-the-loop approval queues. Those are the next runtime layer to add
+around this graph; this patch only establishes the safe node contract.
 
 ## Why this is the right upgrade path
 
@@ -28,7 +49,7 @@ around the deterministic taxonomy contract without moving classification rules i
 This keeps the core thesis intact:
 
 1. deterministic taxonomy lookup first;
-2. LLM-assist only on ambiguous edges;
+2. LLM-assist only as review context on ambiguous edges;
 3. sandbox before apply;
 4. guardrails before human approval;
 5. no autonomous production mutation from the model.
@@ -45,13 +66,13 @@ print(result.node_trace)   # explicit graph stages
 print(result.audit_event)  # final TMF688-shaped audit event
 ```
 
-Install the optional LangGraph runtime with:
+Install the optional LangGraph runtime with Python 3.10+:
 
 ```bash
 pip install -e '.[langgraph]'
 ```
 
-The default test path does not require LangGraph:
+The default test path does not require LangGraph and remains compatible with the repository baseline:
 
 ```bash
 python3 -m pytest tests/test_taxonomy_graph.py
